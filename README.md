@@ -1,6 +1,6 @@
 # Motus-3D Game Engine
-Motus 3D is the 3D game engine which written using C++20 and Vulkan 1.3
-Originally Motus-3D is educational project to increase my Vulkan  
+Motus 3D is the 3D game engine which is written using C++20 and Vulkan 1.3  
+Originally Motus-3D is educational project which was created to increase my Vulkan
 and real-time rendering systems understanding
 
 ## Features
