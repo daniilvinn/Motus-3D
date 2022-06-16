@@ -1,0 +1,22 @@
+# Visual Studio files and folder
+*.sln
+*.vcxproj
+*.filters
+.vs/
+
+# binaries
+bin/
+obj/
+*.lib
+*.dll
+*.idb
+*.pdb
+*.exe
+*.tlog
+
+# Misc
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
