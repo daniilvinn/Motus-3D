@@ -1,6 +1,6 @@
 #include "Application.h"
 #include <iostream>
-
+#include <Core/Logger.h>
 
 namespace Motus3D
 {
@@ -8,9 +8,12 @@ namespace Motus3D
 
 	Application::Application()
 	{
+		CoreLogger::Init();
+		ClientLogger::Init();
+
 		if(s_Instance)
 		{
-			std::cerr << "Application already exists!" << std::endl;
+			MT_CORE_LOG_FATAL("Application already exists!");
 			return;
 		}
 
@@ -27,4 +30,5 @@ namespace Motus3D
 	{
 
 	}
+
 }

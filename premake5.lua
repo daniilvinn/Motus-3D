@@ -14,6 +14,7 @@ VulkanSDK = os.getenv("VULKAN_SDK")
 IncludeDirectory = {}
 IncludeDirectory["GLFW"] = "Motus3D/thirdparty/GLFW/include"
 IncludeDirectory["VulkanSDK"] = "%{VulkanSDK}/Include"
+IncludeDirectory["spdlog"] = "Motus3D/thirdparty/spdlog/include"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
@@ -48,7 +49,8 @@ project "Motus3D"
 	{
 		"%{prj.name}/src",
 		"%{IncludeDirectory.GLFW}",
-		"%{IncludeDirectory.VulkanSDK}"
+		"%{IncludeDirectory.VulkanSDK}",
+		"%{IncludeDirectory.spdlog}"
 	}
 
 	libdirs
@@ -118,7 +120,8 @@ project "Sandbox2D"
 
 	includedirs 
 	{
-		"Motus3D/src"
+		"Motus3D/src",
+		"%{IncludeDirectory.spdlog}"
 	}
 
 	links 
