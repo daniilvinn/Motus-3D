@@ -4,7 +4,15 @@ class Sandbox2D : public Motus3D::Application
 {
 public:
 	Sandbox2D(){};
-	~Sandbox2D() override {};
+	~Sandbox2D() override
+	{
+	};
+};
+
+class TestLayer : public Motus3D::Layer
+{
+public:
+
 };
 
 Motus3D::Scope<Motus3D::Application> CreateApplication()

@@ -20,10 +20,10 @@
 		#define MT_ASSERTS_ENABLED
 		#ifdef MT_PLATFORM_WINDOWS
 			#define MT_CORE_ASSERT(expression, ...) if(!(expression)){\
-														MT_CORE_ERROR("Assertion failed: {}",__VA_ARGS__); __debugbreak();}\
+														MT_CORE_LOG_ERROR("Assertion failed: {}",__VA_ARGS__); __debugbreak();}\
 														else{}
 			#define MT_ASSERT(expression, ...)		if(!(expression)){\
-														MT_CLIENT_ERROR("Assertion failed: {}",__VA_ARGS__); __debugbreak();}\
+														MT_LOG_ERROR("Assertion failed: {}",__VA_ARGS__); __debugbreak();}\
 														else{}
 		#endif
 	#endif
@@ -51,3 +51,10 @@ namespace Motus3D
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 }
+
+#define BIT(bit) (1 << bit)
+
+// Thanks Yan TheCherno Chernikov for this macro <3
+// https://github.com/TheCherno
+#define MT_BIND_EVENT_FUNCTION(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+// --------------------------------------
