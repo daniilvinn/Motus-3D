@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Core/Logger.h>
 #include <Platform/Windows/WinApplicationWindow.h>
-#include <Core/Events/ApplicationEvent.h>
+#include <Core/Events/Event.h>
 
 namespace Motus3D
 {
@@ -47,18 +47,23 @@ namespace Motus3D
 		}
 	}
 
-	void Application::OnEvent(Event* e)
+	void Application::OnEvent(Event e)
 	{
-		m_EventQueue.push(e);
+		// TODO
+		m_EventQueue.Push(e);
+		if(m_EventQueue.GetActualAmount() == APP_CONFIG_MAX_EVENT_QUEUE_SIZE)
+		{
+			ProcessEvents();
+		}
 	}
 
-	bool Application::OnWindowResize(WindowResizeEvent& )
+	bool Application::OnWindowResize(WindowResizedEvent& )
 	{
 		MT_CORE_LOG_TRACE("OnWindowResize");
 		return true;
 	}
 
-	bool Application::OnWindowClosed(WindowCloseEvent& )
+	bool Application::OnWindowClosed(WindowClosedEvent& )
 	{
 		m_ApplicationRunning = false;
 		return false;
@@ -66,25 +71,24 @@ namespace Motus3D
 
 	void Application::ProcessEvents()
 	{
-		while(!m_EventQueue.empty())
-		{
-			Event* e = m_EventQueue.front();
+		// TODO
+		for(int i = 0; i < m_EventQueue.GetActualAmount(); i++){
 
-			EventDispatcher dispatcher(*e);
+			Event e = m_EventQueue[i];
 
-			dispatcher.Dispatch<WindowCloseEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowClosed));
-			dispatcher.Dispatch<WindowResizeEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowResize));
+			EventDispatcher dispatcher(e);
 
-			MT_CORE_LOG_TRACE(e->GetEventName());
+			dispatcher.Dispatch<WindowClosedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowClosed));
+			dispatcher.Dispatch<WindowResizedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowResize));
+
+			MT_CORE_LOG_TRACE(e.ToString());
 
 			for(auto& layer : m_LayerStack)
 			{
-				if (e->m_IsHandled) break;
-				layer->OnEvent(*e);
+				if (e.IsHandled()) break;
+				layer->OnEvent(e);
 			}
-
-			delete e;
-			m_EventQueue.pop();
 		}
+		m_EventQueue.Clear();
 	}
 }

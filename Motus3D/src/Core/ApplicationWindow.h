@@ -10,7 +10,7 @@ namespace Motus3D
 	class ApplicationWindow
 	{
 	public:
-		using EventHandlerFn = std::function<void(Event*)>;
+		using EventHandlerFn = std::function<void(Event)>;
 		virtual ~ApplicationWindow() {};
 
 		virtual void SetEventHandle(const EventHandlerFn& fn) = 0;

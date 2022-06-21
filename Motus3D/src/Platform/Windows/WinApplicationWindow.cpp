@@ -3,9 +3,7 @@
 #include <Core/Macros.h>
 #include <Core/Logger.h>
 
-#include <Core/Events/ApplicationEvent.h>
-#include <Core/Events/MouseEvent.h>
-#include <Core/Events/KeyEvent.h>
+#include <Core/Events/Event.h>
 
 
 // HACK: setting GLFW error callback here isn't good idea. To be moved to another place.
@@ -38,13 +36,17 @@ namespace Motus3D
 			data.width = width;
 			data.height = height;
 
-			WindowResizeEvent* event = new WindowResizeEvent(width, height);
+			WindowResizedEvent variant;
+			variant.width = width;
+			variant.height = height;
+			Event event(variant, WindowResized);
 
 			data.eventHandler(event);
 		});
 		glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* window) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			WindowCloseEvent* event = new WindowCloseEvent;
+			WindowClosedEvent variant;
+			Event event(variant, WindowClosed);
 			data.eventHandler(event);
 		});
 		glfwSetKeyCallback(m_Handle, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -52,18 +54,27 @@ namespace Motus3D
 			switch (action)
 			{
 				case GLFW_PRESS: {
-					KeyPressedEvent* event = new KeyPressedEvent(key, 0);
-					data.eventHandler(event);
+					KeyPressedEvent variant;
+					variant.keycode = key;
+					variant.repeatcount = 0;
+					Event e(variant, KeyPressed);
+					data.eventHandler(e);
 					break;
 				}
 				case GLFW_REPEAT: {
-					KeyPressedEvent* event = new KeyPressedEvent(key, 1);
-					data.eventHandler(event);
+					KeyPressedEvent variant;
+					variant.keycode = key;
+					variant.repeatcount = 1;
+					Event e(variant, KeyPressed);
+					data.eventHandler(e);
+					data.eventHandler(e);
 					break;
 				}
 				case GLFW_RELEASE: {
-					KeyReleasedEvent* event = new KeyReleasedEvent(key);
-					data.eventHandler(event);
+					KeyReleasedEvent variant;
+					variant.keycode = key;
+					Event e(variant, KeyReleased);
+					data.eventHandler(e);
 					break;
 				}
 				default: {
@@ -71,12 +82,16 @@ namespace Motus3D
 					break;
 				}
 			}
-
 		});
 		glfwSetCursorPosCallback(m_Handle, [](GLFWwindow* window, double xpos, double ypos) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-			MouseMovedEvent* event = new MouseMovedEvent((uint16_t)xpos, (uint16_t)ypos);
+			MouseMovedEvent variant;
+			variant.xpos = xpos;
+			variant.ypos = ypos;
+
+			Event event(variant, MouseMoved);
+
 			data.eventHandler(event);
 		});
 		glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* window, int button, int action, int mods) {
@@ -85,13 +100,17 @@ namespace Motus3D
 			{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent* event = new MouseButtonPressedEvent(button);
+					MouseButtonPressedEvent variant;
+					variant.button = button;
+					Event event{ variant, MouseButtonPressed };
 					data.eventHandler(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent* event = new MouseButtonReleasedEvent(button);
+					MouseButtonReleasedEvent variant;
+					variant.button = button;
+					Event event{ variant, MouseButtonReleased };
 					data.eventHandler(event);
 					break;
 				}
@@ -104,12 +123,17 @@ namespace Motus3D
 		});
 		glfwSetScrollCallback(m_Handle, [](GLFWwindow* window, double xoffset, double yoffset) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			MouseScrolledEvent* event = new MouseScrolledEvent(xoffset, yoffset);
+			MouseScrolledEvent variant;
+			variant.xoffset = xoffset;
+			variant.yoffset = yoffset;
+			Event event(variant, MouseScrolled);
 			data.eventHandler(event);
 			});			// m_Handle 
 		glfwSetCharCallback(m_Handle, [](GLFWwindow* window, unsigned int character) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			KeyTypedEvent* event = new KeyTypedEvent(character);
+			KeyTypedEvent variant;
+			variant.keycode = character;
+			Event event(variant, KeyTyped);
 			data.eventHandler(event);
 			});
 		glfwSetErrorCallback(glfwErrorCallback);
