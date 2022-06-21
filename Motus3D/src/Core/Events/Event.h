@@ -1,120 +1,253 @@
-// Currently Motus Engine uses blocking Event System.
-// It means that if any event happens, it will be
-// immediately dispatched and block whole engine execution.
-// --------------------------------------------------------
-// TODO: Buffer Event system
-// Buffer Event system will dispatch all events which happened
-// during main cycle and dispatch it in OnUpdate() stage,
-// which will not block execution of whole engine.
-
-
 #pragma once
-#include <Core/Macros.h>
 
-#include <string>
 #include <functional>
-
-#ifdef MT_DEBUG
-	#define MT_TRACE_EVENTS
-#endif
-
-namespace Motus3D {
-
-	// All possible event types
-	enum class EventType {
-		None = 0,
-		WindowClose, WindowMoved, WindowResize, WindowFocus, WindowUnfocus,
-		AppTick, AppUpdate, AppRender,
-		KeyPressed, KeyReleased, KeyTyped,
-		MouseButtonPressed, MouseButtonHold, MouseButtonReleased, MouseMoved, MouseScrolled
-	};
-
-	// All possible event categories, stored as bit value to be able to 
-	// store event with 2 or more categories in one `int` variable.
-	enum EventCategory {
-		None = 0,
-		ApplicationEventCategory	= BIT(1),
-		InputEventCategory			= BIT(2),
-		KeyboardEventCategory		= BIT(3),
-		MouseEventCategory			= BIT(4)
-	};
-
-// Macros to minimize code further
-#define EVENT_CLASS_TYPE(type)  static EventType GetType() { return EventType::type; }\
-								virtual EventType GetEventType() const override { return GetType(); }\
-								virtual const char* GetEventName() const override { return #type; }
-
-#define EVENT_CLASS_CATEGORY(category) virtual int GetEventCategoryFlags() const override { return category; }
-// ===============================
+#include <Core/Macros.h>
+#include <variant>
+#include <Core/Logger.h>
 
 
 
-	// Event base class
-	class MOTUS_API Event {
-		friend class EventDispatcher;
-	public:
-		virtual EventType GetEventType() const = 0;
-		virtual int GetEventCategoryFlags() const = 0;
+enum MOTUS_API EventType
+{
+	None,
+	KeyTyped,
+	KeyPressed,
+	KeyReleased,
+	MouseMoved,
+	MouseScrolled,
+	MouseButtonPressed,
+	MouseButtonReleased,
+	WindowClosed,
+	WindowResized
 
-		// DEBUG ONLY methods.
-		// TODO: disable these methods in all builds except Debug
-		virtual const char* GetEventName() const = 0;
-		virtual std::string GetLogInfo() const { return GetEventName(); };
-		// ======================================================
-		
-		inline bool IsInCategory(EventCategory category) {
-			return GetEventCategoryFlags() & category;
-		}
+};
 
-		bool m_IsHandled = false;
-	};
+struct MOTUS_API NoneEvent
+{
+	const EventType type = None;
+	static EventType GetStaticType() { return None; }
+};
 
+struct MOTUS_API KeyTypedEvent
+{
+	const EventType type = KeyTyped;
+	int keycode;
+	static EventType GetStaticType() { return KeyTyped; }
+};
 
-	// Event Dispatcher Class implementation 
-	class EventDispatcher
+struct MOTUS_API KeyPressedEvent
+{
+	const EventType type = KeyPressed;
+	int keycode;
+	int repeatcount;
+	static EventType GetStaticType() { return KeyPressed; }
+};
+
+struct MOTUS_API KeyReleasedEvent
+{
+	const EventType type = KeyReleased;
+	int keycode;
+	static EventType GetStaticType() { return KeyReleased; }
+};
+
+struct MOTUS_API MouseMovedEvent
+{
+	const EventType type = MouseMoved;
+	uint16_t xpos;
+	uint16_t ypos;
+	static EventType GetStaticType() { return MouseMoved; }
+};
+
+struct MOTUS_API MouseScrolledEvent
+{
+	const EventType type = MouseScrolled;
+	double xoffset;
+	double yoffset;
+	static EventType GetStaticType() { return MouseScrolled; }
+};
+
+struct MOTUS_API MouseButtonPressedEvent
+{
+	const EventType type = MouseButtonPressed;
+	int button;
+	static EventType GetStaticType() { return MouseButtonPressed; }
+};
+
+struct MOTUS_API MouseButtonReleasedEvent
+{
+	const EventType type = MouseButtonReleased;
+	int button;
+	static EventType GetStaticType() { return MouseButtonReleased; }
+};
+
+struct MOTUS_API WindowClosedEvent
+{
+	const EventType type = WindowClosed;
+	static EventType GetStaticType() { return WindowClosed; }
+};
+
+struct MOTUS_API WindowResizedEvent
+{
+	const EventType type = WindowResized;
+	int width;
+	int height;
+	static EventType GetStaticType() { return WindowResized; }
+};
+
+// Type alias
+using EventVariants = std::variant<NoneEvent, KeyTypedEvent, KeyPressedEvent, KeyReleasedEvent, MouseMovedEvent, MouseScrolledEvent,
+									MouseButtonPressedEvent, MouseButtonReleasedEvent, WindowClosedEvent, WindowResizedEvent>;
+
+class Event
+{
+public:
+	Event()
 	{
-		template <typename T>
-		using EventFunction = std::function<bool(T&)>;
-	public:
-		// Constructor
-		EventDispatcher(Event& event)
-			: m_Event(event) {}
-
-		template<typename T>
-		bool Dispatch(EventFunction<T> function)
-		{
-			if (m_Event.GetEventType() == T::GetType())
-			{
-				m_Event.m_IsHandled |= function(static_cast<T&>(m_Event));
-				return true;
-			}
-			return false;
-		}
-	private:
-		Event& m_Event;
-	};
-
-	
-} // namespace Motus
-
-
-// TODO: Custom format type for logging events
-/* ------------------------------------
-template<> struct fmt::formatter<const Motus::Event&> {
-	char presentation = 'f';
-	constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && (*it == 'f' || *it == 'e'))presentation = *it++;
-		if (it != end && *it != '}') throw format_error("Invalid format");
-		return it;
+		m_Variants.emplace<NoneEvent>(NoneEvent());
+		m_Type = None;
 	}
+
+	constexpr void operator=(const Event& e)
+	{
+		switch (e.m_Type)
+		{
+		case None:
+			m_Variants.emplace<NoneEvent>(std::get<NoneEvent>(e.m_Variants));
+			break;
+		case KeyTyped:
+			m_Variants.emplace<KeyTypedEvent>(std::get<KeyTypedEvent>(e.m_Variants));
+			break;
+		case KeyPressed:
+			m_Variants.emplace<KeyPressedEvent>(std::get<KeyPressedEvent>(e.m_Variants));
+			break;
+		case KeyReleased:
+			m_Variants.emplace<KeyReleasedEvent>(std::get<KeyReleasedEvent>(e.m_Variants));
+			break;
+		case MouseMoved:
+			m_Variants.emplace<MouseMovedEvent>(std::get<MouseMovedEvent>(e.m_Variants));
+			break;
+		case MouseScrolled:
+			m_Variants.emplace<MouseScrolledEvent>(std::get<MouseScrolledEvent>(e.m_Variants));
+			break;
+		case MouseButtonPressed:
+			m_Variants.emplace<MouseButtonPressedEvent>(std::get<MouseButtonPressedEvent>(e.m_Variants));
+			break;
+		case MouseButtonReleased:
+			m_Variants.emplace<MouseButtonReleasedEvent>(std::get<MouseButtonReleasedEvent>(e.m_Variants));
+			break;
+		case WindowClosed:
+			m_Variants.emplace<WindowClosedEvent>(std::get<WindowClosedEvent>(e.m_Variants));
+			break;
+		case WindowResized:
+			m_Variants.emplace<WindowResizedEvent>(std::get<WindowResizedEvent>(e.m_Variants));
+			break;
+		default:
+			//MT_CORE_ASSERT(false, "invalid event type");
+			break;
+		}
+		m_Type = e.m_Type;
+	}
+
+	Event(EventVariants variant, EventType type)
+	{
+		switch (type)
+		{
+		case None:
+			m_Variants.emplace<NoneEvent>(std::get<NoneEvent>(variant));
+			break;
+		case KeyTyped:
+			m_Variants.emplace<KeyTypedEvent>(std::get<KeyTypedEvent>(variant));
+			break;
+		case KeyPressed:
+			m_Variants.emplace<KeyPressedEvent>(std::get<KeyPressedEvent>(variant));
+			break;
+		case KeyReleased:
+			m_Variants.emplace<KeyReleasedEvent>(std::get<KeyReleasedEvent>(variant));
+			break;
+		case MouseMoved:
+			m_Variants.emplace<MouseMovedEvent>(std::get<MouseMovedEvent>(variant));
+			break;
+		case MouseScrolled:
+			m_Variants.emplace<MouseScrolledEvent>(std::get<MouseScrolledEvent>(variant));
+			break;
+		case MouseButtonPressed:
+			m_Variants.emplace<MouseButtonPressedEvent>(std::get<MouseButtonPressedEvent>(variant));
+			break;
+		case MouseButtonReleased:
+			m_Variants.emplace<MouseButtonReleasedEvent>(std::get<MouseButtonReleasedEvent>(variant));
+			break;
+		case WindowClosed:
+			m_Variants.emplace<WindowClosedEvent>(std::get<WindowClosedEvent>(variant));
+			break;
+		case WindowResized:
+			m_Variants.emplace<WindowResizedEvent>(std::get<WindowResizedEvent>(variant));
+			break;
+		default:
+			//MT_CORE_ASSERT(false, "invalid event type");
+			break;
+		}
+		m_Type = type;
+	}
+
+	bool IsHandled() const { return m_IsHandled; }
+
+	constexpr std::string ToString()
+		{
+			switch (m_Type)
+			{
+			case KeyTyped:
+				return "KeyTypedEvent";
+			case KeyPressed:
+				return "KeyPressedEvent";
+			case KeyReleased:
+				return "KeyReleasedEvent";
+			case MouseMoved:
+				return "MouseMovedEvent";
+			case MouseScrolled:
+				return "MouseScrolledEvent";
+			case MouseButtonPressed:
+				return "MouseButtonPressedEvent";
+			case MouseButtonReleased:
+				return "MouseButtonReleasedEvent";
+			case WindowClosed:
+				return "WindowClosedEvent";
+			case WindowResized:
+				return "WindowResizedEvent";
+			default:
+				return "Invalid Event type";
+
+			}
+		}
+
+private:
+	EventVariants m_Variants;
+	EventType m_Type;
+	bool m_IsHandled = false;
+
+	friend class EventDispatcher;
 };
 
-template <typename FormatContext>
-auto format(const Motus::Event& e, FormatContext& ctx) -> decltype(ctx.out()) {
-	return presentation == 'f'
-		? format_to(ctx.out(), "{}", e.GetLogInfo().c_str())
-		: format_to(ctx.out(), "{}", e.GetLogInfo().c_str());
-};
+class EventDispatcher
+{
+public:
+	template <typename T>
+	using EventFunction = std::function<bool(T&)>;
 
-*/
+	EventDispatcher(Event& event)
+	{
+		m_Event = &event;
+	}
+
+	template <typename T>
+	bool Dispatch(EventFunction<T> function)
+	{
+		if(T::GetStaticType() == m_Event->m_Type)
+		{
+			m_Event->m_IsHandled |= function(std::get<T>(m_Event->m_Variants));
+			return true;
+		}
+		return false;
+	}
+private:
+	Event* m_Event;
+};
