@@ -12,9 +12,10 @@ compileOutput = "%{cfg.system}-%{cfg.buildcfg}"
 VulkanSDK = os.getenv("VULKAN_SDK")
 
 IncludeDirectory = {}
+IncludeDirectory["spdlog"] = "Motus3D/thirdparty/spdlog/include"
 IncludeDirectory["GLFW"] = "Motus3D/thirdparty/GLFW/include"
 IncludeDirectory["VulkanSDK"] = "%{VulkanSDK}/Include"
-IncludeDirectory["spdlog"] = "Motus3D/thirdparty/spdlog/include"
+IncludeDirectory["glm"] = "Motus3D/thirdparty/glm/include"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
@@ -48,9 +49,10 @@ project "Motus3D"
 	includedirs 
 	{
 		"%{prj.name}/src",
+		"%{IncludeDirectory.spdlog}",
 		"%{IncludeDirectory.GLFW}",
 		"%{IncludeDirectory.VulkanSDK}",
-		"%{IncludeDirectory.spdlog}"
+		"%{IncludeDirectory.glm}"
 	}
 
 	libdirs
