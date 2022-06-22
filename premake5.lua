@@ -20,9 +20,72 @@ IncludeDirectory["glm"] = "Motus3D/thirdparty/glm/include"
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
 
-group "Core"
-
+group "Dependencies"
 include "Motus3D/thirdparty/GLFW"
+group ""
+
+group "Core"
+project "Visus"
+	location "Visus"
+	kind "SharedLib"
+	language "C++"
+	cppdialect "C++20"
+
+	targetdir("bin/%{prj.name}/" .. compileOutput)
+	objdir("obj/%{prj.name}/" .. compileOutput)
+
+	flags {
+		"MultiProcessorCompile"
+	}
+
+	files {
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+	includedirs {
+		"%{prj.name}/src",
+		"%{IncludeDirectory.VulkanSDK}",
+		"%{IncludeDirectory.GLFW}",
+		"%{IncludeDirectory.glm}",
+		"%{IncludeDirectory.spdlog}"
+		
+	}
+
+	libdirs {
+		"%{LibraryDirectory.VulkanSDK}"
+	}
+
+	links {
+		"GLFW",
+		"vulkan-1.lib"
+	}
+
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+		"VISUS_API"
+	}
+
+	postbuildcommands 
+	{
+		("{COPY} %{cfg.buildtarget.relpath} ../bin/Sandbox2D/" .. compileOutput)
+	}
+
+	filter "system:windows"
+		staticruntime "off"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "VISUS_DEBUG"
+		symbols "On"
+
+	filter "configurations:Release"
+		defines "VISUS_RELEASE"
+		optimize "On"
+
+	filter "configurations:Dist"
+		defines "VISUS_DIST"
+		optimize "On"
 
 project "Motus3D"
 	location "Motus3D"
@@ -43,7 +106,7 @@ project "Motus3D"
 	files 
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.cpp"
 	}
 
 	includedirs 
@@ -63,6 +126,7 @@ project "Motus3D"
 	links 
 	{
 		"GLFW",
+		"Visus",
 		"vulkan-1.lib"
 	}
 
