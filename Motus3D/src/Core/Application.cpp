@@ -1,8 +1,9 @@
 #include "Application.h"
-#include <iostream>
 #include <Core/Logger.h>
 #include <Platform/Windows/WinApplicationWindow.h>
 #include <Core/Events/Event.h>
+
+#include "Visus/Core/GraphicsContext.h"
 
 namespace Motus3D
 {
@@ -23,6 +24,8 @@ namespace Motus3D
 
 		m_AppWindow = CreateRef<WinApplicationWindow>();
 		m_AppWindow->SetEventHandle(MT_BIND_EVENT_FUNCTION(Application::OnEvent));
+
+		Visus::GraphicsContext::Get()->Init({(GLFWwindow*)m_AppWindow->GetHandle()});
 
 	}
 	
@@ -49,7 +52,6 @@ namespace Motus3D
 
 	void Application::OnEvent(Event e)
 	{
-		// TODO
 		m_EventQueue.Push(e);
 		if(m_EventQueue.GetActualAmount() == APP_CONFIG_MAX_EVENT_QUEUE_SIZE)
 		{
@@ -68,7 +70,7 @@ namespace Motus3D
 		m_ApplicationRunning = false;
 		return false;
 	}
-
+	
 	void Application::ProcessEvents()
 	{
 		// TODO
@@ -80,8 +82,6 @@ namespace Motus3D
 
 			dispatcher.Dispatch<WindowClosedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowClosed));
 			dispatcher.Dispatch<WindowResizedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowResize));
-
-			MT_CORE_LOG_TRACE(e.ToString());
 
 			for(auto& layer : m_LayerStack)
 			{

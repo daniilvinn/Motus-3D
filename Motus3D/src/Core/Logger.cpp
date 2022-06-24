@@ -1,6 +1,9 @@
 #include "Logger.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/async.h>
+
+#include <Visus.h>
 
 namespace Motus3D
 {
@@ -12,9 +15,12 @@ namespace Motus3D
 	// ===========
 	void CoreLogger::Init()
 	{
+
 		spdlog::set_pattern("%^[%T][%n]: %v%$");
-		s_Logger = spdlog::stdout_color_mt("Motus3D");
+
+		s_Logger = spdlog::create_async<spdlog::sinks::stdout_color_sink_mt>("Motus3D");
 		s_Logger->set_level(spdlog::level::trace);
+
 	}
 
 	// =============
@@ -23,7 +29,7 @@ namespace Motus3D
 	void ClientLogger::Init()
 	{
 		spdlog::set_pattern("%^[%T][%n]: %v%$");
-		s_Logger = spdlog::stdout_color_mt("Client");
+		s_Logger = spdlog::create_async<spdlog::sinks::stdout_color_sink_mt>("Client");
 		s_Logger->set_level(spdlog::level::trace);
 	}
 

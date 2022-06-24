@@ -16,6 +16,7 @@ IncludeDirectory["spdlog"] = "Motus3D/thirdparty/spdlog/include"
 IncludeDirectory["GLFW"] = "Motus3D/thirdparty/GLFW/include"
 IncludeDirectory["VulkanSDK"] = "%{VulkanSDK}/Include"
 IncludeDirectory["glm"] = "Motus3D/thirdparty/glm/include"
+IncludeDirectory["Visus"] = "Visus/src"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
@@ -44,7 +45,7 @@ project "Visus"
 	}
 
 	includedirs {
-		"%{prj.name}/src",
+		"%{prj.name}/src/",
 		"%{IncludeDirectory.VulkanSDK}",
 		"%{IncludeDirectory.GLFW}",
 		"%{IncludeDirectory.glm}",
@@ -115,7 +116,8 @@ project "Motus3D"
 		"%{IncludeDirectory.spdlog}",
 		"%{IncludeDirectory.GLFW}",
 		"%{IncludeDirectory.VulkanSDK}",
-		"%{IncludeDirectory.glm}"
+		"%{IncludeDirectory.glm}",
+		"%{IncludeDirectory.Visus}",
 	}
 
 	libdirs

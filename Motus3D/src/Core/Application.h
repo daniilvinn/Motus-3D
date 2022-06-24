@@ -3,7 +3,6 @@
 #include <Core/Macros.h>
 #include <Core/ApplicationWindow.h>
 #include <Core/LayerStack.h>
-#include <array>
 
 #include <Core/Events/Event.h>
 #include <Core/Events/EventQueue.h>
