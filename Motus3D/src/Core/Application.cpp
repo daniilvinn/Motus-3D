@@ -25,18 +25,15 @@ namespace Motus3D
 		m_AppWindow = CreateRef<WinApplicationWindow>();
 		m_AppWindow->SetEventHandle(MT_BIND_EVENT_FUNCTION(Application::OnEvent));
 
-		Visus::GraphicsContext::Get()->Init({(GLFWwindow*)m_AppWindow->GetHandle()});
-
 	}
 	
 	Application::~Application()
 	{
-		
+				
 	}
 
 	void Application::Run()
 	{
-
 		while (m_ApplicationRunning)
 		{
 			ProcessEvents();

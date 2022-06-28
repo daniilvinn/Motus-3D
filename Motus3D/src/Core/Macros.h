@@ -59,6 +59,5 @@ namespace Motus3D
 #define MT_BIND_EVENT_FUNCTION(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 // --------------------------------------
 
-
 // TODO: move this to application's config struct
 #define APP_CONFIG_MAX_EVENT_QUEUE_SIZE 300

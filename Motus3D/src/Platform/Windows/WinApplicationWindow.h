@@ -3,6 +3,8 @@
 #include <Core/ApplicationWindow.h>
 #include <GLFW/glfw3.h>
 
+#include <Visus.h>
+
 #include <string>
 
 namespace Motus3D
@@ -30,6 +32,8 @@ namespace Motus3D
 			uint32_t height;
 			EventHandlerFn eventHandler;
 		} m_WindowData;
+
+		Ref<Visus::GraphicsContext> m_Context;
 
 	};
 

@@ -20,7 +20,6 @@ namespace Motus3D
 
 		virtual void OnUpdate() = 0;
 
-
 	};
 }
 

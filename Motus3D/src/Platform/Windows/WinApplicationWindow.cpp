@@ -28,6 +28,9 @@ namespace Motus3D
 		m_WindowData.height = height;
 		m_WindowData.title = title;
 
+		m_Context = Visus::GraphicsContext::Create();
+		m_Context->Init({ (GLFWwindow*)GetHandle() });
+
 		glfwSetWindowUserPointer(m_Handle, &m_WindowData);
 
 		glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow* window, int width, int height) {
