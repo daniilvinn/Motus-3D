@@ -24,8 +24,8 @@ namespace Visus
 	#define VISUS_WARN(...)		Visus::Logger::Get()->warn(__VA_ARGS__);
 	#define VISUS_ERROR(...)	Visus::Logger::Get()->error(__VA_ARGS__);
 #else
-	#define VISUS_TRACE
-	#define VISUS_INFO
-	#define VISUS_WARN
-	#define VISUS_ERROR
+	#define VISUS_TRACE(...)
+	#define VISUS_INFO(...)
+	#define VISUS_WARN(...)
+	#define VISUS_ERROR(...)
 #endif
