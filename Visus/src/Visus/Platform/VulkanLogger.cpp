@@ -32,16 +32,6 @@ namespace Visus
 		return VK_FALSE;
 	}
 
-	/*
-	 *  VkStructureType                         sType;
-    const void*                             pNext;
-    VkDebugUtilsMessengerCreateFlagsEXT     flags;
-    VkDebugUtilsMessageSeverityFlagsEXT     messageSeverity;
-    VkDebugUtilsMessageTypeFlagsEXT         messageType;
-    PFN_vkDebugUtilsMessengerCallbackEXT    pfnUserCallback;
-    void*                                   pUserData;
-	 */
-
 	VkDebugUtilsMessengerEXT VulkanLogger::m_Logger;
 	VkDebugUtilsMessengerCreateInfoEXT VulkanLogger::m_CreateInfo{
 		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -52,7 +42,6 @@ namespace Visus
 		.pfnUserCallback = debugCallback,
 		.pUserData = nullptr
 	};
-
 
 	void VulkanLogger::Init(VkInstance instance)
 	{

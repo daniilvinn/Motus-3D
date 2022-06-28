@@ -7,8 +7,12 @@
 
 namespace Visus
 {
+	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance;
+
 	void VulkanGraphicsContext::Init(const ContextSpecification& spec)
 	{
+		s_Instance = this;
+
 		if(VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
 		{
 			Logger::Init();
@@ -36,14 +40,23 @@ namespace Visus
 			instance_create_info.pNext = VulkanLogger::GetCreateInfo();
 		}
 
-		VkResult result = vkCreateInstance(&instance_create_info, nullptr, &m_Instance);
+		VkResult result = vkCreateInstance(&instance_create_info, nullptr, &m_VulkanInstance);
 
 		if (result == VK_SUCCESS) {
-			VISUS_INFO("Graphics context initialized successfully")
+			VISUS_INFO("Graphics context initialized successfully");
 		} else
 		{
-			VISUS_ERROR("Graphics context initialization failed")
+			VISUS_ERROR("Graphics context initialization failed");
 		}
+
+		m_PhysicalDevice = VulkanPhysicalDevice::SelectDevice();
+
+		VkPhysicalDeviceFeatures enabledfeatures;
+		memset(&enabledfeatures, 0, sizeof(enabledfeatures));
+		enabledfeatures.samplerAnisotropy = true;
+		enabledfeatures.pipelineStatisticsQuery = true;
+
+		m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice, enabledfeatures);
 	}
 
 	void VulkanGraphicsContext::Shutdown()
@@ -68,6 +81,8 @@ namespace Visus
 		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&count);
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + count);
+
+		extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
 		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
 		{

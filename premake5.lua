@@ -150,7 +150,7 @@ project "Motus3D"
 
 		defines
 		{
-			"MT_PLATFORM_WINDOWS",
+			"MT_PLATFORM_WINDOWS"
 		}
 
 	filter "configurations:Debug"

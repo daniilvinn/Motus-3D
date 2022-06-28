@@ -3,5 +3,9 @@
 
 namespace Visus
 {
-	Ref<GraphicsContext> GraphicsContext::s_Instance = CreateRef<VulkanGraphicsContext>();
+
+	Ref<GraphicsContext> GraphicsContext::Create()
+	{
+		return CreateRef<VulkanGraphicsContext>();
+	}
 }

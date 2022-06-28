@@ -33,3 +33,14 @@ namespace Visus
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 }
+
+#include <Visus/Core/Logger.h>
+
+#ifdef VISUS_DEBUG
+#define VK_CHECK_RESULT(expression) if(expression != VK_SUCCESS) {\
+										VISUS_ERROR("Vulkan call failed: {0} || Location: {1} ({2})", #expression, __FILE__, __LINE__); \
+									} else {}
+
+#else 
+	#define VK_CHECK_RESULT(expression) expression
+#endif

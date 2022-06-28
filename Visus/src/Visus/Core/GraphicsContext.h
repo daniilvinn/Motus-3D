@@ -13,16 +13,14 @@ namespace Visus
 	class VISUS_API GraphicsContext
 	{
 	public:
-		static Ref<GraphicsContext> Get() { return s_Instance; }
+		GraphicsContext() = default;
+		~GraphicsContext() = default;
+
+		static Ref<GraphicsContext> Create();
 
 		virtual void Init(const ContextSpecification& spec) = 0;
 		virtual void Shutdown() = 0;
 
-	protected:
-
-
-	private:
-		static Ref<GraphicsContext> s_Instance;
 
 	};
 }
