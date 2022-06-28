@@ -33,7 +33,7 @@ namespace Motus3D
 
 		EventQueue m_EventQueue;
 
-		bool m_ApplicationRunning;
+		bool m_ApplicationRunning = true;
 
 	};
 }
