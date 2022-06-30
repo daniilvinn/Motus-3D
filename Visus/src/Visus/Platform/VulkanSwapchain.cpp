@@ -27,16 +27,16 @@ namespace Visus
 
 		VK_CHECK_RESULT(glfwCreateWindowSurface(vk_instance, context_spec.windowHandle, nullptr, &m_Surface));
 
-		//VkBool32 is_surface_supported;
-		//vkGetPhysicalDeviceSurfaceSupportKHR(m_Device->GetPhysicalDevice()->GetHandle(), m_Device->GetPhysicalDevice()->GetQueueFamilyIndices().graphics, m_Surface, &is_surface_supported);
+		VkBool32 is_surface_supported;
+		vkGetPhysicalDeviceSurfaceSupportKHR(m_Device->GetPhysicalDevice()->GetHandle(), m_Device->GetPhysicalDevice()->GetQueueFamilyIndices().graphics, m_Surface, &is_surface_supported);
 
 		// TODO: redesign physical device selecting in such way, in which if it doesn't support surface, it will be discarded
-		//if (is_surface_supported)
-		//{
-		//	VISUS_ERROR("Selected GPU incompatible with surface!");
-		//} else
-		//{
-		//	VISUS_TRACE("Surface initialized successfully");
-		//}
+		if (is_surface_supported)
+		{
+			VISUS_TRACE("Surface initialized successfully");
+		} else
+		{
+			VISUS_ERROR("Selected GPU incompatible with surface!");
+		}
 	}
 }

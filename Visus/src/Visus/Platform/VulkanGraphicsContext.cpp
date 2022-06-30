@@ -14,6 +14,8 @@ namespace Visus
 		s_Instance = this;
 		m_ContextSpecification = spec;
 
+		glfwInit();
+
 		if(VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
 		{
 			Logger::Init();

@@ -1,9 +1,9 @@
-[submodule "Motus3D/thirdparty/GLFW"]
-	path = Motus3D/thirdparty/GLFW
-	url = https://github.com/daniilvinn/glfw.git
 [submodule "Motus3D/thirdparty/spdlog"]
 	path = Motus3D/thirdparty/spdlog
 	url = https://github.com/gabime/spdlog.git
 [submodule "Motus3D/thirdparty/glm"]
 	path = Motus3D/thirdparty/glm
 	url = https://github.com/Groovounet/glm.git
+[submodule "Motus3D/thirdparty/GLFW"]
+	path = Motus3D/thirdparty/GLFW
+	url = https://github.com/glfw/glfw.git
