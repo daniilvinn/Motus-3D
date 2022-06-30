@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Visus/Core/Macros.h>
+
+#include <Visus/Core/Swapchain.h>
+
 #include <GLFW/glfw3.h>
 
 namespace Visus
@@ -21,6 +24,7 @@ namespace Visus
 		virtual void Init(const ContextSpecification& spec) = 0;
 		virtual void Shutdown() = 0;
 
+		//virtual Ref<Swapchain> GetSwapchain() = 0;
 
 	};
 }

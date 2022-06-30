@@ -2,6 +2,7 @@
 
 #include <Visus/Core/GraphicsContext.h>
 #include <Visus/Platform/VulkanDevice.h>
+#include <Visus/Platform/VulkanSwapchain.h>
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -17,8 +18,10 @@ namespace Visus
 		void Shutdown() override;
 
 		static Ref<VulkanGraphicsContext> GetVulkanContext() { return CreateRef<VulkanGraphicsContext>(*s_Instance); };
-		VkInstance GetInstance() { return m_VulkanInstance; }
+		VkInstance GetInstance() { return m_VulkanInstance; } // TODO: fix confusing method name
 		Ref<VulkanDevice> GetDevice() { return m_Device; }
+
+		ContextSpecification GetSpecification() const { return m_ContextSpecification; }
 
 	private: // Private methods
 		static VulkanGraphicsContext* s_Instance;
@@ -32,6 +35,8 @@ namespace Visus
 
 		Ref<VulkanPhysicalDevice> m_PhysicalDevice;
 		Ref<VulkanDevice> m_Device;
+
+		Ref<VulkanSwapchain> m_Swapchain;
 
 	};
 }

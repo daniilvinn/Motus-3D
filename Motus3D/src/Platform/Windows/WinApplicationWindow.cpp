@@ -5,11 +5,9 @@
 
 #include <Core/Events/Event.h>
 
-
-// HACK: setting GLFW error callback here isn't good idea. To be moved to another place.
-
 namespace Motus3D
 {
+	// HACK: setting GLFW error callback here isn't good idea. To be moved to another place.
 	static void glfwErrorCallback(int code, const char* error)
 	{
 		MT_CORE_LOG_FATAL("GLFW_ERROR: {0} ({1})", error, code);
@@ -17,6 +15,7 @@ namespace Motus3D
 
 	WinApplicationWindow::WinApplicationWindow(uint32_t width, uint32_t height, std::string title)
 	{
+		glfwSetErrorCallback(glfwErrorCallback);
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -139,7 +138,6 @@ namespace Motus3D
 			Event event(variant, KeyTyped);
 			data.eventHandler(event);
 			});
-		glfwSetErrorCallback(glfwErrorCallback);
 	}
 	
 	WinApplicationWindow::~WinApplicationWindow()

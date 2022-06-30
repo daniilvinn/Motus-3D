@@ -7,11 +7,12 @@
 
 namespace Visus
 {
-	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance;
+	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance = nullptr;
 
 	void VulkanGraphicsContext::Init(const ContextSpecification& spec)
 	{
 		s_Instance = this;
+		m_ContextSpecification = spec;
 
 		if(VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
 		{
@@ -57,6 +58,9 @@ namespace Visus
 		enabledfeatures.pipelineStatisticsQuery = true;
 
 		m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice, enabledfeatures);
+
+		m_Swapchain = CreateRef<VulkanSwapchain>();
+		m_Swapchain->InitSurface();
 	}
 
 	void VulkanGraphicsContext::Shutdown()
@@ -82,10 +86,7 @@ namespace Visus
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + count);
 
-		extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-
-		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
-		{
+		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 

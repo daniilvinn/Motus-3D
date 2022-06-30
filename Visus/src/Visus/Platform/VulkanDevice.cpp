@@ -117,6 +117,9 @@ namespace Visus
         }
     }
 
+    // Vulkan Device
+    // =============
+
     VulkanDevice::VulkanDevice(Ref<VulkanPhysicalDevice> physicalDevice, VkPhysicalDeviceFeatures enabledFeatures)
     {
         m_PhysicalDevice = physicalDevice;
@@ -138,6 +141,8 @@ namespace Visus
 
         VK_CHECK_RESULT(vkCreateDevice(m_PhysicalDevice->GetHandle(), &device_create_info, nullptr, &m_Device));
 
+        vkGetDeviceQueue(m_Device, m_PhysicalDevice->GetQueueFamilyIndices().graphics, 0, &m_GraphicsTransferQueue);
+        vkGetDeviceQueue(m_Device, m_PhysicalDevice->GetQueueFamilyIndices().compute, 0, &m_ComputeQueue);
     }
 
     VulkanDevice::~VulkanDevice()
@@ -147,8 +152,6 @@ namespace Visus
         VISUS_TRACE("Logical device destroyed");
     }
 
-    // Vulkan Device
-    // =============
 
 
 }
