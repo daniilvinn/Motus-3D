@@ -32,7 +32,6 @@ namespace Visus {
 	private: // Private Methods
 		void FindQueueFamilies();
 
-
 	private: // Private fields
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 		QueueFamilyIndices m_QueueFamilyIndices;
@@ -51,6 +50,9 @@ namespace Visus {
 
 		VkDevice GetHandle() { return m_Device; }
 		Ref<VulkanPhysicalDevice> GetPhysicalDevice() { return m_PhysicalDevice; }
+		VkQueue GetGraphicsTransferQueue() { return m_GraphicsTransferQueue; };
+		VkQueue GetComputeQueue() { return m_ComputeQueue; };
+
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;
 

@@ -17,25 +17,24 @@ namespace Visus
 		void Init(const ContextSpecification& spec) override;
 		void Shutdown() override;
 
-		static Ref<VulkanGraphicsContext> GetVulkanContext() { return CreateRef<VulkanGraphicsContext>(*s_Instance); };
-		VkInstance GetInstance() { return m_VulkanInstance; } // TODO: fix confusing method name
-		Ref<VulkanDevice> GetDevice() { return m_Device; }
-
+		static VulkanGraphicsContext* GetVulkanContext() { return s_Instance; }
 		ContextSpecification GetSpecification() const { return m_ContextSpecification; }
 
-	private: // Private methods
-		static VulkanGraphicsContext* s_Instance;
+		VkInstance GetInstance() { return m_VulkanInstance; } // TODO: fix confusing method name
+		Ref<VulkanDevice> GetDevice() { return m_Device; }
+		Ref<Swapchain> GetSwapchain() override { return m_Swapchain; }
 
+	private: // Private methods
 		std::vector<const char*> GetRequiredLayers();
 		std::vector<const char*> GetRequiredExtensions();
 
 	private: // Private fields
+		static VulkanGraphicsContext* s_Instance;
 		ContextSpecification m_ContextSpecification;
-		VkInstance m_VulkanInstance;
 
+		VkInstance m_VulkanInstance;
 		Ref<VulkanPhysicalDevice> m_PhysicalDevice;
 		Ref<VulkanDevice> m_Device;
-
 		Ref<VulkanSwapchain> m_Swapchain;
 
 	};

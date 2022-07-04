@@ -9,9 +9,11 @@
 
 namespace Visus
 {
+	// Abstract from GLFW
 	struct VISUS_API ContextSpecification
 	{
 		GLFWwindow* windowHandle;
+		uint8_t framesInFlight;
 	};
 
 	class VISUS_API GraphicsContext
@@ -25,7 +27,7 @@ namespace Visus
 		virtual void Init(const ContextSpecification& spec) = 0;
 		virtual void Shutdown() = 0;
 
-		//virtual Ref<Swapchain> GetSwapchain() = 0;
+		virtual Ref<Swapchain> GetSwapchain() = 0;
 
 	};
 }

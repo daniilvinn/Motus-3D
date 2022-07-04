@@ -77,8 +77,7 @@ namespace Visus
 
     VulkanPhysicalDevice::~VulkanPhysicalDevice()
     {
-        m_QueueCreateInfos.clear();
-        m_PhysicalDevice = VK_NULL_HANDLE;
+        
     }
 
     bool VulkanPhysicalDevice::IsExtensionSupported(std::string ext) const
@@ -151,7 +150,5 @@ namespace Visus
         vkDestroyDevice(m_Device, nullptr);
         VISUS_TRACE("Logical device destroyed");
     }
-
-
 
 }

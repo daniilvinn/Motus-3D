@@ -6,7 +6,10 @@ namespace Visus {
 	class VISUS_API Swapchain
 	{
 	public:
-		~Swapchain(){};
+		~Swapchain(){}
+
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
 
 	};
 }

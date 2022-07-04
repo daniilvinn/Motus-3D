@@ -63,11 +63,20 @@ namespace Visus
 
 		m_Swapchain = CreateRef<VulkanSwapchain>();
 		m_Swapchain->InitSurface();
+		m_Swapchain->Create(1600, 900, true);
 	}
 
 	void VulkanGraphicsContext::Shutdown()
 	{
-		
+		vkDeviceWaitIdle(m_Device->GetHandle());
+		m_Swapchain.reset();
+		m_Device.reset();
+		vkDestroyInstance(m_VulkanInstance, nullptr);
+
+		glfwTerminate();
+
+		VISUS_TRACE("Graphics context destroyed");
+
 	}
 
 	std::vector<const char*> VulkanGraphicsContext::GetRequiredLayers()
