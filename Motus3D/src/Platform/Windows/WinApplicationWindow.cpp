@@ -19,7 +19,6 @@ namespace Motus3D
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_Handle = glfwCreateWindow(width, height, title.c_str(), nullptr , nullptr);
 
@@ -27,8 +26,10 @@ namespace Motus3D
 		m_WindowData.height = height;
 		m_WindowData.title = title;
 
-		m_Context = Visus::GraphicsContext::Create();
-		m_Context->Init({ (GLFWwindow*)GetHandle() });
+		Visus::Renderer::Init({
+			m_Handle,
+			3
+		});
 
 		glfwSetWindowUserPointer(m_Handle, &m_WindowData);
 

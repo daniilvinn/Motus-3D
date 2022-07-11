@@ -1,0 +1,45 @@
+#include "Renderer.h"
+
+#include <Visus/Platform/VulkanRenderer.h>
+
+namespace Visus
+{
+	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
+	RendererConfiguration Renderer::m_Configuration;
+
+	void Renderer::Init(RendererConfiguration configuration)
+	{
+		m_Configuration = configuration;
+		s_RendererAPI = CreateRef<VulkanRenderer>();
+	}
+
+	void Renderer::Shutdown()
+	{
+		s_RendererAPI.reset();
+	}
+
+	Ref<GraphicsContext> Renderer::GetContext()
+	{
+		return s_RendererAPI->GetContext();
+	}
+
+	void Renderer::OnWindowResize(uint32_t width, uint32_t height, bool vsync)
+	{
+		s_RendererAPI->OnWindowResize(width, height, vsync);
+	}
+
+	void Renderer::BeginFrame()
+	{
+		s_RendererAPI->BeginFrame();
+	}
+
+	void Renderer::EndFrame()
+	{
+		s_RendererAPI->EndFrame();
+	}
+
+	void Renderer::ClearColor(float r, float g, float b, float a)
+	{
+		s_RendererAPI->ClearColor(r, g, b, a);
+	}
+}

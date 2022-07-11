@@ -3,7 +3,7 @@
 #include <Platform/Windows/WinApplicationWindow.h>
 #include <Core/Events/Event.h>
 
-#include "Visus/Core/GraphicsContext.h"
+#include "Visus.h"
 
 namespace Motus3D
 {
@@ -29,7 +29,7 @@ namespace Motus3D
 	
 	Application::~Application()
 	{
-				
+		Visus::Renderer::Shutdown();
 	}
 
 	void Application::Run()
@@ -37,6 +37,10 @@ namespace Motus3D
 		while (m_ApplicationRunning)
 		{
 			ProcessEvents();
+
+			Visus::Renderer::BeginFrame();
+			Visus::Renderer::ClearColor(0.1f, 0.7f, 0.8f, 1.0f);
+			Visus::Renderer::EndFrame();
 
 			for(auto& layer : m_LayerStack)
 			{
@@ -56,13 +60,15 @@ namespace Motus3D
 		}
 	}
 
-	bool Application::OnWindowResize(WindowResizedEvent& )
+	bool Application::OnWindowResize(WindowResizedEvent& e)
 	{
-		MT_CORE_LOG_TRACE("OnWindowResize");
+		
+		//Visus::Renderer::OnWindowResize(e.width, e.height);
+		// ^^^ Causes crash, to be fixed ^^^
 		return true;
 	}
 
-	bool Application::OnWindowClosed(WindowClosedEvent& )
+	bool Application::OnWindowClosed(WindowClosedEvent& e)
 	{
 		m_ApplicationRunning = false;
 		return false;
