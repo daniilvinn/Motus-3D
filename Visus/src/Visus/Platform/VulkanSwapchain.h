@@ -15,12 +15,20 @@ namespace Visus {
 		VulkanSwapchain();
 		~VulkanSwapchain();
 
+		void Destroy() override;
+
 		void InitSurface();
 		void Create(uint32_t width, uint32_t height, bool vsync = false);
 
 		VkSwapchainKHR GetHandle() { return m_Swapchain; }
 		VkSurfaceKHR GetSurfaceHandle() { return m_Surface; }
 		VkRenderPass GetRenderPass() { return m_RenderPass; }
+		VkFramebuffer GetCurrentFramebuffer() { return m_Framebuffers[m_CurrentSwapchainImageIndex]; };
+		std::pair<uint32_t, uint32_t> GetExtent() const override { return {m_SwapchainExtent.width, m_SwapchainExtent.height}; } // TODO: HOTFIX, MAKE IT VIRTUAL
+		uint8_t GetCurrentFrameIndex() override { return m_CurrentFrameIndex; };
+
+		VkSemaphore GetRenderCompleteSemaphore() { return m_Semaphores.renderComplete; }
+		VkSemaphore GetPresentCompleteSemaphore() { return m_Semaphores.presentComplete; }
 
 		void BeginFrame() override;
 		void EndFrame() override;
@@ -35,6 +43,7 @@ namespace Visus {
 		GLFWwindow* m_WindowHandle;
 
 		VkSurfaceCapabilitiesKHR m_SurfaceCapabilities;
+		VkExtent2D m_SwapchainExtent;
 		VkFormat m_SurfaceFormat;
 		VkColorSpaceKHR m_SurfaceColorSpace;
 //		\/ \/ \/  FIFO mode is guaranteed to be available, while MAILBOX may be not available, so it is optional. \/ \/ \/
@@ -63,5 +72,6 @@ namespace Visus {
 		bool m_VSync;
 		uint8_t m_FramesInFlight;
 
+		friend class VulkanRenderer;
 	};
 }

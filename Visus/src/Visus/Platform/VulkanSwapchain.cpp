@@ -8,11 +8,16 @@ namespace Visus
 	VulkanSwapchain::VulkanSwapchain()
 	{
 		m_Device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		m_WindowHandle = VulkanGraphicsContext::GetVulkanContext()->GetSpecification().windowHandle;
+		m_WindowHandle = (GLFWwindow*)VulkanGraphicsContext::GetVulkanContext()->GetSpecification().windowHandle;
 		m_FramesInFlight = VulkanGraphicsContext::GetVulkanContext()->GetSpecification().framesInFlight;
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()
+	{
+		
+	}
+
+	void VulkanSwapchain::Destroy()
 	{
 		auto vk_instance = VulkanGraphicsContext::GetVulkanContext()->GetInstance();
 		// TODO: I don't think it is great idea to wait device idle in every desctructor.
@@ -22,12 +27,12 @@ namespace Visus
 		vkDestroySwapchainKHR(m_Device->GetHandle(), m_Swapchain, nullptr);
 		vkDestroySurfaceKHR(vk_instance, m_Surface, nullptr);
 
-		for(auto& image : m_SwapchainImages)
+		for (auto& image : m_SwapchainImages)
 		{
 			vkDestroyImageView(m_Device->GetHandle(), image.view, nullptr);
 		}
 
-		for(auto& framebuffer : m_Framebuffers)
+		for (auto& framebuffer : m_Framebuffers)
 		{
 			vkDestroyFramebuffer(m_Device->GetHandle(), framebuffer, nullptr);
 		}
@@ -37,7 +42,7 @@ namespace Visus
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.presentComplete, nullptr);
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.renderComplete, nullptr);
 
-		for(auto& fence : m_Fences)
+		for (auto& fence : m_Fences)
 		{
 			vkDestroyFence(m_Device->GetHandle(), fence, nullptr);
 		}
@@ -50,7 +55,7 @@ namespace Visus
 		auto vk_instance = VulkanGraphicsContext::GetVulkanContext()->GetInstance();
 		auto context_spec = VulkanGraphicsContext::GetVulkanContext()->GetSpecification();
 
-		VK_CHECK_RESULT(glfwCreateWindowSurface(vk_instance, context_spec.windowHandle, nullptr, &m_Surface));
+		VK_CHECK_RESULT(glfwCreateWindowSurface(vk_instance, (GLFWwindow*)context_spec.windowHandle, nullptr, &m_Surface));
 
 		VkBool32 is_surface_supported;
 		vkGetPhysicalDeviceSurfaceSupportKHR(m_Device->GetPhysicalDevice()->GetHandle(), m_Device->GetPhysicalDevice()->GetQueueFamilyIndices().graphics, m_Surface, &is_surface_supported);
@@ -108,6 +113,9 @@ namespace Visus
 	void VulkanSwapchain::Create(uint32_t width, uint32_t height, bool vsync)
 	{
 		m_VSync = vsync;
+		m_FramesInFlight = VulkanGraphicsContext::GetVulkanContext()->GetSpecification().framesInFlight;
+		m_SwapchainExtent.width = width;
+		m_SwapchainExtent.height = height;
 
 		if(m_Swapchain != VK_NULL_HANDLE)
 		{
@@ -256,12 +264,11 @@ namespace Visus
 		fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		auto context_specification = VulkanGraphicsContext::GetVulkanContext()->GetSpecification();
-		m_Fences.resize(context_specification.framesInFlight);
-
-		for(auto& fence : m_Fences)
+		for(int i = 0; i < m_FramesInFlight; i++)
 		{
+			VkFence fence;
 			VK_CHECK_RESULT(vkCreateFence(m_Device->GetHandle(), &fence_create_info, nullptr, &fence));
+			m_Fences.push_back(fence);
 		}
 
 	}
