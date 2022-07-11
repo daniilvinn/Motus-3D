@@ -7,6 +7,8 @@
 #include <Core/Events/Event.h>
 #include <Core/Events/EventQueue.h>
 
+#include <Visus.h>
+
 namespace Motus3D
 {
 	class MOTUS_API Application
@@ -30,7 +32,6 @@ namespace Motus3D
 		static Application* s_Instance;
 		Ref<ApplicationWindow> m_AppWindow;
 		LayerStack m_LayerStack;
-
 		EventQueue m_EventQueue;
 
 		bool m_ApplicationRunning = true;

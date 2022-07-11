@@ -5,12 +5,15 @@
 
 #include <vulkan/vulkan.h>
 
+#include <Visus/Platform/VulkanShader.h>
+
 namespace Visus
 {
 	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance = nullptr;
 
 	void VulkanGraphicsContext::Init(const ContextSpecification& spec)
 	{
+		if (s_Instance) VISUS_ERROR("Context already initialized!");
 		s_Instance = this;
 		m_ContextSpecification = spec;
 
@@ -69,11 +72,9 @@ namespace Visus
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
-		m_Swapchain.reset();
-		m_Device.reset();
+		m_Swapchain->Destroy();
+		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);
-
-		glfwTerminate();
 
 		VISUS_TRACE("Graphics context destroyed");
 

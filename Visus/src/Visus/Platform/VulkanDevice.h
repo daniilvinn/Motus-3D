@@ -48,6 +48,8 @@ namespace Visus {
 		VulkanDevice(Ref<VulkanPhysicalDevice> physicalDevice, VkPhysicalDeviceFeatures enabledFeatures);
 		~VulkanDevice();
 
+		void Destroy();
+
 		VkDevice GetHandle() { return m_Device; }
 		Ref<VulkanPhysicalDevice> GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkQueue GetGraphicsTransferQueue() { return m_GraphicsTransferQueue; };

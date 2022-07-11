@@ -4,15 +4,12 @@
 
 #include <Visus/Core/Swapchain.h>
 
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-
 namespace Visus
 {
 	// Abstract from GLFW
 	struct VISUS_API ContextSpecification
 	{
-		GLFWwindow* windowHandle;
+		void* windowHandle;
 		uint8_t framesInFlight;
 	};
 
@@ -26,8 +23,6 @@ namespace Visus
 
 		virtual void Init(const ContextSpecification& spec) = 0;
 		virtual void Shutdown() = 0;
-
-		virtual Ref<Swapchain> GetSwapchain() = 0;
 
 	};
 }

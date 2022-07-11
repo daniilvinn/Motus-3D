@@ -146,9 +146,13 @@ namespace Visus
 
     VulkanDevice::~VulkanDevice()
     {
+
+    }
+
+    void VulkanDevice::Destroy()
+    {
         vkDeviceWaitIdle(m_Device);
         vkDestroyDevice(m_Device, nullptr);
         VISUS_TRACE("Logical device destroyed");
     }
-
 }

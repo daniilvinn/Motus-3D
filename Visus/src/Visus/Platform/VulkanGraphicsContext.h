@@ -22,7 +22,7 @@ namespace Visus
 
 		VkInstance GetInstance() { return m_VulkanInstance; } // TODO: fix confusing method name
 		Ref<VulkanDevice> GetDevice() { return m_Device; }
-		Ref<Swapchain> GetSwapchain() override { return m_Swapchain; }
+		Ref<VulkanSwapchain> GetSwapchain() { return m_Swapchain; }
 
 	private: // Private methods
 		std::vector<const char*> GetRequiredLayers();
