@@ -12,5 +12,6 @@ namespace Visus
 		spdlog::set_pattern("%^[%T][%n]: %v%$");
 		s_Logger = spdlog::stdout_color_mt("Visus");
 		s_Logger->set_level(spdlog::level::trace);
+
 	}
 }

@@ -59,7 +59,7 @@ project "Visus"
 
 	links {
 		"GLFW",
-		"vulkan-1.lib"
+		"vulkan-1.lib",
 	}
 
 	defines {
@@ -79,14 +79,36 @@ project "Visus"
 	filter "configurations:Debug"
 		defines "VISUS_DEBUG"
 		symbols "On"
+		links 
+		{
+			"shaderc_sharedd.lib",
+			"shaderc_utild.lib",
+			"spirv-cross-cored.lib",
+			"spirv-cross-glsld.lib",
+			"SPIRV-Toolsd.lib"
+		}
 
 	filter "configurations:Release"
 		defines "VISUS_RELEASE"
 		optimize "On"
+		links 
+		{
+			"shaderc_shared.lib",
+			"shaderc_util.lib",
+			"spirv-cross-core.lib",
+			"spirv-cross-glsl.lib"
+		}
 
 	filter "configurations:Dist"
 		defines "VISUS_DIST"
 		optimize "On"
+		links 
+		{
+			"shaderc_shared.lib",
+			"shaderc_util.lib",
+			"spirv-cross-core.lib",
+			"spirv-cross-glsl.lib"
+		}
 
 project "Motus3D"
 	location "Motus3D"
@@ -189,6 +211,7 @@ project "Sandbox2D"
 	includedirs 
 	{
 		"Motus3D/src",
+		"Visus/src",
 		"%{IncludeDirectory.spdlog}"
 	}
 
