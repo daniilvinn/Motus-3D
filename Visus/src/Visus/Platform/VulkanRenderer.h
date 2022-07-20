@@ -3,7 +3,7 @@
 #include <Visus/Core/RendererAPI.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
-namespace Visus {
+namespace Motus3D {
 	class VulkanRenderer : public RendererAPI
 	{
 	public:

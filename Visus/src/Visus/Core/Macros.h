@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory.h"
+#include <Core/Macros.h>
 
 #ifdef VISUS_API
 	#undef VISUS_API
@@ -10,9 +10,9 @@
 #endif
 
 #ifdef VISUS_DEBUG
-	#define VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS 1
+	#define VISUS_INTERNAL_ENABLE_VALIDATION 1
 #else
-	#define VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS 0
+	#define VISUS_INTERNAL_ENABLE_VALIDATION 0
 #endif
 
 #include <Visus/Core/Logger.h>

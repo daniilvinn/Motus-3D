@@ -4,10 +4,10 @@
 #include <Visus/Platform/ShaderUtils/ShaderCompiler.h>
 
 #include <vulkan/vulkan.h>
+#include <spirv_cross/spirv_glsl.hpp>
 #include <map>
 
-
-namespace Visus {
+namespace Motus3D {
 
 	constexpr VkShaderStageFlagBits VisusToVulkanShaderStage(ShaderStage stage)
 	{
@@ -25,7 +25,6 @@ namespace Visus {
 		default:
 			assert(false, "Invalid shader stage!");
 			break;
-
 		}
 	}
 
@@ -45,5 +44,7 @@ namespace Visus {
 		std::array<std::optional<std::pair<ShaderStage, std::stringstream>>, ShaderStage::MAX_VALUE + 1> m_ShaderSources; // Sources of shaders
 		std::map<ShaderStage, std::vector<uint32_t>> m_BinaryData;
 		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;
+
+		std::vector<VkDescriptorSetLayout> m_SetLayouts;
 	};
 }

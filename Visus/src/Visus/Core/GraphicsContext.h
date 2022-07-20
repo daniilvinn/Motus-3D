@@ -2,9 +2,7 @@
 
 #include <Visus/Core/Macros.h>
 
-#include <Visus/Core/Swapchain.h>
-
-namespace Visus
+namespace Motus3D
 {
 	// Abstract from GLFW
 	struct VISUS_API ContextSpecification

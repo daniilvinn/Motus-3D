@@ -107,6 +107,47 @@ public:
 		m_Type = None;
 	}
 
+	Event(EventVariants variant, EventType type)
+	{
+		switch (type)
+		{
+		case None:
+			m_Variants.emplace<NoneEvent>(std::get<NoneEvent>(variant));
+			break;
+		case KeyTyped:
+			m_Variants.emplace<KeyTypedEvent>(std::get<KeyTypedEvent>(variant));
+			break;
+		case KeyPressed:
+			m_Variants.emplace<KeyPressedEvent>(std::get<KeyPressedEvent>(variant));
+			break;
+		case KeyReleased:
+			m_Variants.emplace<KeyReleasedEvent>(std::get<KeyReleasedEvent>(variant));
+			break;
+		case MouseMoved:
+			m_Variants.emplace<MouseMovedEvent>(std::get<MouseMovedEvent>(variant));
+			break;
+		case MouseScrolled:
+			m_Variants.emplace<MouseScrolledEvent>(std::get<MouseScrolledEvent>(variant));
+			break;
+		case MouseButtonPressed:
+			m_Variants.emplace<MouseButtonPressedEvent>(std::get<MouseButtonPressedEvent>(variant));
+			break;
+		case MouseButtonReleased:
+			m_Variants.emplace<MouseButtonReleasedEvent>(std::get<MouseButtonReleasedEvent>(variant));
+			break;
+		case WindowClosed:
+			m_Variants.emplace<WindowClosedEvent>(std::get<WindowClosedEvent>(variant));
+			break;
+		case WindowResized:
+			m_Variants.emplace<WindowResizedEvent>(std::get<WindowResizedEvent>(variant));
+			break;
+		default:
+			//MT_CORE_ASSERT(false, "invalid event type");
+			break;
+		}
+		m_Type = type;
+	}
+
 	constexpr void operator=(const Event& e)
 	{
 		switch (e.m_Type)
@@ -148,46 +189,7 @@ public:
 		m_Type = e.m_Type;
 	}
 
-	Event(EventVariants variant, EventType type)
-	{
-		switch (type)
-		{
-		case None:
-			m_Variants.emplace<NoneEvent>(std::get<NoneEvent>(variant));
-			break;
-		case KeyTyped:
-			m_Variants.emplace<KeyTypedEvent>(std::get<KeyTypedEvent>(variant));
-			break;
-		case KeyPressed:
-			m_Variants.emplace<KeyPressedEvent>(std::get<KeyPressedEvent>(variant));
-			break;
-		case KeyReleased:
-			m_Variants.emplace<KeyReleasedEvent>(std::get<KeyReleasedEvent>(variant));
-			break;
-		case MouseMoved:
-			m_Variants.emplace<MouseMovedEvent>(std::get<MouseMovedEvent>(variant));
-			break;
-		case MouseScrolled:
-			m_Variants.emplace<MouseScrolledEvent>(std::get<MouseScrolledEvent>(variant));
-			break;
-		case MouseButtonPressed:
-			m_Variants.emplace<MouseButtonPressedEvent>(std::get<MouseButtonPressedEvent>(variant));
-			break;
-		case MouseButtonReleased:
-			m_Variants.emplace<MouseButtonReleasedEvent>(std::get<MouseButtonReleasedEvent>(variant));
-			break;
-		case WindowClosed:
-			m_Variants.emplace<WindowClosedEvent>(std::get<WindowClosedEvent>(variant));
-			break;
-		case WindowResized:
-			m_Variants.emplace<WindowResizedEvent>(std::get<WindowResizedEvent>(variant));
-			break;
-		default:
-			//MT_CORE_ASSERT(false, "invalid event type");
-			break;
-		}
-		m_Type = type;
-	}
+	
 
 	bool IsHandled() const { return m_IsHandled; }
 

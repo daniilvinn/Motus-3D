@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 
 
-namespace Visus {
+namespace Motus3D {
 	class VulkanSwapchain : public Swapchain
 	{
 	public:

@@ -26,7 +26,7 @@ namespace Motus3D
 		m_WindowData.height = height;
 		m_WindowData.title = title;
 
-		Visus::Renderer::Init({
+		Motus3D::Renderer::Init({
 			m_Handle,
 			3
 		});

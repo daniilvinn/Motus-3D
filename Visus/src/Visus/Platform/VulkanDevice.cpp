@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace Visus
+namespace Motus3D
 {
     // Vulkan Physical Device
     // ======================

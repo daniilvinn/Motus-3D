@@ -3,7 +3,7 @@
 #include <Visus/Platform/VulkanGraphicsContext.h>
 #include <Visus/Core/Logger.h>
 
-namespace Visus
+namespace Motus3D
 {
 	VulkanSwapchain::VulkanSwapchain()
 	{

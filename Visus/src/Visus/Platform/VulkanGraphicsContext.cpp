@@ -7,7 +7,7 @@
 
 #include <Visus/Platform/VulkanShader.h>
 
-namespace Visus
+namespace Motus3D
 {
 	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance = nullptr;
 
@@ -19,15 +19,15 @@ namespace Visus
 
 		glfwInit();
 
-		if(VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
+		if(VISUS_INTERNAL_ENABLE_VALIDATION)
 		{
 			Logger::Init();
 		}
 
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Motus-3D Core";
-		appInfo.pEngineName = "Motus-3D Game Engine";
+		appInfo.pApplicationName = "Motus3D-3D Core";
+		appInfo.pEngineName = "Motus3D-3D Game Engine";
 		appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
 		appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_3;
@@ -42,7 +42,7 @@ namespace Visus
 		instance_create_info.ppEnabledExtensionNames = enabledExtensions.data();
 		instance_create_info.enabledExtensionCount = enabledExtensions.size();
 		instance_create_info.pApplicationInfo = &appInfo;
-		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS) {
+		if (VISUS_INTERNAL_ENABLE_VALIDATION) {
 			instance_create_info.pNext = VulkanLogger::GetCreateInfo();
 		}
 
@@ -64,9 +64,14 @@ namespace Visus
 
 		m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice, enabledfeatures);
 
+		// Getting window's framebuffer size and passing it to swapchain creation
+		int windowWidth = 0;
+		int windowHeight = 0;
+		glfwGetFramebufferSize((GLFWwindow*)spec.windowHandle, &windowWidth, &windowHeight);
+
 		m_Swapchain = CreateRef<VulkanSwapchain>();
 		m_Swapchain->InitSurface();
-		m_Swapchain->Create(1600, 900, true);
+		m_Swapchain->Create(windowWidth, windowHeight, true);
 	}
 
 	void VulkanGraphicsContext::Shutdown()
@@ -77,13 +82,12 @@ namespace Visus
 		vkDestroyInstance(m_VulkanInstance, nullptr);
 
 		VISUS_TRACE("Graphics context destroyed");
-
 	}
 
 	std::vector<const char*> VulkanGraphicsContext::GetRequiredLayers()
 	{
 		std::vector<const char*> layers;
-		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS)
+		if (VISUS_INTERNAL_ENABLE_VALIDATION)
 		{
 			layers.push_back("VK_LAYER_KHRONOS_validation");
 		}
@@ -98,7 +102,7 @@ namespace Visus
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + count);
 
-		if (VISUS_INTERNAL_ENABLE_VALIDATION_LAYERS) {
+		if (VISUS_INTERNAL_ENABLE_VALIDATION) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 

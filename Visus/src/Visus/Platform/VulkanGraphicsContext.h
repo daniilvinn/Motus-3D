@@ -7,7 +7,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-namespace Visus
+namespace Motus3D
 {
 	// Class which represents context for rendering using Vulkan.
 	// Call Init() method to initiazlize every renderer component.

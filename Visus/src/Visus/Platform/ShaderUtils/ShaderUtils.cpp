@@ -1,6 +1,6 @@
 #include "ShaderUtils.h"
 
-namespace Visus
+namespace Motus3D
 {
 	Ref<ShaderCompiler> ShaderUtils::s_Compiler = CreateRef<ShaderCompiler>();
 }

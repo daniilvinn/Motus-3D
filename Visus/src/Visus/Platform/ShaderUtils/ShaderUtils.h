@@ -3,7 +3,7 @@
 #include <Visus/Core/Macros.h>
 #include <Visus/Platform/ShaderUtils/ShaderCompiler.h>
 
-namespace Visus
+namespace Motus3D
 {
 	class ShaderUtils
 	{

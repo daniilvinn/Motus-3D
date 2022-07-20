@@ -4,7 +4,7 @@
 
 #include <Visus/Core/RendererAPI.h>
 
-namespace Visus {
+namespace Motus3D {
 	struct VISUS_API RendererConfiguration
 	{
 		void* windowHandle;

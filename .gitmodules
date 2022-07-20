@@ -7,3 +7,6 @@
 [submodule "Motus3D/thirdparty/GLFW"]
 	path = Motus3D/thirdparty/GLFW
 	url = https://github.com/glfw/glfw.git
+[submodule "Motus3D/thirdparty/VulkanMemoryAllocator"]
+	path = Motus3D/thirdparty/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

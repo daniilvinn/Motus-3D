@@ -5,7 +5,7 @@
 
 #include <Visus/Platform/VulkanShader.h>
 
-namespace Visus {
+namespace Motus3D {
 	class VulkanPipeline : public Pipeline
 	{
 	public:

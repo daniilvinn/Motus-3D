@@ -3,7 +3,7 @@
 #include <Visus/Core/Logger.h>
 #include <shaderc/shaderc.hpp>
 
-namespace Visus
+namespace Motus3D
 {
 	constexpr shaderc_shader_kind VisusToShadercStage(ShaderStage stage)
 	{

@@ -7,7 +7,7 @@
 #include <shaderc/shaderc.hpp>
 #include <fstream>
 
-namespace Visus
+namespace Motus3D
 {
 	VulkanShader::VulkanShader()
 	{
@@ -60,12 +60,12 @@ namespace Visus
 
 			auto resources = reflect.get_shader_resources();
 
-			VISUS_TRACE("Shader Info ({0}):", shader.first);
-			VISUS_TRACE(" - Attribute inputs: {0}", resources.stage_inputs.size());
-			for(auto& res : resources.stage_inputs)
-			{
-				VISUS_TRACE("	Location: {0}", reflect.get_decoration(res.id, spv::DecorationLocation));
-			}
+			VkDescriptorSetLayoutBinding binding;
+			VkDescriptorSetLayoutCreateInfo abu;
+			
+			
+
+
 		}
 
 		for(auto& src : m_ShaderSources)

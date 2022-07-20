@@ -4,7 +4,7 @@
 
 #include <Visus/Core/Shader.h>
 
-namespace Visus {
+namespace Motus3D {
 
 	struct PipelineSpecification
 	{

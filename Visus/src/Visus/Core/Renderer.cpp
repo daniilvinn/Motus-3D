@@ -2,7 +2,7 @@
 
 #include <Visus/Platform/VulkanRenderer.h>
 
-namespace Visus
+namespace Motus3D
 {
 	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
 	RendererConfiguration Renderer::m_Configuration;

@@ -2,7 +2,7 @@
 
 #include <Visus/Core/Macros.h>
 
-namespace Visus {
+namespace Motus3D {
 	class Shader
 	{
 	public:

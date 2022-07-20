@@ -2,7 +2,7 @@
 
 #include <Visus/Core/Renderer.h>
 
-namespace Visus {
+namespace Motus3D {
 
 	VulkanRenderer::VulkanRenderer()
 	{

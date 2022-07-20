@@ -4,7 +4,7 @@
 
 #include <Visus/Core/GraphicsContext.h>
 
-namespace Visus {
+namespace Motus3D {
 	class VISUS_API RendererAPI
 	{
 	public:

@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace Visus {
+namespace Motus3D {
 
 	struct QueueFamilyIndices
 	{

@@ -2,7 +2,7 @@
 
 #include <Visus/Core/Macros.h>
 
-namespace Visus {
+namespace Motus3D {
 
 	enum ShaderStage
 	{
@@ -13,7 +13,7 @@ namespace Visus {
 		MAX_VALUE = COMPUTE
 	};
 
-	// Visus currently supports only vertex, fragment and compute shaders.
+	// Motus3D currently supports only vertex, fragment and compute shaders.
 	// Also visus supports only GLSL shaders.
 	// TODO: compiling geometry shaders and HLSL compiling
 	class ShaderCompiler

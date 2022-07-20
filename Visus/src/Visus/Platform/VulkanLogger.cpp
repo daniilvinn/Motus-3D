@@ -4,7 +4,7 @@
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
 
-namespace Visus
+namespace Motus3D
 {
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
