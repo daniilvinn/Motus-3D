@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include <Visus/Platform/VulkanShader.h>
+#include <Visus/Platform/VulkanAllocator.h>
 
 namespace Motus3D
 {
@@ -72,6 +72,9 @@ namespace Motus3D
 		m_Swapchain = CreateRef<VulkanSwapchain>();
 		m_Swapchain->InitSurface();
 		m_Swapchain->Create(windowWidth, windowHeight, true);
+
+		VulkanAllocator::Init();
+
 	}
 
 	void VulkanGraphicsContext::Shutdown()

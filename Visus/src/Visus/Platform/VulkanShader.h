@@ -9,6 +9,26 @@
 
 namespace Motus3D {
 
+	class VulkanShader : public Shader
+	{
+	public:
+		VulkanShader();
+		VulkanShader(const std::string& filename);
+		~VulkanShader();
+
+		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() const { return m_CreateInfos; };
+
+	private:
+		void ParseFile(const std::string& filename);
+
+	private:
+		std::array<std::optional<std::pair<ShaderStage, std::stringstream>>, ShaderStage::MAX_VALUE + 1> m_ShaderSources; // Sources of shaders
+		std::map<ShaderStage, std::vector<uint32_t>> m_BinaryData;
+		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;
+
+		std::vector<VkDescriptorSetLayout> m_SetLayouts;
+	};
+
 	constexpr VkShaderStageFlagBits VisusToVulkanShaderStage(ShaderStage stage)
 	{
 		switch (stage)
@@ -28,23 +48,23 @@ namespace Motus3D {
 		}
 	}
 
-	class VulkanShader : public Shader
+	constexpr VkFormat VisusToVulkanDataFormat(ShaderDataType format)
 	{
-	public:
-		VulkanShader();
-		VulkanShader(const std::string& filename);
-		~VulkanShader();
+		switch (format)
+		{
+			case ShaderDataType::INT:		return VK_FORMAT_R32_SINT;
+			case ShaderDataType::INT2:		return VK_FORMAT_R32G32_SINT;
+			case ShaderDataType::INT3:		return VK_FORMAT_R32G32B32_SINT;
+			case ShaderDataType::INT4:		return VK_FORMAT_R32G32B32A32_SINT;
+			case ShaderDataType::FLOAT:		return VK_FORMAT_R32_SFLOAT;
+			case ShaderDataType::FLOAT2:	return VK_FORMAT_R32G32_SFLOAT;
+			case ShaderDataType::FLOAT3:	return VK_FORMAT_R32G32B32_SFLOAT;
+			case ShaderDataType::FLOAT4:	return VK_FORMAT_R32G32B32A32_SFLOAT;
+			case ShaderDataType::MAT3:		return VK_FORMAT_R32G32B32_SFLOAT;
+			case ShaderDataType::MAT4:		return VK_FORMAT_R32G32B32A32_SFLOAT;
+			case ShaderDataType::BOOL:		return VK_FORMAT_R8_UINT;
+		}
+		VISUS_ASSERT(false, "Unknown shader data type");
+	}
 
-		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() const { return m_CreateInfos; };
-
-	private:
-		void ParseFile(const std::string& filename);
-		
-	private:
-		std::array<std::optional<std::pair<ShaderStage, std::stringstream>>, ShaderStage::MAX_VALUE + 1> m_ShaderSources; // Sources of shaders
-		std::map<ShaderStage, std::vector<uint32_t>> m_BinaryData;
-		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;
-
-		std::vector<VkDescriptorSetLayout> m_SetLayouts;
-	};
 }
