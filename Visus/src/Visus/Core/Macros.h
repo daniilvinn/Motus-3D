@@ -22,6 +22,11 @@
 										VISUS_ERROR("Vulkan call failed: {0} || Location: {1} ({2})", #expression, __FILE__, __LINE__); \
 									} else {}
 
+#define VISUS_ASSERT(expression, ...) if(!(expression)){\
+										VISUS_ERROR("Assertion failed: {}", __VA_ARGS__); __debugbreak();}\
+									  else{}
+
 #else 
 	#define VK_CHECK_RESULT(expression) expression
+	#define VISUS_ASSERT(expression, ...)
 #endif
