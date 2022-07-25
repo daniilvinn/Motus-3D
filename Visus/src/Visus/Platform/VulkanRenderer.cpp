@@ -59,15 +59,76 @@ namespace Motus3D {
 	void VulkanRenderer::BeginFrame()
 	{
 		m_Swapchain->BeginFrame();
+
 		vkResetCommandPool(m_Device->GetHandle(), m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].pool, 0);
 		VkCommandBufferBeginInfo cmd_buffer_begin_info = {};
 		cmd_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, &cmd_buffer_begin_info));
+
+		// Before rendering, we need to transition swapchain image into VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL layout,
+		// so it will be optimal for rendering, since we draw stuff directly into swapchain images
+		const VkImageMemoryBarrier image_memory_barrier{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.image = m_Swapchain->GetCurrentImageView().image,
+			.subresourceRange = {
+			  .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			  .baseMipLevel = 0,
+			  .levelCount = 1,
+			  .baseArrayLayer = 0,
+			  .layerCount = 1,
+			}
+		};
+
+		vkCmdPipelineBarrier(
+			m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,  // srcStageMask
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, // dstStageMask
+			0,
+			0,
+			nullptr,
+			0,
+			nullptr,
+			1, // imageMemoryBarrierCount
+			&image_memory_barrier // pImageMemoryBarriers
+		);
+
 	}
 
 	void VulkanRenderer::EndFrame()
 	{
+		// Right before image being presented, it stould transitioned back into VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout.
+		const VkImageMemoryBarrier image_memory_barrier{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			.image = m_Swapchain->GetCurrentImageView().image,
+			.subresourceRange = {
+			  .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			  .baseMipLevel = 0,
+			  .levelCount = 1,
+			  .baseArrayLayer = 0,
+			  .layerCount = 1,
+			}
+		};
+
+		vkCmdPipelineBarrier(
+			m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  // srcStageMask
+			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, // dstStageMask
+			0,
+			0,
+			nullptr,
+			0,
+			nullptr,
+			1, // imageMemoryBarrierCount
+			&image_memory_barrier // pImageMemoryBarriers
+		);
+
 		vkEndCommandBuffer(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer);
 		VkPipelineStageFlags stagemasks[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
@@ -90,17 +151,28 @@ namespace Motus3D {
 		VkClearValue clear_value = {};
 		clear_value.color = { r, g, b, a};
 
-		VkRenderPassBeginInfo render_pass_begin_info = {};
-		render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		render_pass_begin_info.renderPass = m_Swapchain->GetRenderPass();
-		render_pass_begin_info.framebuffer = m_Swapchain->GetCurrentFramebuffer();
-		render_pass_begin_info.clearValueCount = 1;
-		render_pass_begin_info.pClearValues = &clear_value;
-		render_pass_begin_info.renderArea.offset = { 0, 0 };
-		render_pass_begin_info.renderArea.extent = { m_Swapchain->GetExtent().first, m_Swapchain->GetExtent().second };
+		VkRenderingAttachmentInfo color_rendering_attachment = {};
+		color_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		color_rendering_attachment.imageView = m_Swapchain->GetCurrentImageView().view;
+		color_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		color_rendering_attachment.clearValue = clear_value;
+		color_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		color_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-		vkCmdBeginRenderPass(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdEndRenderPass(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer);
+		auto renderArea = m_Swapchain->GetExtent();
+
+		VkRenderingInfo rendering_info = {};
+		rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		rendering_info.colorAttachmentCount = 1;
+		rendering_info.pColorAttachments = &color_rendering_attachment;
+		rendering_info.layerCount = 1;
+		rendering_info.renderArea = {
+			{0, 0},
+			{renderArea.first, renderArea.second}
+		};
+
+		vkCmdBeginRendering(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, &rendering_info);
+		vkCmdEndRendering(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer);
 
 	}
 }

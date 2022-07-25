@@ -5,11 +5,11 @@
 namespace Motus3D
 {
 	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
-	RendererConfiguration Renderer::m_Configuration;
+	RendererConfiguration Renderer::s_Configuration;
 
 	void Renderer::Init(RendererConfiguration configuration)
 	{
-		m_Configuration = configuration;
+		s_Configuration = configuration;
 		s_RendererAPI = CreateRef<VulkanRenderer>();
 	}
 

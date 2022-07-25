@@ -82,6 +82,7 @@ project "Visus"
 	filter "configurations:Debug"
 		defines "VISUS_DEBUG"
 		symbols "On"
+		runtime "Debug"
 		links 
 		{
 			"shaderc_sharedd.lib",
@@ -94,6 +95,7 @@ project "Visus"
 	filter "configurations:Release"
 		defines "VISUS_RELEASE"
 		optimize "On"
+		runtime "Release"
 		links 
 		{
 			"shaderc_shared.lib",
@@ -105,6 +107,7 @@ project "Visus"
 	filter "configurations:Dist"
 		defines "VISUS_DIST"
 		optimize "On"
+		runtime "Release"
 		links 
 		{
 			"shaderc_shared.lib",
@@ -172,7 +175,7 @@ project "Motus3D"
 	filter "system:windows"
 		staticruntime "off"
 		systemversion "latest"
-
+		
 		defines
 		{
 			"MT_PLATFORM_WINDOWS"
@@ -181,14 +184,17 @@ project "Motus3D"
 	filter "configurations:Debug"
 		defines "MT_DEBUG"
 		symbols "On"
+		runtime "Debug"
 
 	filter "configurations:Release"
 		defines "MT_RELEASE"
 		optimize "On"
+		runtime "Release"
 
 	filter "configurations:Dist"
 		defines "MT_DIST"
 		optimize "On"
+		runtime "Release"
 group ""
 
 group "Test"

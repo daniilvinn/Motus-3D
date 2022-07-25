@@ -32,13 +32,6 @@ namespace Motus3D
 			vkDestroyImageView(m_Device->GetHandle(), image.view, nullptr);
 		}
 
-		for (auto& framebuffer : m_Framebuffers)
-		{
-			vkDestroyFramebuffer(m_Device->GetHandle(), framebuffer, nullptr);
-		}
-
-		vkDestroyRenderPass(m_Device->GetHandle(), m_RenderPass, nullptr);
-
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.presentComplete, nullptr);
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.renderComplete, nullptr);
 
@@ -166,63 +159,21 @@ namespace Motus3D
 		uint32_t swapchain_image_count;
 		vkGetSwapchainImagesKHR(m_Device->GetHandle(), m_Swapchain, &swapchain_image_count, nullptr);
 		std::vector<VkImage> swapchain_images(swapchain_image_count);
-		m_SwapchainImages.resize(swapchain_image_count);
 		vkGetSwapchainImagesKHR(m_Device->GetHandle(), m_Swapchain, &swapchain_image_count, swapchain_images.data());
-
-		if (m_RenderPass != VK_NULL_HANDLE)
-		{
-			vkDestroyRenderPass(m_Device->GetHandle(), m_RenderPass, nullptr);
-		}
-
-		m_Framebuffers.resize(swapchain_image_count);
-
-		VkAttachmentDescription attachment_description = {};
-		attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachment_description.format = m_SurfaceFormat;
-
-		VkAttachmentReference attachment_reference = {};
-		attachment_reference.attachment = 0;
-		attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpass_description = {};
-		subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass_description.colorAttachmentCount = 1;
-		subpass_description.pColorAttachments = &attachment_reference;
-
-		VkRenderPassCreateInfo render_pass_create_info = {};
-		render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		render_pass_create_info.attachmentCount = 1;
-		render_pass_create_info.pAttachments = &attachment_description;
-		render_pass_create_info.subpassCount = 1;
-		render_pass_create_info.pSubpasses = &subpass_description;
-
-		VK_CHECK_RESULT(vkCreateRenderPass(m_Device->GetHandle(), &render_pass_create_info, nullptr, &m_RenderPass));
 
 		for (auto& image : m_SwapchainImages)
 		{
 			vkDestroyImageView(m_Device->GetHandle(), image.view, nullptr);
+			m_SwapchainImages.clear();
 		}
 
-		for(auto& framebuffer : m_Framebuffers)
+		for (int i = 0; i < swapchain_images.size(); i++)
 		{
-			vkDestroyFramebuffer(m_Device->GetHandle(), framebuffer, nullptr);
-		}
-
-		for (int i = 0; i < m_SwapchainImages.size(); i++)
-		{
-			m_SwapchainImages[i].image = swapchain_images[i];
-
 			VkImageViewCreateInfo image_view_create_info = {};
 			image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			image_view_create_info.pNext = nullptr;
 			image_view_create_info.flags = 0;
-			image_view_create_info.image = m_SwapchainImages[i].image;
+			image_view_create_info.image = swapchain_images[i];
 			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			image_view_create_info.format = m_SurfaceFormat;
 			image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -235,19 +186,9 @@ namespace Motus3D
 			image_view_create_info.subresourceRange.baseArrayLayer = 0;
 			image_view_create_info.subresourceRange.layerCount = 1;
 
-			VK_CHECK_RESULT(vkCreateImageView(m_Device->GetHandle(), &image_view_create_info, nullptr, &m_SwapchainImages[i].view));
-
-			// TODO: framebuffer creation
-			VkFramebufferCreateInfo framebuffer_create_info = {};
-			framebuffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebuffer_create_info.renderPass = m_RenderPass;
-			framebuffer_create_info.pAttachments = &m_SwapchainImages[i].view;
-			framebuffer_create_info.attachmentCount = 1;
-			framebuffer_create_info.width = width;
-			framebuffer_create_info.height = height;
-			framebuffer_create_info.layers = 1;
-
-			VK_CHECK_RESULT(vkCreateFramebuffer(m_Device->GetHandle(), &framebuffer_create_info, nullptr, &m_Framebuffers[i]));
+			VkImageView view;
+			VK_CHECK_RESULT(vkCreateImageView(m_Device->GetHandle(), &image_view_create_info, nullptr, &view));
+			m_SwapchainImages.push_back({ swapchain_images[i], view });
 
 		}
 

@@ -55,22 +55,22 @@ namespace Motus3D
         {
             // Graphics queue
             float defaultPriority = 1.0f;
-            VkDeviceQueueCreateInfo graphicsqueue = {};
-            graphicsqueue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            graphicsqueue.queueFamilyIndex = m_QueueFamilyIndices.graphics;
-            graphicsqueue.queueCount = 1;
-            graphicsqueue.pQueuePriorities = &defaultPriority;
-            m_QueueCreateInfos.push_back(graphicsqueue);
+            VkDeviceQueueCreateInfo graphics_queue = {};
+            graphics_queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            graphics_queue.queueFamilyIndex = m_QueueFamilyIndices.graphics;
+            graphics_queue.queueCount = 1;
+            graphics_queue.pQueuePriorities = &defaultPriority;
+            m_QueueCreateInfos.push_back(graphics_queue);
         }
         {
             // Compute queue
             float defaultPriority = 1.0f;
-            VkDeviceQueueCreateInfo computequeue = {};
-            computequeue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            computequeue.queueFamilyIndex = m_QueueFamilyIndices.compute;
-            computequeue.queueCount = 1;
-            computequeue.pQueuePriorities = &defaultPriority;
-            m_QueueCreateInfos.push_back(computequeue);
+            VkDeviceQueueCreateInfo compute_queue = {};
+            compute_queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            compute_queue.queueFamilyIndex = m_QueueFamilyIndices.compute;
+            compute_queue.queueCount = 1;
+            compute_queue.pQueuePriorities = &defaultPriority;
+            m_QueueCreateInfos.push_back(compute_queue);
         }
 
     }
@@ -128,9 +128,21 @@ namespace Motus3D
         // therefore, selected device will 100% support surface and swapchain,
         // so no extension support checking needed
         enabledExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        enabledExtensions.push_back(VK_EXT_INDEX_TYPE_UINT8_EXTENSION_NAME);
+        enabledExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+
+        VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature_enable_struct = {};
+        dynamic_rendering_feature_enable_struct.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+        dynamic_rendering_feature_enable_struct.dynamicRendering = VK_TRUE;
+
+        VkPhysicalDeviceIndexTypeUint8FeaturesEXT uint8_index_feature_enable_struct = {};
+        uint8_index_feature_enable_struct.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT;
+        uint8_index_feature_enable_struct.indexTypeUint8 = VK_TRUE;
+        uint8_index_feature_enable_struct.pNext = &dynamic_rendering_feature_enable_struct;
 
         VkDeviceCreateInfo device_create_info = {};
         device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        device_create_info.pNext = &uint8_index_feature_enable_struct;
         device_create_info.enabledExtensionCount = enabledExtensions.size();
         device_create_info.ppEnabledExtensionNames = enabledExtensions.data();
         device_create_info.queueCreateInfoCount = m_PhysicalDevice->m_QueueCreateInfos.size();

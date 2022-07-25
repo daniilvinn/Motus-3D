@@ -18,7 +18,7 @@ namespace Motus3D {
 		static void Shutdown();
 
 		static Ref<GraphicsContext> GetContext();
-		static RendererConfiguration GetConfiguration() { return m_Configuration; }
+		static RendererConfiguration GetConfiguration() { return s_Configuration; }
 
 		static void OnWindowResize(uint32_t width, uint32_t height, bool vsync = true);
 
@@ -28,6 +28,6 @@ namespace Motus3D {
 
 	private:
 		static Ref<RendererAPI> s_RendererAPI;
-		static RendererConfiguration m_Configuration;
+		static RendererConfiguration s_Configuration;
 	};
 }
