@@ -21,8 +21,12 @@ namespace Motus3D {
 		void InitSurface();
 		void Create(uint32_t width, uint32_t height, bool vsync = false);
 
+		void BeginFrame() override;
+		void EndFrame() override;
+
 		VkSwapchainKHR GetHandle() { return m_Swapchain; }
 		VkSurfaceKHR GetSurfaceHandle() { return m_Surface; }
+		VkFormat GetImageFormat() { return m_SurfaceFormat; };
 
 		struct SwapchainImage
 		{
@@ -37,8 +41,6 @@ namespace Motus3D {
 		VkSemaphore GetRenderCompleteSemaphore() { return m_Semaphores.renderComplete; }
 		VkSemaphore GetPresentCompleteSemaphore() { return m_Semaphores.presentComplete; }
 
-		void BeginFrame() override;
-		void EndFrame() override;
 
 	private:
 		void TryAcquireNextImage();

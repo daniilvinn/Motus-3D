@@ -42,7 +42,7 @@ namespace Motus3D
 			VISUS_ERROR("Failed to compiler shader ({0}): {1}", nametag, result.GetErrorMessage());
 		} else
 		{
-			VISUS_INFO("Shader ({0}) compiled successfully!", nametag);
+			VISUS_TRACE("Shader ({0}) compiled successfully!", nametag);
 		}
 
 		std::vector<uint32_t> binary_data(result.begin(), result.end());

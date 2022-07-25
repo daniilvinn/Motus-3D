@@ -58,14 +58,6 @@ namespace Motus3D
 
 			m_CreateInfos.push_back(pipeline_shader_stage_create_info);
 
-			auto resources = reflect.get_shader_resources();
-
-			VkDescriptorSetLayoutBinding binding;
-			VkDescriptorSetLayoutCreateInfo abu;
-			
-			
-
-
 		}
 
 		for(auto& src : m_ShaderSources)
@@ -95,12 +87,6 @@ namespace Motus3D
 		{
 			data.second.clear();
 		}
-
-		for(auto& info : m_CreateInfos)
-		{
-			vkDestroyShaderModule(device->GetHandle(), info.module, nullptr);
-		}
-
 	}
 
 	void VulkanShader::ParseFile(const std::string& filename)

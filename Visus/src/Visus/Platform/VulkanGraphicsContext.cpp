@@ -7,6 +7,8 @@
 
 #include <Visus/Platform/VulkanAllocator.h>
 
+#include <Visus/Core/Pipeline.h>
+
 namespace Motus3D
 {
 	VulkanGraphicsContext* VulkanGraphicsContext::s_Instance = nullptr;
@@ -75,12 +77,21 @@ namespace Motus3D
 
 		VulkanAllocator::Init();
 
+		Ref<Shader> shader = Shader::Create("basic.glsl");
+		VertexBufferLayout buffer_layout({
+			{"a_Pos", ShaderDataType::FLOAT3},
+			{"a_Color", ShaderDataType::FLOAT4},
+			
+		});
+
+		m_Pipeline = Pipeline::Create({ shader, buffer_layout, PolygonMode::FILL });
 	}
 
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
 		m_Swapchain->Destroy();
+		m_Pipeline.reset();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);
 

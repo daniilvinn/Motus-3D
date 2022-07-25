@@ -16,6 +16,8 @@ namespace Motus3D {
 
 	private:
 		VkPipeline m_Pipeline;
+		VkPipelineLayout m_Layout;
+
 		Ref<VulkanShader> m_Shader;
 
 	};

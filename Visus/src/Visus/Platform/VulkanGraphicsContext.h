@@ -3,6 +3,8 @@
 #include <Visus/Core/GraphicsContext.h>
 #include <Visus/Platform/VulkanDevice.h>
 #include <Visus/Platform/VulkanSwapchain.h>
+#include <Visus/Core/Pipeline.h>
+
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -36,6 +38,8 @@ namespace Motus3D
 		Ref<VulkanPhysicalDevice> m_PhysicalDevice;
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanSwapchain> m_Swapchain;
+
+		Ref<Pipeline> m_Pipeline;
 
 	};
 }

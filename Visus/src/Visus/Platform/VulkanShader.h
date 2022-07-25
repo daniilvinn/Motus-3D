@@ -16,7 +16,7 @@ namespace Motus3D {
 		VulkanShader(const std::string& filename);
 		~VulkanShader();
 
-		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() const { return m_CreateInfos; };
+		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() { return m_CreateInfos; };
 
 	private:
 		void ParseFile(const std::string& filename);
