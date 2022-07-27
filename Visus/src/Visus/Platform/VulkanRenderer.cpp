@@ -2,6 +2,10 @@
 
 #include <Visus/Core/Renderer.h>
 
+#include <Visus/Platform/VulkanVertexBuffer.h>
+#include <Visus/Platform/VulkanIndexBuffer.h>
+#include <Visus/Platform/VulkanPipeline.h>
+
 namespace Motus3D {
 
 	VulkanRenderer::VulkanRenderer()
@@ -59,7 +63,6 @@ namespace Motus3D {
 	void VulkanRenderer::BeginFrame()
 	{
 		m_Swapchain->BeginFrame();
-
 		vkResetCommandPool(m_Device->GetHandle(), m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].pool, 0);
 		VkCommandBufferBeginInfo cmd_buffer_begin_info = {};
 		cmd_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -96,11 +99,15 @@ namespace Motus3D {
 			&image_memory_barrier // pImageMemoryBarriers
 		);
 
+		auto viewportBounds = m_Swapchain->GetExtent();
+		VkViewport viewport = { 0, viewportBounds.second, viewportBounds.first, -(float)viewportBounds.second, 1.0, 1.0f };
+		vkCmdSetViewport(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, 0, 1, &viewport);
+
 	}
 
 	void VulkanRenderer::EndFrame()
 	{
-		// Right before image being presented, it stould transitioned back into VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout.
+		// Right before image being presented, it should be transitioned back into VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout.
 		const VkImageMemoryBarrier image_memory_barrier{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 			.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -130,6 +137,7 @@ namespace Motus3D {
 		);
 
 		vkEndCommandBuffer(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer);
+
 		VkPipelineStageFlags stagemasks[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
 		VkSubmitInfo submitinfo = {};
@@ -142,8 +150,60 @@ namespace Motus3D {
 		submitinfo.pWaitSemaphores = &m_Swapchain->m_Semaphores.presentComplete;
 		submitinfo.pWaitDstStageMask = stagemasks;
 
-		VK_CHECK_RESULT(vkQueueSubmit(m_Device->GetGraphicsTransferQueue(), 1, &submitinfo, m_Swapchain->m_Fences[m_Swapchain->m_CurrentFrameIndex]));
+		vkQueueSubmit(m_Device->GetGraphicsTransferQueue(), 1, &submitinfo, m_Swapchain->m_Fences[m_Swapchain->m_CurrentFrameIndex]);
+
 		m_Swapchain->EndFrame();
+	}
+
+	void VulkanRenderer::BeginRender()
+	{
+		VkRenderingAttachmentInfo color_rendering_attachment = {};
+		color_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		color_rendering_attachment.imageView = m_Swapchain->GetCurrentImageView().view;
+		color_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		color_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		color_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+		auto renderArea = m_Swapchain->GetExtent();
+
+		VkRenderingInfo rendering_info = {};
+		rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		rendering_info.colorAttachmentCount = 1;
+		rendering_info.pColorAttachments = &color_rendering_attachment;
+		rendering_info.layerCount = 1;
+		rendering_info.renderArea = {
+			{0, 0},
+			{renderArea.first, renderArea.second}
+		};
+
+		vkCmdBeginRendering(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, &rendering_info);
+	}
+
+	void VulkanRenderer::EndRender()
+	{
+		vkCmdEndRendering(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer);
+	}
+
+	void VulkanRenderer::RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline)
+	{
+		auto vulkanVertexBuffer = RefAs<VulkanVertexBuffer>(vbo);
+		auto vulkanIndexBuffer = RefAs<VulkanIndexBuffer>(ibo);
+		auto vulkanPipeline = RefAs<VulkanPipeline>(pipeline);
+
+		VkDeviceSize offset = 0;
+
+		vkCmdBindPipeline(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetHandle());
+		vkCmdBindVertexBuffers(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, 0, 1, vulkanVertexBuffer->GetHandle(), &offset);
+		vkCmdBindIndexBuffer(m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer, *vulkanIndexBuffer->GetHandle(), 0, vulkanIndexBuffer->GetVulkanIndexType());
+
+		vkCmdDrawIndexed(
+			m_CommandBuffers[m_Swapchain->GetCurrentFrameIndex()].buffer,
+			vulkanIndexBuffer->GetCount(),
+			1,
+			0,
+			0,
+			0
+		);
 	}
 
 	void VulkanRenderer::ClearColor(float r, float b, float g, float a)

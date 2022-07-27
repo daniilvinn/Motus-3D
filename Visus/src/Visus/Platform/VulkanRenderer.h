@@ -12,11 +12,16 @@ namespace Motus3D {
 
 		void OnWindowResize(uint32_t width, uint32_t height, bool vsync) override;
 
+		Ref<GraphicsContext> GetContext() override { return m_GraphicsContext; };
+
 		void BeginFrame() override;
 		void EndFrame() override;
+		void BeginRender() override;
+		void EndRender() override;
 
-		Ref<GraphicsContext> GetContext() override { return m_GraphicsContext; };
 		void ClearColor(float r, float b, float g, float a) override;
+		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline) override;
+
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
 		Ref<VulkanDevice> m_Device;

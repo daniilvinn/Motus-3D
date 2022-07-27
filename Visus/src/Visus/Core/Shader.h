@@ -4,7 +4,7 @@
 
 namespace Motus3D {
 
-	enum class ShaderDataType : uint8_t
+	enum class VISUS_API ShaderDataType : uint8_t
 	{
 		INT,
 		INT2,
@@ -19,7 +19,7 @@ namespace Motus3D {
 		BOOL
 	};
 
-	class Shader
+	class VISUS_API Shader
 	{
 	public:
 		static Ref<Shader> Create(const std::string& filename);

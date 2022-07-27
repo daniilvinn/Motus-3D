@@ -226,7 +226,8 @@ project "Sandbox2D"
 
 	links 
 	{
-		"Motus3D"
+		"Motus3D",
+		"Visus"
 	}
 
 	defines 
@@ -254,4 +255,5 @@ project "Sandbox2D"
 	filter "configurations:Dist"
 		defines "MT_DIST"
 		optimize "On"
+		kind "WindowedApp"
 group ""

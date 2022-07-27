@@ -12,7 +12,7 @@ namespace Motus3D {
 		VulkanPipeline(PipelineSpecification specification);
 		~VulkanPipeline() override;
 
-		VkPipeline GetHandle() { m_Pipeline; }
+		VkPipeline GetHandle() { return m_Pipeline; }
 
 	private:
 		VkPipeline m_Pipeline;

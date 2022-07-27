@@ -30,8 +30,12 @@ namespace Motus3D {
 		VulkanIndexBuffer(void* data, uint64_t size, uint64_t offset, IndexType type);
 		~VulkanIndexBuffer();
 
-		void SetData(void* data, uint64_t size, uint64_t offset, IndexType type);
+		VkBuffer* GetHandle() { return &m_Buffer; }
 		VkIndexType GetVulkanIndexType() const { return m_IndexType; }
+		uint32_t GetCount() const override { return m_Count; }
+
+		void SetData(void* data, uint64_t size, uint64_t offset, IndexType type);
+
 
 	private:
 		VkBuffer m_Buffer;
@@ -43,6 +47,8 @@ namespace Motus3D {
 			void* data;
 			uint64_t size;
 		} m_Data;
+
+		uint32_t m_Count;
 
 	};
 

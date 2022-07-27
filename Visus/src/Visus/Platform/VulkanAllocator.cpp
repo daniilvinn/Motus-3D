@@ -12,7 +12,7 @@ namespace Motus3D
 	void VulkanAllocator::Init()
 	{
 		if (s_Instance != nullptr)
-			VISUS_ERROR("Trying to initialize VulkanAllocator twice!");
+			VISUS_ERROR("Vulkan Allocator is already initialized!");
 		else
 			s_Instance = new VulkanAllocator();
 	}
@@ -33,6 +33,9 @@ namespace Motus3D
 		allocator_create_info.pVulkanFunctions = &vulkan_functions;
 
 		VK_CHECK_RESULT(vmaCreateAllocator(& allocator_create_info, &m_Allocator));
+
+		m_Statistics.allocatedMemory = 0;
+		m_Statistics.freedMemory = 0;
 	}
 
 	VmaAllocation VulkanAllocator::AllocateBuffer(VkBufferCreateInfo* create_info, uint32_t flags, VkBuffer* buffer)
@@ -54,15 +57,15 @@ namespace Motus3D
 		return allocation;
 	}
 
-	void VulkanAllocator::DestroyBuffer(VmaAllocation allocation, VkBuffer buffer)
+	void VulkanAllocator::DestroyBuffer(VkBuffer* buffer, VmaAllocation* allocation)
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 
 		VmaAllocationInfo allocation_info;
-		vmaGetAllocationInfo(m_Allocator, allocation, &allocation_info);
+		vmaGetAllocationInfo(m_Allocator, *allocation, &allocation_info);
 
 		vkDeviceWaitIdle(device->GetHandle());
-		vmaDestroyBuffer(m_Allocator, buffer, allocation);
+		vmaDestroyBuffer(m_Allocator, *buffer, *allocation);
 
 #ifdef VISUS_DEBUG
 		VISUS_TRACE("Destroying buffer: total freed memory = {0} + {1}", m_Statistics.freedMemory, allocation_info.size);

@@ -76,22 +76,12 @@ namespace Motus3D
 		m_Swapchain->Create(windowWidth, windowHeight, true);
 
 		VulkanAllocator::Init();
-
-		Ref<Shader> shader = Shader::Create("basic.glsl");
-		VertexBufferLayout buffer_layout({
-			{"a_Pos", ShaderDataType::FLOAT3},
-			{"a_Color", ShaderDataType::FLOAT4},
-			
-		});
-
-		m_Pipeline = Pipeline::Create({ shader, buffer_layout, PolygonMode::FILL });
 	}
 
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
 		m_Swapchain->Destroy();
-		m_Pipeline.reset();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);
 
@@ -118,6 +108,7 @@ namespace Motus3D
 
 		if (VISUS_INTERNAL_ENABLE_VALIDATION) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		}
 
 		return extensions;

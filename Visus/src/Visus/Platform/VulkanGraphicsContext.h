@@ -38,8 +38,5 @@ namespace Motus3D
 		Ref<VulkanPhysicalDevice> m_PhysicalDevice;
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanSwapchain> m_Swapchain;
-
-		Ref<Pipeline> m_Pipeline;
-
 	};
 }

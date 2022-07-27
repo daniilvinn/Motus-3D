@@ -42,4 +42,4 @@
 // --------------------------------------
 
 // TODO: move this to application's config struct
-#define APP_CONFIG_MAX_EVENT_QUEUE_SIZE 300
+#define APP_CONFIG_MAX_EVENT_QUEUE_SIZE 200

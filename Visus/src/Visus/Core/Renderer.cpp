@@ -38,8 +38,24 @@ namespace Motus3D
 		s_RendererAPI->EndFrame();
 	}
 
+	void Renderer::BeginRender()
+	{
+		s_RendererAPI->BeginRender();
+	}
+
+	void Renderer::EndRender()
+	{
+		s_RendererAPI->EndRender();
+	}
+
 	void Renderer::ClearColor(float r, float g, float b, float a)
 	{
 		s_RendererAPI->ClearColor(r, g, b, a);
 	}
+
+	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline)
+	{
+		s_RendererAPI->RenderMesh(vbo, ibo, pipeline);
+	}
+
 }

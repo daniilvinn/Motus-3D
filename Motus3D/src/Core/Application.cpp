@@ -29,7 +29,11 @@ namespace Motus3D
 	
 	Application::~Application()
 	{
-		Motus3D::Renderer::Shutdown();
+		for (auto& layer : m_LayerStack) {
+			layer->OnDetach();
+		}
+
+		Renderer::Shutdown();
 	}
 
 	void Application::Run()
@@ -37,16 +41,13 @@ namespace Motus3D
 		while (m_ApplicationRunning)
 		{
 			ProcessEvents();
-
 			Renderer::BeginFrame();
 			Renderer::ClearColor(0.1f, 0.7f, 0.8f, 1.0f);
-			Renderer::EndFrame();
-
 			for(auto& layer : m_LayerStack)
 			{
 				layer->OnUpdate();
 			}
-
+			Renderer::EndFrame();
 			m_AppWindow->OnUpdate();
 		}
 	}
@@ -62,9 +63,8 @@ namespace Motus3D
 
 	bool Application::OnWindowResize(WindowResizedEvent& e)
 	{
-		// TODO
-		//Motus3D::Renderer::OnWindowResize(e.width, e.height);
-		// ^^^ Causes crash, to be fixed ^^^
+		// TODO: vvv Causes crash, to be fixed vvv
+		// Motus3D::Renderer::OnWindowResize(e.width, e.height);
 		return true;
 	}
 

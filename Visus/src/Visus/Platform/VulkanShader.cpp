@@ -39,8 +39,6 @@ namespace Motus3D
 
 		for (auto& shader : m_BinaryData)
 		{
-			spirv_cross::Compiler reflect(shader.second); // .first - shader stage, .second - binary data
-
 			VkShaderModule module;
 			VkShaderModuleCreateInfo module_create_info = {};
 

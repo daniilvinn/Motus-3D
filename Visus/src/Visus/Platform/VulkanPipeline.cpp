@@ -60,14 +60,12 @@ namespace Motus3D
 		// Specifying dynamic states
 		VkDynamicState dynamic_states[] = {
 			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR,
-			VK_DYNAMIC_STATE_LINE_WIDTH
 		};
 
 		VkPipelineDynamicStateCreateInfo dynamic_state = {};
 		dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamic_state.pDynamicStates = dynamic_states;
-		dynamic_state.dynamicStateCount = 3;
+		dynamic_state.dynamicStateCount = 1;
 
 		// ===================
 		// Rasterization state
@@ -174,6 +172,7 @@ namespace Motus3D
 	VulkanPipeline::~VulkanPipeline()
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice()->GetHandle();
+		vkDeviceWaitIdle(device);
 		vkDestroyPipeline(device, m_Pipeline, nullptr);
 		vkDestroyPipelineLayout(device, m_Layout, nullptr);
 		VISUS_TRACE("Pipeline destroyed");

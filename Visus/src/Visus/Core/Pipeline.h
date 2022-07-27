@@ -7,7 +7,7 @@
 
 namespace Motus3D {
 
-	enum class PolygonMode : uint8_t
+	enum class VISUS_API PolygonMode : uint8_t
 	{
 		FILL, // fill polygon
 		LINES // fill only edges of polygon
