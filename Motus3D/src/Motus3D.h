@@ -6,6 +6,7 @@
 #include <Core/Application.h>
 #include <Core/Layer.h>
 #include <Core/Events/Event.h>
+#include <Core/Input.h>
 // ==================
 
 // ===== Renderer =====
