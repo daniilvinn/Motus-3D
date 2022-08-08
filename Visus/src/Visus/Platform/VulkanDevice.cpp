@@ -130,8 +130,9 @@ namespace Motus3D
         enabledExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         enabledExtensions.push_back(VK_EXT_INDEX_TYPE_UINT8_EXTENSION_NAME);
         enabledExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
-        enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-
+        if (VISUS_INTERNAL_ENABLE_VALIDATION) {
+            enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+        }
         VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature_enable_struct = {};
         dynamic_rendering_feature_enable_struct.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
         dynamic_rendering_feature_enable_struct.dynamicRendering = VK_TRUE;
