@@ -221,7 +221,8 @@ project "Sandbox2D"
 	{
 		"Motus3D/src",
 		"Visus/src",
-		"%{IncludeDirectory.spdlog}"
+		"%{IncludeDirectory.spdlog}",
+		"%{IncludeDirectory.glm}"
 	}
 
 	links 
