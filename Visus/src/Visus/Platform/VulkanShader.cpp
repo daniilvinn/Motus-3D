@@ -3,7 +3,7 @@
 #include <Visus/Platform/ShaderUtils/ShaderUtils.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
-#include <spirv_cross/spirv_glsl.hpp>
+#include <spirv_cross/spirv_reflect.hpp>
 #include <shaderc/shaderc.hpp>
 #include <fstream>
 
@@ -56,6 +56,30 @@ namespace Motus3D
 
 			m_CreateInfos.push_back(pipeline_shader_stage_create_info);
 
+			spirv_cross::CompilerGLSL reflectionCompiler(shader.second);
+			spirv_cross::ShaderResources shader_resources = reflectionCompiler.get_shader_resources();
+
+			for (auto& res : shader_resources.push_constant_buffers) 
+			{
+				VkPushConstantRange range = {};
+				range.stageFlags = VisusToVulkanShaderStage(shader.first);
+
+				spirv_cross::SmallVector<spirv_cross::BufferRange> active_buffers = reflectionCompiler.get_active_buffer_ranges(res.id);
+				for (auto& buffer : active_buffers) 
+				{
+					range.size += buffer.range;
+				}
+				m_PushConstantRanges.push_back(range);
+			}
+		}
+
+		// Setting up ranges' offsets by fetching them after they're all created
+		{
+			int rangeOffset = 0;
+			for (auto& range : m_PushConstantRanges) {
+				range.offset = rangeOffset;
+				rangeOffset += range.size;
+			}
 		}
 
 		for(auto& src : m_ShaderSources)

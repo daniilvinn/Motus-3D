@@ -3,6 +3,8 @@
 #include <Visus/Core/RendererAPI.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
+#include <glm/glm.hpp>
+
 namespace Motus3D {
 	class VulkanRenderer : public RendererAPI
 	{
@@ -20,7 +22,7 @@ namespace Motus3D {
 		void EndRender() override;
 
 		void ClearColor(float r, float b, float g, float a) override;
-		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline) override;
+		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::mat4 vp, const glm::vec3& transform) override;
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
@@ -33,6 +35,8 @@ namespace Motus3D {
 			VkCommandBuffer buffer;
 		};
 		std::vector<CommandBuffer> m_CommandBuffers;
+
+		CommandBuffer m_CurrentCommandBuffer;
 
 	};
 }

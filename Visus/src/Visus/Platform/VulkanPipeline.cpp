@@ -60,12 +60,13 @@ namespace Motus3D
 		// Specifying dynamic states
 		VkDynamicState dynamic_states[] = {
 			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
 		};
 
 		VkPipelineDynamicStateCreateInfo dynamic_state = {};
 		dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamic_state.pDynamicStates = dynamic_states;
-		dynamic_state.dynamicStateCount = 1;
+		dynamic_state.dynamicStateCount = 2;
 
 		// ===================
 		// Rasterization state
@@ -124,10 +125,13 @@ namespace Motus3D
 		// ===============
 		// TODO: retrieve pipeline layout from shader class
 		// Pipeline layout
+
+		std::vector<VkPushConstantRange> push_constant_ranges = m_Shader->GetPushConstantRangeCreateInfos();
+
 		VkPipelineLayoutCreateInfo pipeline_layout = {};
 		pipeline_layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipeline_layout.pushConstantRangeCount = 0;
-		pipeline_layout.pPushConstantRanges = nullptr;
+		pipeline_layout.pushConstantRangeCount = push_constant_ranges.size();
+		pipeline_layout.pPushConstantRanges = push_constant_ranges.data();
 		pipeline_layout.setLayoutCount = 0;
 		pipeline_layout.pSetLayouts = nullptr;
 

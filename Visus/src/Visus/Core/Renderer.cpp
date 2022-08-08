@@ -6,6 +6,7 @@ namespace Motus3D
 {
 	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
 	RendererConfiguration Renderer::s_Configuration;
+	Renderer::SceneData Renderer::m_SceneData = Renderer::SceneData();
 
 	void Renderer::Init(RendererConfiguration configuration)
 	{
@@ -28,6 +29,12 @@ namespace Motus3D
 		s_RendererAPI->OnWindowResize(width, height, vsync);
 	}
 
+	float Renderer::GetDeltaTime()
+	{
+		MT_CORE_ASSERT(false, "Method not implemented");
+		return 0.0f;
+	}
+
 	void Renderer::BeginFrame()
 	{
 		s_RendererAPI->BeginFrame();
@@ -36,6 +43,17 @@ namespace Motus3D
 	void Renderer::EndFrame()
 	{
 		s_RendererAPI->EndFrame();
+	}
+
+	void Renderer::BeginScene(SceneData data)
+	{
+		m_SceneData = data;
+		s_RendererAPI->BeginRender();
+	}
+
+	void Renderer::EndScene()
+	{
+		s_RendererAPI->EndRender();
 	}
 
 	void Renderer::BeginRender()
@@ -53,9 +71,9 @@ namespace Motus3D
 		s_RendererAPI->ClearColor(r, g, b, a);
 	}
 
-	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline)
+	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform)
 	{
-		s_RendererAPI->RenderMesh(vbo, ibo, pipeline);
+		s_RendererAPI->RenderMesh(vbo, ibo, pipeline, m_SceneData.m_VPmatrix, transform);
 	}
 
 }

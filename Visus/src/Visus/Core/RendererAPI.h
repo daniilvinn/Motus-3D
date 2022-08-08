@@ -8,6 +8,8 @@
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/Pipeline.h>
 
+#include <glm/glm.hpp>
+
 namespace Motus3D {
 	class VISUS_API RendererAPI
 	{
@@ -21,7 +23,7 @@ namespace Motus3D {
 		virtual void EndRender() = 0;
 
 		virtual void ClearColor(float r, float b, float g, float a) = 0;
-		virtual void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline) = 0;
+		virtual void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::mat4 vp, const glm::vec3& transform) = 0;
 
 	};
 }

@@ -73,7 +73,7 @@ namespace Motus3D
 
 		m_Swapchain = CreateRef<VulkanSwapchain>();
 		m_Swapchain->InitSurface();
-		m_Swapchain->Create(windowWidth, windowHeight, true);
+		m_Swapchain->Create(windowWidth, windowHeight, false);
 
 		VulkanAllocator::Init();
 	}
@@ -81,6 +81,7 @@ namespace Motus3D
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
+		VulkanAllocator::Shutdown();
 		m_Swapchain->Destroy();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);

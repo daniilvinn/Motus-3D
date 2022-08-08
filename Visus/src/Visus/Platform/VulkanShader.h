@@ -17,6 +17,7 @@ namespace Motus3D {
 		~VulkanShader();
 
 		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() { return m_CreateInfos; };
+		std::vector<VkPushConstantRange> GetPushConstantRangeCreateInfos() { return m_PushConstantRanges; }
 
 	private:
 		void ParseFile(const std::string& filename);
@@ -26,7 +27,7 @@ namespace Motus3D {
 		std::map<ShaderStage, std::vector<uint32_t>> m_BinaryData;
 		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;
 
-		std::vector<VkDescriptorSetLayout> m_SetLayouts;
+		std::vector<VkPushConstantRange> m_PushConstantRanges;
 	};
 
 	constexpr VkShaderStageFlagBits VisusToVulkanShaderStage(ShaderStage stage)
