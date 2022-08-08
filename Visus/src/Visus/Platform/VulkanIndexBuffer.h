@@ -36,7 +36,6 @@ namespace Motus3D {
 
 		void SetData(void* data, uint64_t size, uint64_t offset, IndexType type);
 
-
 	private:
 		VkBuffer m_Buffer;
 		VmaAllocation m_Allocation;

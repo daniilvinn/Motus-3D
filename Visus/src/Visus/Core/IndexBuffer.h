@@ -15,6 +15,8 @@ namespace Motus3D {
 	class VISUS_API IndexBuffer
 	{
 	public:
+		virtual ~IndexBuffer() {};
+
 		static Ref<IndexBuffer> Create(uint64_t size);
 		static Ref<IndexBuffer> Create(void* data, uint64_t size, uint64_t offset, IndexType type);
 

@@ -17,7 +17,8 @@ namespace Motus3D
 		Application();
 		virtual ~Application();
 
-		Application* Get() { return s_Instance; }
+		static Application* Get() { return s_Instance; }
+		Ref<ApplicationWindow> GetWindow() { return m_AppWindow; };
 		void Run();
 
 		void AddLayer(Layer* layer) { m_LayerStack.AddLayer(layer); };

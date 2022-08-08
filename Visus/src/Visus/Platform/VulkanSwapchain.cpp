@@ -212,6 +212,9 @@ namespace Motus3D
 			m_Fences.push_back(fence);
 		}
 
+		
+	
+
 	}
 
 	void VulkanSwapchain::BeginFrame()
@@ -252,7 +255,7 @@ namespace Motus3D
 	void VulkanSwapchain::TryAcquireNextImage()
 	{
 		VkResult result = vkAcquireNextImageKHR(m_Device->GetHandle(), m_Swapchain, UINT64_MAX, m_Semaphores.presentComplete, VK_NULL_HANDLE, &m_CurrentSwapchainImageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
 			int width, height;
 			glfwGetFramebufferSize(m_WindowHandle, &width, &height);

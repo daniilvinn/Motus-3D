@@ -42,7 +42,7 @@ namespace Motus3D
 		{
 			ProcessEvents();
 			Renderer::BeginFrame();
-			Renderer::ClearColor(0.1f, 0.7f, 0.8f, 1.0f);
+			Renderer::ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			for(auto& layer : m_LayerStack)
 			{
 				layer->OnUpdate();
@@ -65,7 +65,7 @@ namespace Motus3D
 	{
 		// TODO: vvv Causes crash, to be fixed vvv
 		// Motus3D::Renderer::OnWindowResize(e.width, e.height);
-		return true;
+		return false;
 	}
 
 	bool Application::OnWindowClosed(WindowClosedEvent& e)

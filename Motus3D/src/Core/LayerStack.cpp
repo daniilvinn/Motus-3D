@@ -10,11 +10,11 @@ namespace Motus3D
 	
 	LayerStack::~LayerStack()
 	{
-		for(auto& layer : m_LayerStack)
-		{
-			layer->OnDetach();
-			delete layer;
-		}
+		//for (auto& layer : m_LayerStack)
+		//{
+		//	layer->OnDetach();
+		//	delete layer;
+		//}
 	}
 	
 	void LayerStack::AddLayer(Layer* layer)
