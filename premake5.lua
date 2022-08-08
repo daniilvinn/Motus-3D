@@ -16,13 +16,105 @@ IncludeDirectory["spdlog"] = "Motus3D/thirdparty/spdlog/include"
 IncludeDirectory["GLFW"] = "Motus3D/thirdparty/GLFW/include"
 IncludeDirectory["VulkanSDK"] = "%{VulkanSDK}/Include"
 IncludeDirectory["glm"] = "Motus3D/thirdparty/glm/include"
+IncludeDirectory["Visus"] = "Visus/src"
+IncludeDirectory["VMA"] = "Motus3D/thirdparty/VulkanMemoryAllocator/include"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
 
-group "Core"
-
+group "Dependencies"
 include "Motus3D/thirdparty/GLFW"
+group ""
+
+group "Core"
+project "Visus"
+	location "Visus"
+	kind "SharedLib"
+	language "C++"
+	cppdialect "C++20"
+
+	targetdir("bin/%{prj.name}/" .. compileOutput)
+	objdir("obj/%{prj.name}/" .. compileOutput)
+
+	flags {
+		"MultiProcessorCompile"
+	}
+
+	files {
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+	includedirs {
+		"%{prj.name}/src/",
+		"Motus3D/src/",
+		"%{IncludeDirectory.VulkanSDK}",
+		"%{IncludeDirectory.GLFW}",
+		"%{IncludeDirectory.glm}",
+		"%{IncludeDirectory.spdlog}",
+		"%{IncludeDirectory.VMA}",
+		
+	}
+
+	libdirs {
+		"%{LibraryDirectory.VulkanSDK}"
+	}
+
+	links {
+		"GLFW",
+		"vulkan-1.lib",
+	}
+
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+		"VISUS_API"
+	}
+
+	postbuildcommands 
+	{
+		("{COPY} %{cfg.buildtarget.relpath} ../bin/Sandbox2D/" .. compileOutput)
+	}
+
+	filter "system:windows"
+		staticruntime "off"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "VISUS_DEBUG"
+		symbols "On"
+		runtime "Debug"
+		links 
+		{
+			"shaderc_sharedd.lib",
+			"shaderc_utild.lib",
+			"spirv-cross-cored.lib",
+			"spirv-cross-glsld.lib",
+			"SPIRV-Toolsd.lib"
+		}
+
+	filter "configurations:Release"
+		defines "VISUS_RELEASE"
+		optimize "On"
+		runtime "Release"
+		links 
+		{
+			"shaderc_shared.lib",
+			"shaderc_util.lib",
+			"spirv-cross-core.lib",
+			"spirv-cross-glsl.lib"
+		}
+
+	filter "configurations:Dist"
+		defines "VISUS_DIST"
+		optimize "On"
+		runtime "Release"
+		links 
+		{
+			"shaderc_shared.lib",
+			"shaderc_util.lib",
+			"spirv-cross-core.lib",
+			"spirv-cross-glsl.lib"
+		}
 
 project "Motus3D"
 	location "Motus3D"
@@ -43,7 +135,7 @@ project "Motus3D"
 	files 
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.cpp"
 	}
 
 	includedirs 
@@ -52,7 +144,8 @@ project "Motus3D"
 		"%{IncludeDirectory.spdlog}",
 		"%{IncludeDirectory.GLFW}",
 		"%{IncludeDirectory.VulkanSDK}",
-		"%{IncludeDirectory.glm}"
+		"%{IncludeDirectory.glm}",
+		"%{IncludeDirectory.Visus}",
 	}
 
 	libdirs
@@ -63,6 +156,7 @@ project "Motus3D"
 	links 
 	{
 		"GLFW",
+		"Visus",
 		"vulkan-1.lib"
 	}
 
@@ -81,23 +175,26 @@ project "Motus3D"
 	filter "system:windows"
 		staticruntime "off"
 		systemversion "latest"
-
+		
 		defines
 		{
-			"MT_PLATFORM_WINDOWS",
+			"MT_PLATFORM_WINDOWS"
 		}
 
 	filter "configurations:Debug"
 		defines "MT_DEBUG"
 		symbols "On"
+		runtime "Debug"
 
 	filter "configurations:Release"
 		defines "MT_RELEASE"
 		optimize "On"
+		runtime "Release"
 
 	filter "configurations:Dist"
 		defines "MT_DIST"
 		optimize "On"
+		runtime "Release"
 group ""
 
 group "Test"
@@ -123,12 +220,15 @@ project "Sandbox2D"
 	includedirs 
 	{
 		"Motus3D/src",
-		"%{IncludeDirectory.spdlog}"
+		"Visus/src",
+		"%{IncludeDirectory.spdlog}",
+		"%{IncludeDirectory.glm}"
 	}
 
 	links 
 	{
-		"Motus3D"
+		"Motus3D",
+		"Visus"
 	}
 
 	defines 
@@ -156,4 +256,5 @@ project "Sandbox2D"
 	filter "configurations:Dist"
 		defines "MT_DIST"
 		optimize "On"
+		kind "WindowedApp"
 group ""

@@ -3,10 +3,11 @@
 #include <Core/Macros.h>
 #include <Core/ApplicationWindow.h>
 #include <Core/LayerStack.h>
-#include <array>
 
 #include <Core/Events/Event.h>
 #include <Core/Events/EventQueue.h>
+
+#include <Visus.h>
 
 namespace Motus3D
 {
@@ -16,7 +17,8 @@ namespace Motus3D
 		Application();
 		virtual ~Application();
 
-		Application* Get() { return s_Instance; }
+		static Application* Get() { return s_Instance; }
+		Ref<ApplicationWindow> GetWindow() { return m_AppWindow; };
 		void Run();
 
 		void AddLayer(Layer* layer) { m_LayerStack.AddLayer(layer); };
@@ -31,10 +33,9 @@ namespace Motus3D
 		static Application* s_Instance;
 		Ref<ApplicationWindow> m_AppWindow;
 		LayerStack m_LayerStack;
-
 		EventQueue m_EventQueue;
 
-		bool m_ApplicationRunning;
+		bool m_ApplicationRunning = true;
 
 	};
 }

@@ -1,8 +1,9 @@
 #include "Application.h"
-#include <iostream>
 #include <Core/Logger.h>
 #include <Platform/Windows/WinApplicationWindow.h>
 #include <Core/Events/Event.h>
+
+#include "Visus.h"
 
 namespace Motus3D
 {
@@ -28,28 +29,31 @@ namespace Motus3D
 	
 	Application::~Application()
 	{
-		
+		for (auto& layer : m_LayerStack) {
+			layer->OnDetach();
+		}
+
+		Renderer::Shutdown();
 	}
 
 	void Application::Run()
 	{
-
 		while (m_ApplicationRunning)
 		{
 			ProcessEvents();
-
+			Renderer::BeginFrame();
+			Renderer::ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			for(auto& layer : m_LayerStack)
 			{
 				layer->OnUpdate();
 			}
-
+			Renderer::EndFrame();
 			m_AppWindow->OnUpdate();
 		}
 	}
 
 	void Application::OnEvent(Event e)
 	{
-		// TODO
 		m_EventQueue.Push(e);
 		if(m_EventQueue.GetActualAmount() == APP_CONFIG_MAX_EVENT_QUEUE_SIZE)
 		{
@@ -57,18 +61,19 @@ namespace Motus3D
 		}
 	}
 
-	bool Application::OnWindowResize(WindowResizedEvent& )
+	bool Application::OnWindowResize(WindowResizedEvent& e)
 	{
-		MT_CORE_LOG_TRACE("OnWindowResize");
-		return true;
+		// TODO: vvv Causes crash, to be fixed vvv
+		// Motus3D::Renderer::OnWindowResize(e.width, e.height);
+		return false;
 	}
 
-	bool Application::OnWindowClosed(WindowClosedEvent& )
+	bool Application::OnWindowClosed(WindowClosedEvent& e)
 	{
 		m_ApplicationRunning = false;
 		return false;
 	}
-
+	
 	void Application::ProcessEvents()
 	{
 		// TODO
@@ -80,8 +85,6 @@ namespace Motus3D
 
 			dispatcher.Dispatch<WindowClosedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowClosed));
 			dispatcher.Dispatch<WindowResizedEvent>(MT_BIND_EVENT_FUNCTION(Application::OnWindowResize));
-
-			MT_CORE_LOG_TRACE(e.ToString());
 
 			for(auto& layer : m_LayerStack)
 			{
