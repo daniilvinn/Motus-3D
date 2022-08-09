@@ -73,7 +73,7 @@ namespace Motus3D
 
 	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform)
 	{
-		s_RendererAPI->RenderMesh(vbo, ibo, pipeline, m_SceneData.m_VPmatrix, transform);
+		s_RendererAPI->RenderMesh(vbo, ibo, pipeline, m_SceneData.camera->GetViewProjectionMatrix(), transform);
 	}
 
 }

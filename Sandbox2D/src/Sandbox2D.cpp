@@ -11,26 +11,24 @@ class TestLayer : public Motus3D::Layer
 public:
 	void OnUpdate() override
 	{
+		OnCameraUpdate();
+
 		if (Input::KeyPressed(KeyCode::KEY_W)) {
-			//m_QuadPosition.y += 0.001f;
 			m_Acceleration.y = 0.0f;
 			m_Acceleration.y += 0.001f;
 			m_AccelerationMagnitude.y = 1.0f;
 		};
 		if (Input::KeyPressed(KeyCode::KEY_A)) {
-			//m_QuadPosition.x -= 0.001f;
 			m_Acceleration.x = 0.0f;
 			m_Acceleration.x -= 0.001f;
 			m_AccelerationMagnitude.x = 1.0f;
 		};
 		if (Input::KeyPressed(KeyCode::KEY_S)) {
-			//m_QuadPosition.y -= 0.001f;
 			m_Acceleration.y = 0.0f;
 			m_Acceleration.y -= 0.001f;
 			m_AccelerationMagnitude.y = 1.0f;
 		};
 		if (Input::KeyPressed(KeyCode::KEY_D)) {
-			//m_QuadPosition.x += 0.001f;
 			m_Acceleration.x = 0.0f;
 			m_Acceleration.x += 0.001f;
 			m_AccelerationMagnitude.x = 1.0f;
@@ -42,7 +40,7 @@ public:
 		if (m_AccelerationMagnitude.x < 0.0f) m_AccelerationMagnitude.x = 0.0f;
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
 
-		Renderer::BeginScene({ m_VPmatrix });
+		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
 		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, m_QuadPosition);
 		Renderer::EndScene();
 	};
@@ -76,10 +74,11 @@ public:
 		m_VBO = VertexBuffer::Create(vertices, sizeof(vertices), 0);
 		m_IBO = IndexBuffer::Create(indices, sizeof(indices), 0, IndexType::UINT8);
 		
-		m_VPmatrix = glm::perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+		m_Camera = CreateRef<Camera2D>();
+		m_Camera->SetProjection(-2.0f, 2.0f, -2.0f, 2.0f);
 
 		// Physics
-		m_QuadPosition = glm::vec3(0.0f, 0.0f, -10.0f);
+		m_QuadPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_Acceleration = glm::vec3(0.0f);
 		m_AccelerationMagnitude = glm::vec3(0.0f);
 
@@ -100,6 +99,20 @@ public:
 		dispatcher.Dispatch<WindowResizedEvent>(MT_BIND_EVENT_FUNCTION(TestLayer::OnWindowResize));
 	};
 
+	void OnCameraUpdate() {
+		glm::vec3 newCameraPosition = m_Camera->GetPosition();
+
+		if (Input::KeyPressed(KeyCode::KEY_LEFT)) newCameraPosition.x -= 0.001f;
+		if (Input::KeyPressed(KeyCode::KEY_RIGHT)) newCameraPosition.x += 0.001f;
+		if (Input::KeyPressed(KeyCode::KEY_UP)) newCameraPosition.y += 0.001f;
+		if (Input::KeyPressed(KeyCode::KEY_DOWN)) newCameraPosition.y -= 0.001f;
+
+		newCameraPosition.z = 0.5f;
+
+		m_Camera->SetPosition(newCameraPosition);
+
+	};
+
 private:
 
 	bool OnWindowResize(WindowResizedEvent& e) 
@@ -118,6 +131,8 @@ private:
 
 	// Dynamic data
 	glm::mat4 m_VPmatrix;
+
+	Ref<Camera2D> m_Camera;
 
 	// Physics
 	glm::vec3 m_QuadPosition;

@@ -6,6 +6,8 @@
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/Pipeline.h>
 
+#include <Visus/Core/Camera.h>
+
 #include <Visus/Core/RendererAPI.h>
 
 namespace Motus3D {
@@ -19,7 +21,7 @@ namespace Motus3D {
 	{
 	public:
 		struct SceneData {
-			glm::mat4 m_VPmatrix;
+			Ref<Camera> camera;
 		};
 	public:
 		static void Init(RendererConfiguration configuration);

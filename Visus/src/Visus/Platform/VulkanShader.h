@@ -41,10 +41,10 @@ namespace Motus3D {
 		case COMPUTE:
 			return VK_SHADER_STAGE_COMPUTE_BIT;
 		case NONE:
-			assert(false, "Invalid shader stage!");
+			MT_CORE_ASSERT(false, "Invalid shader stage!");
 			break;
 		default:
-			assert(false, "Invalid shader stage!");
+			MT_CORE_ASSERT(false, "Invalid shader stage!");
 			break;
 		}
 	}

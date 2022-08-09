@@ -14,6 +14,7 @@
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/VertexBuffer.h>
 #include <Visus/Core/Pipeline.h>
+#include <Visus/Core/Camera.h>
 // ====================
 
 #include <Core/EntryPoint.h>
