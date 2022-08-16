@@ -4,7 +4,7 @@
 #include <Visus/Platform/ShaderUtils/ShaderCompiler.h>
 
 #include <vulkan/vulkan.h>
-#include <spirv_cross/spirv_glsl.hpp>
+#include <SPIRV-Reflect/spirv_reflect.h>
 #include <map>
 
 namespace Motus3D {
@@ -18,6 +18,7 @@ namespace Motus3D {
 
 		std::vector<VkPipelineShaderStageCreateInfo> GetPipelineStageCreateInfos() { return m_CreateInfos; };
 		std::vector<VkPushConstantRange> GetPushConstantRangeCreateInfos() { return m_PushConstantRanges; }
+		std::vector<VkDescriptorSetLayout> GetDescriptorSetLayouts() { return m_DescriptorSetLayouts; }
 
 	private:
 		void ParseFile(const std::string& filename);
@@ -28,6 +29,7 @@ namespace Motus3D {
 		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;
 
 		std::vector<VkPushConstantRange> m_PushConstantRanges;
+		std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
 	};
 
 	constexpr VkShaderStageFlagBits VisusToVulkanShaderStage(ShaderStage stage)

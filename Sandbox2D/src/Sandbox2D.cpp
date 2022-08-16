@@ -13,23 +13,22 @@ public:
 	{
 		OnCameraUpdate();
 
-#if 0
-		if (Input::KeyPressed(KeyCode::KEY_W)) {
+		if (Input::KeyPressed(KeyCode::KEY_UP)) {
 			m_Acceleration.y = 0.0f;
 			m_Acceleration.y += 0.001f;
 			m_AccelerationMagnitude.y = 1.0f;
 		};
-		if (Input::KeyPressed(KeyCode::KEY_A)) {
+		if (Input::KeyPressed(KeyCode::KEY_LEFT)) {
 			m_Acceleration.x = 0.0f;
 			m_Acceleration.x -= 0.001f;
 			m_AccelerationMagnitude.x = 1.0f;
 		};
-		if (Input::KeyPressed(KeyCode::KEY_S)) {
+		if (Input::KeyPressed(KeyCode::KEY_DOWN)) {
 			m_Acceleration.y = 0.0f;
 			m_Acceleration.y -= 0.001f;
 			m_AccelerationMagnitude.y = 1.0f;
 		};
-		if (Input::KeyPressed(KeyCode::KEY_D)) {
+		if (Input::KeyPressed(KeyCode::KEY_RIGHT)) {
 			m_Acceleration.x = 0.0f;
 			m_Acceleration.x += 0.001f;
 			m_AccelerationMagnitude.x = 1.0f;
@@ -40,7 +39,6 @@ public:
 		m_AccelerationMagnitude -= 0.001f;
 		if (m_AccelerationMagnitude.x < 0.0f) m_AccelerationMagnitude.x = 0.0f;
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
-#endif
 
 		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
 		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, m_QuadPosition);

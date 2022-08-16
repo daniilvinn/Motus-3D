@@ -1,13 +1,13 @@
 #include "VulkanGraphicsContext.h"
 
 #include <Visus/Core/Logger.h>
+#include <Visus/Core/Pipeline.h>
+
 #include <Visus/Platform/VulkanLogger.h>
+#include <Visus/Platform/VulkanAllocator.h>
+#include <Visus/Platform/VulkanDescriptorSet.h>
 
 #include <vulkan/vulkan.h>
-
-#include <Visus/Platform/VulkanAllocator.h>
-
-#include <Visus/Core/Pipeline.h>
 
 namespace Motus3D
 {
@@ -76,12 +76,14 @@ namespace Motus3D
 		m_Swapchain->Create(windowWidth, windowHeight, false);
 
 		VulkanAllocator::Init();
+		VulkanDescriptorSet::InitPools();
 	}
 
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
 		VulkanAllocator::Shutdown();
+		VulkanDescriptorSet::ReleasePools();
 		m_Swapchain->Destroy();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);

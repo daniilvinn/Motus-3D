@@ -6,20 +6,15 @@
 #include <Visus/Platform/VulkanIndexBuffer.h>
 #include <Visus/Platform/VulkanPipeline.h>
 
+#include <Visus/Platform/VulkanUniformBuffer.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <Visus/Core/Renderer.h>
+#include <Visus/Platform/VulkanDescriptorSet.h>
+
 namespace Motus3D {
-
-	static struct GlobalRenderData {
-		// All shaders MUST have Descriptor Set #0. It is reserved as renderer's scene data.
-		// Currently it contains only UBO with VP matrix, but it will be extended further.
-		VkDescriptorPool scene_data_pool;
-		VkDescriptorSet scene_data_set;
-		VkDescriptorSetLayout scene_data_set_layout;
-
-		// VulkanUniformBuffer m_VPMatrixBuffer;
-	} s_GlobalRenderData;
 
 	VulkanRenderer::VulkanRenderer()
 	{
@@ -28,12 +23,12 @@ namespace Motus3D {
 		m_GraphicsContext->Init({
 			renderer_config.windowHandle,
 			renderer_config.framesInFlight
-		});
+			});
 
 		m_Device = m_GraphicsContext->GetDevice();
 		m_Swapchain = m_GraphicsContext->GetSwapchain();
 
-		for(int i = 0; i < renderer_config.framesInFlight; i++)
+		for (int i = 0; i < renderer_config.framesInFlight; i++)
 		{
 			VkCommandPoolCreateInfo cmd_pool_create_info = {};
 			cmd_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -52,60 +47,19 @@ namespace Motus3D {
 			VkCommandBuffer cmd_buffer;
 			vkAllocateCommandBuffers(m_Device->GetHandle(), &cmd_buffer_allocate_info, &cmd_buffer);
 
-			m_CommandBuffers.push_back({cmd_pool, cmd_buffer});
+			m_CommandBuffers.push_back({ cmd_pool, cmd_buffer });
 		}
-
-		// Descriptor pool
-		std::vector<VkDescriptorPoolSize> pool_sizes = {
-			{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
-		};
-
-		VkDescriptorPoolCreateInfo descriptor_pool_create_info = {};
-		descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		descriptor_pool_create_info.maxSets = 1;
-		descriptor_pool_create_info.poolSizeCount = pool_sizes.size();
-		descriptor_pool_create_info.pPoolSizes = pool_sizes.data();
-		
-		VK_CHECK_RESULT(vkCreateDescriptorPool(m_Device->GetHandle(), &descriptor_pool_create_info, nullptr, &s_GlobalRenderData.scene_data_pool));
-
-		// Set layout
-		VkDescriptorSetLayoutBinding set_layout_binding = {};
-		set_layout_binding.binding = 0;
-		set_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		set_layout_binding.descriptorCount = 1;
-		set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-		VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
-		set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		set_layout_create_info.bindingCount = 1;
-		set_layout_create_info.pBindings = &set_layout_binding;
-
-		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_Device->GetHandle(), &set_layout_create_info, nullptr, &s_GlobalRenderData.scene_data_set_layout));
-
-		// Descriptor Set
-		VkDescriptorSetAllocateInfo set_allocate_info = {};
-		set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		set_allocate_info.descriptorPool = s_GlobalRenderData.scene_data_pool;
-		set_allocate_info.descriptorSetCount = 1;
-		set_allocate_info.pSetLayouts = &s_GlobalRenderData.scene_data_set_layout;
-
-		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Device->GetHandle(), &set_allocate_info, &s_GlobalRenderData.scene_data_set));
-
 	}
 
 	VulkanRenderer::~VulkanRenderer()
 	{
 		vkQueueWaitIdle(m_Device->GetGraphicsTransferQueue());
-		for(auto& cmd : m_CommandBuffers)
+		for (auto& cmd : m_CommandBuffers)
 		{
 			vkDestroyCommandPool(m_Device->GetHandle(), cmd.pool, nullptr);
 		}
 
-		vkDestroyDescriptorPool(m_Device->GetHandle(), s_GlobalRenderData.scene_data_pool, nullptr);
-		vkDestroyDescriptorSetLayout(m_Device->GetHandle(), s_GlobalRenderData.scene_data_set_layout, nullptr);
-
 		m_GraphicsContext->Shutdown();
-
 	}
 
 	void VulkanRenderer::OnWindowResize(uint32_t width, uint32_t height, bool vsync)
@@ -130,7 +84,7 @@ namespace Motus3D {
 		vkCmdSetViewport(m_CurrentCommandBuffer.buffer, 0, 1, &viewport);
 
 		VkRect2D scissor = {};
-		scissor.extent = {viewportBounds.first, viewportBounds.second};
+		scissor.extent = { viewportBounds.first, viewportBounds.second };
 		scissor.offset = { 0, 0 };
 		vkCmdSetScissor(m_CurrentCommandBuffer.buffer, 0, 1, &scissor);
 
@@ -245,11 +199,29 @@ namespace Motus3D {
 		vkCmdEndRendering(m_CurrentCommandBuffer.buffer);
 	}
 
-	void VulkanRenderer::RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::mat4 vp, const glm::vec3& transform)
+	void VulkanRenderer::RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
 	{
 		auto vulkanVertexBuffer = RefAs<VulkanVertexBuffer>(vbo);
 		auto vulkanIndexBuffer = RefAs<VulkanIndexBuffer>(ibo);
 		auto vulkanPipeline = RefAs<VulkanPipeline>(pipeline);
+
+		std::vector<VkDescriptorSet> vulkan_descriptor_sets(sets.size());
+		for (int i = 0; i < sets.size(); i++) 
+		{
+			Ref<VulkanDescriptorSet> vulkan_descriptors = RefAs<VulkanDescriptorSet>(sets[i]);
+			vulkan_descriptor_sets[i] = vulkan_descriptors->GetHandle();
+		}
+
+		vkCmdBindDescriptorSets(
+			m_CurrentCommandBuffer.buffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			vulkanPipeline->GetLayoutHandle(),
+			0,
+			sets.size(),
+			vulkan_descriptor_sets.data(),
+			0,
+			0
+		);
 
 		VkDeviceSize offset = 0;
 
@@ -259,15 +231,13 @@ namespace Motus3D {
 
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), transform);
 
-		glm::mat4 constants[] = { vp, model };
-
 		vkCmdPushConstants(
 			m_CurrentCommandBuffer.buffer,
 			vulkanPipeline->GetLayoutHandle(),
 			VK_SHADER_STAGE_VERTEX_BIT,
 			0,
-			sizeof(constants),
-			(const void*)constants
+			sizeof(model),
+			(const void*)&model
 		);
 
 		vkCmdDrawIndexed(
@@ -278,7 +248,6 @@ namespace Motus3D {
 			0,
 			0
 		);
-
 	}
 
 	void VulkanRenderer::ClearColor(float r, float b, float g, float a)

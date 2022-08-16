@@ -10,6 +10,8 @@
 
 #include <Visus/Core/RendererAPI.h>
 
+#include <Visus/Core/DescriptorSet.h>
+
 namespace Motus3D {
 	struct VISUS_API RendererConfiguration
 	{
@@ -49,7 +51,11 @@ namespace Motus3D {
 	private:
 		static Ref<RendererAPI> s_RendererAPI;
 		static RendererConfiguration s_Configuration;
-		static SceneData m_SceneData;
+
+		// Scene data descriptor sets and buffers, images with its data
+		static std::vector<Ref<DescriptorSet>> s_SceneDataDescriptorSets;
+		static std::vector<Ref<UniformBuffer>> s_CameraDataBuffers;
+
 		static float m_DeltaTime;
 	};
 }

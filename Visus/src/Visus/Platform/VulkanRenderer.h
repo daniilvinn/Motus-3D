@@ -3,6 +3,9 @@
 #include <Visus/Core/RendererAPI.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
+#include <Visus/Core/DescriptorSet.h>
+#include <Visus/Core/Pipeline.h>
+
 #include <glm/glm.hpp>
 
 namespace Motus3D {
@@ -15,6 +18,7 @@ namespace Motus3D {
 		void OnWindowResize(uint32_t width, uint32_t height, bool vsync) override;
 
 		Ref<GraphicsContext> GetContext() override { return m_GraphicsContext; };
+		uint8_t GetCurrentFrameIndex() const override { return m_Swapchain->GetCurrentFrameIndex(); }
 
 		void BeginFrame() override;
 		void EndFrame() override;
@@ -22,7 +26,7 @@ namespace Motus3D {
 		void EndRender() override;
 
 		void ClearColor(float r, float b, float g, float a) override;
-		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::mat4 vp, const glm::vec3& transform) override;
+		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform) override;
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;

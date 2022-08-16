@@ -127,13 +127,14 @@ namespace Motus3D
 		// Pipeline layout
 
 		std::vector<VkPushConstantRange> push_constant_ranges = m_Shader->GetPushConstantRangeCreateInfos();
+		std::vector<VkDescriptorSetLayout> set_layouts = m_Shader->GetDescriptorSetLayouts();
 
 		VkPipelineLayoutCreateInfo pipeline_layout = {};
 		pipeline_layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout.pushConstantRangeCount = push_constant_ranges.size();
 		pipeline_layout.pPushConstantRanges = push_constant_ranges.data();
-		pipeline_layout.setLayoutCount = 0;
-		pipeline_layout.pSetLayouts = nullptr;
+		pipeline_layout.setLayoutCount = set_layouts.size();
+		pipeline_layout.pSetLayouts = set_layouts.data();
 
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipeline_layout, nullptr, &m_Layout));
 

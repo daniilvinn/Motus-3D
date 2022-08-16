@@ -3,12 +3,58 @@
 #include <Visus/Platform/ShaderUtils/ShaderUtils.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
-#include <spirv_cross/spirv_reflect.hpp>
+#include <SPIRV-Reflect/spirv_reflect.h>
 #include <shaderc/shaderc.hpp>
 #include <fstream>
 
 namespace Motus3D
 {
+	static constexpr VkDescriptorType SpirvToVulkanDescriptorType(SpvReflectDescriptorType type) 
+	{
+		switch (type)
+		{
+		case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:
+			return VK_DESCRIPTOR_TYPE_SAMPLER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+			return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+			return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+			return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+			break;
+		case SPV_REFLECT_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR:
+			return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+			break;
+		default:
+			MT_CORE_ASSERT(false, "Invalid SPIR-V descriptor type!");
+			break;
+		}
+	}
+
 	VulkanShader::VulkanShader()
 	{
 		
@@ -55,30 +101,59 @@ namespace Motus3D
 			pipeline_shader_stage_create_info.pName = "main";
 
 			m_CreateInfos.push_back(pipeline_shader_stage_create_info);
+			
+			// REFLECTION
+			SpvReflectShaderModule reflect_module;
+			SpvReflectResult reflect_result = spvReflectCreateShaderModule(shader.second.size() * 4, shader.second.data(), &reflect_module);
+			MT_CORE_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			spirv_cross::CompilerGLSL reflectionCompiler(shader.second);
-			spirv_cross::ShaderResources shader_resources = reflectionCompiler.get_shader_resources();
+			// Reflect Push Constants
+			uint32_t push_constant_count;
+			spvReflectEnumeratePushConstants(&reflect_module, &push_constant_count, nullptr);
+			std::vector<SpvReflectBlockVariable*> ranges(push_constant_count);
+			spvReflectEnumeratePushConstants(&reflect_module, &push_constant_count, ranges.data());
 
-			for (auto& res : shader_resources.push_constant_buffers) 
+			for (auto& range : ranges) 
 			{
-				VkPushConstantRange range = {};
-				range.stageFlags = VisusToVulkanShaderStage(shader.first);
+				VkPushConstantRange push_constant = {};
+				push_constant.stageFlags = VisusToVulkanShaderStage(shader.first);
+				push_constant.size = range->size;
+				push_constant.offset = range->offset;
 
-				spirv_cross::SmallVector<spirv_cross::BufferRange> active_buffers = reflectionCompiler.get_active_buffer_ranges(res.id);
-				for (auto& buffer : active_buffers) 
-				{
-					range.size += buffer.range;
-				}
-				m_PushConstantRanges.push_back(range);
+				m_PushConstantRanges.push_back(push_constant);
 			}
-		}
 
-		// Setting up ranges' offsets by fetching them after they're all created
-		{
-			int rangeOffset = 0;
-			for (auto& range : m_PushConstantRanges) {
-				range.offset = rangeOffset;
-				rangeOffset += range.size;
+			// Reflect Descriptor Sets
+			uint32_t descriptor_set_count;
+			spvReflectEnumerateDescriptorSets(&reflect_module, &descriptor_set_count, nullptr);
+			std::vector<SpvReflectDescriptorSet*> reflect_descriptor_sets(descriptor_set_count);
+			spvReflectEnumerateDescriptorSets(&reflect_module, &descriptor_set_count, reflect_descriptor_sets.data());
+			
+			for (auto& reflect_set : reflect_descriptor_sets) 
+			{
+				VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
+				set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+				
+				std::vector<VkDescriptorSetLayoutBinding> bindings(reflect_set->binding_count);
+
+				for (int i = 0; i < reflect_set->binding_count; i++) 
+				{
+					VkDescriptorSetLayoutBinding binding = {};
+					binding.binding = reflect_set->bindings[i]->binding;
+					binding.stageFlags = VisusToVulkanShaderStage(shader.first);
+					binding.descriptorCount = reflect_set->bindings[i]->count;
+					binding.descriptorType = SpirvToVulkanDescriptorType(reflect_set->bindings[i]->descriptor_type);
+
+					bindings[i] = binding;
+				}
+
+				set_layout_create_info.bindingCount = bindings.size();
+				set_layout_create_info.pBindings = bindings.data();
+
+				VkDescriptorSetLayout final_set_layout;
+
+				VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device->GetHandle(), &set_layout_create_info, nullptr, &final_set_layout));
+				m_DescriptorSetLayouts.push_back(final_set_layout);
 			}
 		}
 

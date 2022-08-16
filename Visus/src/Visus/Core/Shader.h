@@ -19,10 +19,13 @@ namespace Motus3D {
 		BOOL
 	};
 
-	enum class VISUS_API ShaderUniformType : uint8_t {
-		BLOCK,
-		SAMPLER,
-		SSBO
+	enum ShaderStage
+	{
+		NONE = -1,
+		VERTEX = 0,
+		FRAGMENT = 1,
+		COMPUTE = 2,
+		MAX_VALUE = COMPUTE
 	};
 
 	class VISUS_API Shader
