@@ -54,22 +54,20 @@ namespace Motus3D
 
         {
             // Graphics queue
-            float defaultPriority = 1.0f;
             VkDeviceQueueCreateInfo graphics_queue = {};
             graphics_queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             graphics_queue.queueFamilyIndex = m_QueueFamilyIndices.graphics;
             graphics_queue.queueCount = 1;
-            graphics_queue.pQueuePriorities = &defaultPriority;
+            graphics_queue.pQueuePriorities = &m_DefaultQueuePriority;
             m_QueueCreateInfos.push_back(graphics_queue);
         }
         {
             // Compute queue
-            float defaultPriority = 1.0f;
             VkDeviceQueueCreateInfo compute_queue = {};
             compute_queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             compute_queue.queueFamilyIndex = m_QueueFamilyIndices.compute;
             compute_queue.queueCount = 1;
-            compute_queue.pQueuePriorities = &defaultPriority;
+            compute_queue.pQueuePriorities = &m_DefaultQueuePriority;
             m_QueueCreateInfos.push_back(compute_queue);
         }
 
@@ -130,9 +128,7 @@ namespace Motus3D
         enabledExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         enabledExtensions.push_back(VK_EXT_INDEX_TYPE_UINT8_EXTENSION_NAME);
         enabledExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
-        if (VISUS_INTERNAL_ENABLE_VALIDATION) {
-            enabledExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-        }
+
         VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature_enable_struct = {};
         dynamic_rendering_feature_enable_struct.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
         dynamic_rendering_feature_enable_struct.dynamicRendering = VK_TRUE;
@@ -156,6 +152,22 @@ namespace Motus3D
 
         vkGetDeviceQueue(m_Device, m_PhysicalDevice->GetQueueFamilyIndices().graphics, 0, &m_GraphicsTransferQueue);
         vkGetDeviceQueue(m_Device, m_PhysicalDevice->GetQueueFamilyIndices().compute, 0, &m_ComputeQueue);
+
+        // Creating default cmd pool and allocating single cmd buffer.
+        VkCommandPoolCreateInfo cmd_pool_create_info = {};
+        cmd_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        cmd_pool_create_info.queueFamilyIndex = m_PhysicalDevice->GetQueueFamilyIndices().graphics;
+        
+        VK_CHECK_RESULT(vkCreateCommandPool(m_Device, &cmd_pool_create_info, nullptr, &m_DefaultCmdPool));
+
+        VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {};
+        cmd_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        cmd_buffer_allocate_info.commandPool = m_DefaultCmdPool;
+        cmd_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        cmd_buffer_allocate_info.commandBufferCount = 1;
+
+        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_Device, &cmd_buffer_allocate_info, &m_CommandBuffer));
+
     }
 
     VulkanDevice::~VulkanDevice()

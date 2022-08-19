@@ -5,6 +5,7 @@
 
 #include <Visus/Core/DescriptorSet.h>
 #include <Visus/Core/Pipeline.h>
+#include <Visus/Core/Image.h>
 
 #include <glm/glm.hpp>
 
@@ -25,8 +26,12 @@ namespace Motus3D {
 		void BeginRender() override;
 		void EndRender() override;
 
+		// Clears render target (now only current swapchain image) with specified color.
 		void ClearColor(float r, float b, float g, float a) override;
 		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform) override;
+
+		// It is assumed that command buffer recording is already started and will be ended manually.
+		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
