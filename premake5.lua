@@ -19,6 +19,7 @@ IncludeDirectory["glm"] = "Motus3D/thirdparty/glm/include"
 IncludeDirectory["Visus"] = "Visus/src"
 IncludeDirectory["VMA"] = "Motus3D/thirdparty/VulkanMemoryAllocator/include"
 IncludeDirectory["VulkanSDK_Sources"] = "%{VulkanSDK}/Source"
+IncludeDirectory["stb_image"] = "Motus3D/thirdparty/stb_image"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
@@ -56,7 +57,8 @@ project "Visus"
 		"%{IncludeDirectory.glm}",
 		"%{IncludeDirectory.spdlog}",
 		"%{IncludeDirectory.VMA}",
-		"%{IncludeDirectory.VulkanSDK_Sources}"
+		"%{IncludeDirectory.VulkanSDK_Sources}",
+		"%{IncludeDirectory.stb_image}"
 	}
 
 	libdirs {
@@ -148,7 +150,7 @@ project "Motus3D"
 		"%{IncludeDirectory.GLFW}",
 		"%{IncludeDirectory.VulkanSDK}",
 		"%{IncludeDirectory.glm}",
-		"%{IncludeDirectory.Visus}",
+		"%{IncludeDirectory.Visus}"
 	}
 
 	libdirs
