@@ -42,7 +42,13 @@ namespace Motus3D {
 
 
 		static void ClearColor(float r, float g, float b, float a);
-		static void Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform);
+		static void Submit(
+			Ref<VertexBuffer> vbo, 
+			Ref<IndexBuffer> ibo, 
+			Ref<Pipeline> pipeline, 
+			std::vector<Ref<DescriptorSet>> sets,
+			const glm::vec3& transform
+		);
 
 	private:
 		static void BeginRender();

@@ -2,6 +2,7 @@
 
 #include <Visus/Core/Macros.h>
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
 namespace Motus3D {
@@ -16,7 +17,6 @@ namespace Motus3D {
 		virtual glm::mat4 GetViewMatrix() const = 0;		
 
 	};
-
 
 	// 2D camera, which uses orthographic matrix as projection matrix.
 	// Should be used in 2D games or to render GUI.

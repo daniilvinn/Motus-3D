@@ -92,9 +92,17 @@ namespace Motus3D
 		s_RendererAPI->ClearColor(r, g, b, a);
 	}
 
-	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform)
+	// Temporar solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.
+	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
 	{
-		s_RendererAPI->RenderMesh(vbo, ibo, pipeline, {s_SceneDataDescriptorSets[s_RendererAPI->GetCurrentFrameIndex()]}, transform);
+		sets.insert(sets.begin(), s_SceneDataDescriptorSets[0]);
+		s_RendererAPI->RenderMesh(
+			vbo,
+			ibo,
+			pipeline,
+			sets,
+			transform
+		);
 	}
 
 }

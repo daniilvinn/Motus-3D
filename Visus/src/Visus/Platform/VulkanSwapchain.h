@@ -6,11 +6,24 @@
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#include <vk_mem_alloc.h>
 
 
 namespace Motus3D {
 	class VulkanSwapchain : public Swapchain
 	{
+	public:
+		struct SwapchainImage
+		{
+			VkImage image;
+			VkImageView view;
+		};
+		struct DepthBuffer {
+			VkImage image = VK_NULL_HANDLE;
+			VkImageView view = VK_NULL_HANDLE;
+			VmaAllocation allocation = VK_NULL_HANDLE;
+			VkFormat format;
+		};
 
 	public:
 		VulkanSwapchain();
@@ -27,13 +40,9 @@ namespace Motus3D {
 		VkSwapchainKHR GetHandle() { return m_Swapchain; }
 		VkSurfaceKHR GetSurfaceHandle() { return m_Surface; }
 		VkFormat GetImageFormat() { return m_SurfaceFormat; };
-
-		struct SwapchainImage
-		{
-			VkImage image;
-			VkImageView view;
-		};
+		
 		SwapchainImage GetCurrentImageView() { return m_SwapchainImages[m_CurrentSwapchainImageIndex]; }
+		DepthBuffer GetDepthBuffer() { return m_DepthBuffer; }
 
 		std::pair<uint32_t, uint32_t> GetExtent() const override { return {m_SwapchainExtent.width, m_SwapchainExtent.height}; }
 		uint8_t GetCurrentFrameIndex() override { return m_CurrentFrameIndex; };
@@ -44,6 +53,7 @@ namespace Motus3D {
 
 	private:
 		void TryAcquireNextImage();
+		VkFormat PickDepthFormat();
 
 	private:
 		VkSurfaceKHR m_Surface;
@@ -59,6 +69,8 @@ namespace Motus3D {
 		std::pair<VkPresentModeKHR, std::optional<VkPresentModeKHR>> m_PresentModes;
 
 		std::vector<SwapchainImage> m_SwapchainImages;
+		DepthBuffer m_DepthBuffer;
+
 		uint32_t m_CurrentSwapchainImageIndex;
 		uint32_t m_CurrentFrameIndex = 0;
 

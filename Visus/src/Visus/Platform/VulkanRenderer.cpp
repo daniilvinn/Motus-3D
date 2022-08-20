@@ -137,12 +137,21 @@ namespace Motus3D {
 		color_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		color_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
+		VkRenderingAttachmentInfo depth_rendering_attachment = {};
+		depth_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		depth_rendering_attachment.imageView = m_Swapchain->GetDepthBuffer().view;
+		depth_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depth_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depth_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+		depth_rendering_attachment.clearValue = { 1.0f, 0 };
+
 		auto renderArea = m_Swapchain->GetExtent();
 
 		VkRenderingInfo rendering_info = {};
 		rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 		rendering_info.colorAttachmentCount = 1;
 		rendering_info.pColorAttachments = &color_rendering_attachment;
+		rendering_info.pDepthAttachment = &depth_rendering_attachment;
 		rendering_info.layerCount = 1;
 		rendering_info.renderArea = {
 			{0, 0},
@@ -282,14 +291,15 @@ namespace Motus3D {
 	
 	void VulkanRenderer::ClearColor(float r, float b, float g, float a)
 	{
-		VkClearValue clear_value = {};
-		clear_value.color = { r, g, b, a};
+		std::array<VkClearValue, 2> clear_values;
+		clear_values[0].color = { {r, g, b, a} };
+		clear_values[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderingAttachmentInfo color_rendering_attachment = {};
 		color_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		color_rendering_attachment.imageView = m_Swapchain->GetCurrentImageView().view;
 		color_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		color_rendering_attachment.clearValue = clear_value;
+		color_rendering_attachment.clearValue = clear_values[0];
 		color_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		color_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 

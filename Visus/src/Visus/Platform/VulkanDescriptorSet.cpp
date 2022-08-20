@@ -4,6 +4,7 @@
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
 #include <Visus/Platform/VulkanShader.h>
+#include <Visus/Platform/VulkanImage.h>
 
 namespace Motus3D {
 
@@ -106,6 +107,29 @@ namespace Motus3D {
 		write_struct.dstArrayElement = arrayElement;
 		write_struct.descriptorCount = 1;
 		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+	}
+
+	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement)
+	{
+		Ref<VulkanImage> vulkanImage = RefAs<VulkanImage>(image);
+		Ref<VulkanSampler> vulkanSampler = RefAs<VulkanSampler>(sampler);
+
+		VkDescriptorImageInfo image_info = {};
+		image_info.imageView = vulkanImage->GetImageView();
+		image_info.sampler = vulkanSampler->GetHandle();
+		image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		VkWriteDescriptorSet write_struct = {};
+		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_struct.dstSet = m_DescriptorSet;
+		write_struct.dstBinding = binding;
+		write_struct.pImageInfo = &image_info;
+		write_struct.dstArrayElement = arrayElement;
+		write_struct.descriptorCount = 1;
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);

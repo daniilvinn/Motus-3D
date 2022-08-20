@@ -41,7 +41,9 @@ public:
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
 
 		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
-		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, m_QuadPosition);
+		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, glm::vec3(0.0f, 0.0f, -15.0f));
+		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, m_QuadPosition);
+
 		Renderer::EndScene();
 	};
 
@@ -49,8 +51,9 @@ public:
 	{
 		m_Shader = Shader::Create("basic.glsl");
 		VertexBufferLayout bufferLayout({
-			{"a_Pos", ShaderDataType::FLOAT2},
-			{"a_Color", ShaderDataType::FLOAT3},
+			{ "aPos", ShaderDataType::FLOAT2 },
+			{ "aColor", ShaderDataType::FLOAT3 },
+			{ "aTexCoord", ShaderDataType::FLOAT2 },
 		});
 
 		m_Pipeline = Pipeline::Create({
@@ -60,10 +63,11 @@ public:
 		});
 
 		float vertices[] = {
-			-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,
-			-0.5f,  0.5f,	1.0f, 1.0f, 1.0f
+			// Position		// Color			// Texture Coords
+			-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,	0.0f, 1.0f,	
+			 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
+			 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
+			-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f
 		};
 
 		uint8_t indices[] = {
@@ -73,7 +77,27 @@ public:
 
 		m_VBO = VertexBuffer::Create(vertices, sizeof(vertices), 0);
 		m_IBO = IndexBuffer::Create(indices, sizeof(indices), 0, IndexType::UINT8);
-		
+		m_Texture = Image::Create("assets/textures/blending_test.png");
+		m_DefaultSampler = Sampler::Create(
+			{
+				SamplerFilter::LINEAR,
+				SamplerFilter::NEAREST,
+				MipmapMode::LINEAR,
+				SamplerAddressMode::REPEAT,
+				16.0f
+			}
+		);
+		m_MeshDescriptorSet = DescriptorSet::Create({
+			{
+				0,
+				ResourceType::IMAGE,
+				ShaderStage::FRAGMENT,
+				1
+			}
+		});
+
+		m_MeshDescriptorSet->UpdateDescriptor(0, m_Texture, m_DefaultSampler);
+
 		m_Camera = CreateRef<Camera3D>();
 		m_Camera->SetProjection(80.0f, 1.6f / 0.9f, 0.1f, 100.0f);
 		m_Camera->SetSensivity(0.1f);
@@ -82,6 +106,7 @@ public:
 		m_QuadPosition = glm::vec3(0.0f, 0.0f, -10.0f);
 		m_Acceleration = glm::vec3(0.0f);
 		m_AccelerationMagnitude = glm::vec3(0.0f);
+
 
 		MT_LOG_TRACE("Test layer attached");
 	};
@@ -154,8 +179,11 @@ private:
 	// Static data
 	Ref<VertexBuffer> m_VBO;
 	Ref<IndexBuffer> m_IBO;
+	Ref<Image> m_Texture;
+	Ref<Sampler> m_DefaultSampler;
 	Ref<Pipeline> m_Pipeline;
 	Ref<Shader> m_Shader;
+	Ref<DescriptorSet> m_MeshDescriptorSet;
 
 	// Dynamic data
 	Ref<Camera3D> m_Camera;

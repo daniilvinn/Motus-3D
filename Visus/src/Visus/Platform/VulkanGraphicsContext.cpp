@@ -65,6 +65,9 @@ namespace Motus3D
 		enabledfeatures.pipelineStatisticsQuery = true;
 
 		m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice, enabledfeatures);
+		VulkanAllocator::Init();
+		VulkanDescriptorSet::InitPools();
+
 
 		// Getting window's framebuffer size and passing it to swapchain creation
 		int windowWidth = 0;
@@ -75,8 +78,7 @@ namespace Motus3D
 		m_Swapchain->InitSurface();
 		m_Swapchain->Create(windowWidth, windowHeight, false);
 
-		VulkanAllocator::Init();
-		VulkanDescriptorSet::InitPools();
+		
 	}
 
 	void VulkanGraphicsContext::Shutdown()
