@@ -87,6 +87,40 @@ namespace Motus3D
 
 	}
 
+	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo* create_info, uint32_t flags, VkImage* image)
+	{
+		VmaAllocationCreateInfo allocation_create_info = {};
+		allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
+		allocation_create_info.flags = flags;
+
+		VmaAllocation allocation;
+		VmaAllocationInfo allocation_info;
+
+		VK_CHECK_RESULT(vmaCreateImage(m_Allocator, create_info, &allocation_create_info, image, &allocation, &allocation_info));
+
+#ifdef VISUS_DEBUG
+		VISUS_TRACE("Allocating image: total allocated memory = {0} + {1}", m_Statistics.allocatedMemory, allocation_info.size);
+		m_Statistics.allocatedMemory += allocation_info.size;
+#endif
+		return allocation;
+	}
+
+	void VulkanAllocator::DestroyImage(VkImage image, VmaAllocation allocation)
+	{
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+
+		VmaAllocationInfo allocation_info;
+		vmaGetAllocationInfo(m_Allocator, allocation, &allocation_info);
+
+		vkDeviceWaitIdle(device->GetHandle());
+		vmaDestroyImage(m_Allocator, image, allocation);
+
+#ifdef VISUS_DEBUG
+		VISUS_TRACE("Destroying image: total freed memory = {0} + {1}", m_Statistics.freedMemory, allocation_info.size);
+		m_Statistics.freedMemory += allocation_info.size;
+#endif
+	}
+
 	void* VulkanAllocator::MapMemory(VmaAllocation allocation)
 	{
 		void* memory;

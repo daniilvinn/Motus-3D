@@ -16,6 +16,9 @@ namespace Motus3D {
 		VmaAllocation AllocateBuffer(VkBufferCreateInfo* create_info, uint32_t flags, VkBuffer* buffer);
 		void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 
+		VmaAllocation AllocateImage(VkImageCreateInfo* create_info, uint32_t flags, VkImage* image);
+		void DestroyImage(VkImage image, VmaAllocation allocation);
+
 		void* MapMemory(VmaAllocation allocation);
 		void UnmapMemory(VmaAllocation allocation);
 

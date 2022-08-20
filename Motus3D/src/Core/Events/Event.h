@@ -53,8 +53,8 @@ struct MOTUS_API KeyReleasedEvent
 struct MOTUS_API MouseMovedEvent
 {
 	const EventType type = MouseMoved;
-	uint16_t xpos;
-	uint16_t ypos;
+	int16_t xpos;
+	int16_t ypos;
 	static EventType GetStaticType() { return MouseMoved; }
 };
 

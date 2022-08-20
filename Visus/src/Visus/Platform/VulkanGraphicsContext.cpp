@@ -1,13 +1,13 @@
 #include "VulkanGraphicsContext.h"
 
 #include <Visus/Core/Logger.h>
+#include <Visus/Core/Pipeline.h>
+
 #include <Visus/Platform/VulkanLogger.h>
+#include <Visus/Platform/VulkanAllocator.h>
+#include <Visus/Platform/VulkanDescriptorSet.h>
 
 #include <vulkan/vulkan.h>
-
-#include <Visus/Platform/VulkanAllocator.h>
-
-#include <Visus/Core/Pipeline.h>
 
 namespace Motus3D
 {
@@ -65,6 +65,9 @@ namespace Motus3D
 		enabledfeatures.pipelineStatisticsQuery = true;
 
 		m_Device = CreateRef<VulkanDevice>(m_PhysicalDevice, enabledfeatures);
+		VulkanAllocator::Init();
+		VulkanDescriptorSet::InitPools();
+
 
 		// Getting window's framebuffer size and passing it to swapchain creation
 		int windowWidth = 0;
@@ -75,13 +78,14 @@ namespace Motus3D
 		m_Swapchain->InitSurface();
 		m_Swapchain->Create(windowWidth, windowHeight, false);
 
-		VulkanAllocator::Init();
+		
 	}
 
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
 		VulkanAllocator::Shutdown();
+		VulkanDescriptorSet::ReleasePools();
 		m_Swapchain->Destroy();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);

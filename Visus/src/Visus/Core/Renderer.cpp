@@ -6,12 +6,24 @@ namespace Motus3D
 {
 	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
 	RendererConfiguration Renderer::s_Configuration;
-	Renderer::SceneData Renderer::m_SceneData = Renderer::SceneData();
-
+	std::vector<Ref<DescriptorSet>> Renderer::s_SceneDataDescriptorSets;
+	std::vector<Ref<UniformBuffer>> Renderer::s_CameraDataBuffers;
+		
 	void Renderer::Init(RendererConfiguration configuration)
 	{
 		s_Configuration = configuration;
 		s_RendererAPI = CreateRef<VulkanRenderer>();
+
+		// Setting up descriptor sets
+		for (int i = 0; i < s_Configuration.framesInFlight; i++) {
+			s_SceneDataDescriptorSets.push_back(DescriptorSet::Create({
+				{ 0, ResourceType::UBO, ShaderStage::VERTEX, 1 }
+			}));
+
+			s_CameraDataBuffers.push_back(UniformBuffer::Create(sizeof(glm::mat4) * 3, 0));
+
+			s_SceneDataDescriptorSets[i]->UpdateDescriptor(0, 0, 0, s_CameraDataBuffers[i], 0);
+		}
 	}
 
 	void Renderer::Shutdown()
@@ -47,8 +59,17 @@ namespace Motus3D
 
 	void Renderer::BeginScene(SceneData data)
 	{
-		m_SceneData = data;
 		s_RendererAPI->BeginRender();
+
+		glm::mat4 matrices[3] = 
+		{
+			data.camera->GetViewProjectionMatrix(),
+			data.camera->GetProjectionMatrix(),
+			data.camera->GetViewMatrix()
+		};
+
+		s_CameraDataBuffers[s_RendererAPI->GetCurrentFrameIndex()]->SetData(matrices, sizeof(matrices));
+
 	}
 
 	void Renderer::EndScene()
@@ -71,9 +92,17 @@ namespace Motus3D
 		s_RendererAPI->ClearColor(r, g, b, a);
 	}
 
-	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform)
+	// Temporar solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.
+	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
 	{
-		s_RendererAPI->RenderMesh(vbo, ibo, pipeline, m_SceneData.m_VPmatrix, transform);
+		sets.insert(sets.begin(), s_SceneDataDescriptorSets[0]);
+		s_RendererAPI->RenderMesh(
+			vbo,
+			ibo,
+			pipeline,
+			sets,
+			transform
+		);
 	}
 
 }

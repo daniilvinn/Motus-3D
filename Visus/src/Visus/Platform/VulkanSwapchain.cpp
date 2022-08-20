@@ -1,6 +1,7 @@
 #include "VulkanSwapchain.h"
 
 #include <Visus/Platform/VulkanGraphicsContext.h>
+#include <Visus/Platform/VulkanAllocator.h>
 #include <Visus/Core/Logger.h>
 
 namespace Motus3D
@@ -212,9 +213,51 @@ namespace Motus3D
 			m_Fences.push_back(fence);
 		}
 
-		
-	
+		// DEPTH BUFFER SETUP
+		// Cleanup old depth buffer
+		auto allocator = VulkanAllocator::Get();
+		if (m_DepthBuffer.image != VK_NULL_HANDLE) 
+		{
+			allocator->DestroyImage(m_DepthBuffer.image, m_DepthBuffer.allocation);
+			vkDestroyImageView(m_Device->GetHandle(), m_DepthBuffer.view, nullptr);
+		}
 
+		m_DepthBuffer.format = PickDepthFormat();
+
+		VkImageCreateInfo depth_buffer_create_info = {};
+		depth_buffer_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		depth_buffer_create_info.format = m_DepthBuffer.format;
+		depth_buffer_create_info.imageType = VK_IMAGE_TYPE_2D;
+		depth_buffer_create_info.extent = { m_SwapchainExtent.width, m_SwapchainExtent.height, 1 };
+		depth_buffer_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+		depth_buffer_create_info.mipLevels = 1;
+		depth_buffer_create_info.arrayLayers = 1;
+		depth_buffer_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+		depth_buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		depth_buffer_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		depth_buffer_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		
+		m_DepthBuffer.allocation = allocator->AllocateImage(&depth_buffer_create_info, 0, &m_DepthBuffer.image);
+
+		
+		VkImageViewCreateInfo depth_buffer_view_create_info = {};
+		depth_buffer_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		depth_buffer_view_create_info.image = m_DepthBuffer.image;
+		depth_buffer_view_create_info.format = depth_buffer_create_info.format;
+		depth_buffer_view_create_info.components = {
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_IDENTITY
+		};
+		depth_buffer_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		depth_buffer_view_create_info.subresourceRange.levelCount = 1;
+		depth_buffer_view_create_info.subresourceRange.baseMipLevel = 0;
+		depth_buffer_view_create_info.subresourceRange.layerCount = 1;
+		depth_buffer_view_create_info.subresourceRange.baseArrayLayer = 0;
+		depth_buffer_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		
+		VK_CHECK_RESULT(vkCreateImageView(m_Device->GetHandle(), &depth_buffer_view_create_info, nullptr, &m_DepthBuffer.view));
 	}
 
 	void VulkanSwapchain::BeginFrame()
@@ -267,4 +310,24 @@ namespace Motus3D
 			);
 		}
 	}
+
+	VkFormat VulkanSwapchain::PickDepthFormat()
+	{
+		// First one is VK_FORMAT_D32_SFLOAT, since it is most preferable format for now.
+		std::array<VkFormat, 3> formats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT };
+
+		VkFormatProperties properties;
+
+		for (auto& format : formats) {
+			vkGetPhysicalDeviceFormatProperties(
+				m_Device->GetPhysicalDevice()->GetHandle(),
+				format,
+				&properties
+			);
+
+			if (properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) 
+				return format;
+		}
+	}
+
 }

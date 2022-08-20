@@ -35,7 +35,8 @@ namespace Motus3D {
 	private: // Private fields
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 		QueueFamilyIndices m_QueueFamilyIndices;
-		
+		const float m_DefaultQueuePriority = 1.0f;
+
 		std::vector<VkDeviceQueueCreateInfo> m_QueueCreateInfos;
 
 		friend class VulkanDevice;
@@ -55,6 +56,9 @@ namespace Motus3D {
 		VkQueue GetGraphicsTransferQueue() { return m_GraphicsTransferQueue; };
 		VkQueue GetComputeQueue() { return m_ComputeQueue; };
 
+		VkCommandPool GetDefaultCmdPool() { return m_DefaultCmdPool; }
+		VkCommandBuffer GetDefaultCmdBuffer() { return m_CommandBuffer; }
+ 
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;
 
@@ -62,6 +66,11 @@ namespace Motus3D {
 
 		VkQueue m_GraphicsTransferQueue = VK_NULL_HANDLE;
 		VkQueue m_ComputeQueue = VK_NULL_HANDLE;
+
+		// General purpose command buffer. Recommended for use in one-time submission cases.
+		// Owned by graphics-transfer queue.
+		VkCommandPool m_DefaultCmdPool;
+		VkCommandBuffer m_CommandBuffer;
 
 	};
 

@@ -115,6 +115,16 @@ namespace Motus3D
 		color_blend_state.pAttachments = &color_blend_attachment;
 		color_blend_state.logicOpEnable = VK_FALSE;
 
+		// ===================
+		// Depth stencil State
+		VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+		depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depth_stencil_state.depthTestEnable = VK_TRUE;
+		depth_stencil_state.depthWriteEnable = VK_TRUE;
+		depth_stencil_state.depthCompareOp = VK_COMPARE_OP_LESS;
+		depth_stencil_state.depthBoundsTestEnable = VK_FALSE;
+		depth_stencil_state.stencilTestEnable = VK_FALSE;
+
 		// =================
 		// Multisample state
 		VkPipelineMultisampleStateCreateInfo multisample_state = {};
@@ -123,17 +133,16 @@ namespace Motus3D
 		multisample_state.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
 		// ===============
-		// TODO: retrieve pipeline layout from shader class
 		// Pipeline layout
-
 		std::vector<VkPushConstantRange> push_constant_ranges = m_Shader->GetPushConstantRangeCreateInfos();
+		std::vector<VkDescriptorSetLayout> set_layouts = m_Shader->GetDescriptorSetLayouts();
 
 		VkPipelineLayoutCreateInfo pipeline_layout = {};
 		pipeline_layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout.pushConstantRangeCount = push_constant_ranges.size();
 		pipeline_layout.pPushConstantRanges = push_constant_ranges.data();
-		pipeline_layout.setLayoutCount = 0;
-		pipeline_layout.pSetLayouts = nullptr;
+		pipeline_layout.setLayoutCount = set_layouts.size();
+		pipeline_layout.pSetLayouts = set_layouts.data();
 
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipeline_layout, nullptr, &m_Layout));
 
@@ -143,6 +152,7 @@ namespace Motus3D
 		pipeline_rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipeline_rendering.colorAttachmentCount = 1;
 		pipeline_rendering.pColorAttachmentFormats = &image_format;
+		pipeline_rendering.depthAttachmentFormat = VulkanGraphicsContext::GetVulkanContext()->GetSwapchain()->GetDepthBuffer().format;
 
 		// vvv Dangling pointer fix vvv
 		std::vector<VkPipelineShaderStageCreateInfo> stages_create_infos = m_Shader->GetPipelineStageCreateInfos();
@@ -157,6 +167,7 @@ namespace Motus3D
 		pipeline_create_info.pDynamicState = &dynamic_state;
 		pipeline_create_info.pRasterizationState = &rasterization_state;
 		pipeline_create_info.pColorBlendState = &color_blend_state;
+		pipeline_create_info.pDepthStencilState = &depth_stencil_state;
 		pipeline_create_info.pMultisampleState = &multisample_state;
 		pipeline_create_info.layout = m_Layout;
 		pipeline_create_info.pViewportState = &viewport_state;

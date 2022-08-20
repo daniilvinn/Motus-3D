@@ -6,7 +6,11 @@
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/Pipeline.h>
 
+#include <Visus/Core/Camera.h>
+
 #include <Visus/Core/RendererAPI.h>
+
+#include <Visus/Core/DescriptorSet.h>
 
 namespace Motus3D {
 	struct VISUS_API RendererConfiguration
@@ -19,7 +23,7 @@ namespace Motus3D {
 	{
 	public:
 		struct SceneData {
-			glm::mat4 m_VPmatrix;
+			Ref<Camera> camera;
 		};
 	public:
 		static void Init(RendererConfiguration configuration);
@@ -38,7 +42,13 @@ namespace Motus3D {
 
 
 		static void ClearColor(float r, float g, float b, float a);
-		static void Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::vec3& transform);
+		static void Submit(
+			Ref<VertexBuffer> vbo, 
+			Ref<IndexBuffer> ibo, 
+			Ref<Pipeline> pipeline, 
+			std::vector<Ref<DescriptorSet>> sets,
+			const glm::vec3& transform
+		);
 
 	private:
 		static void BeginRender();
@@ -47,7 +57,11 @@ namespace Motus3D {
 	private:
 		static Ref<RendererAPI> s_RendererAPI;
 		static RendererConfiguration s_Configuration;
-		static SceneData m_SceneData;
+
+		// Scene data descriptor sets and buffers, images with its data
+		static std::vector<Ref<DescriptorSet>> s_SceneDataDescriptorSets;
+		static std::vector<Ref<UniformBuffer>> s_CameraDataBuffers;
+
 		static float m_DeltaTime;
 	};
 }

@@ -35,3 +35,5 @@ namespace Motus3D
 	};
 
 }
+
+#undef MT_CHECK_CLASS_COMPATIBILITY

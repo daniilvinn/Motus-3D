@@ -3,6 +3,10 @@
 #include <Visus/Core/RendererAPI.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
+#include <Visus/Core/DescriptorSet.h>
+#include <Visus/Core/Pipeline.h>
+#include <Visus/Core/Image.h>
+
 #include <glm/glm.hpp>
 
 namespace Motus3D {
@@ -15,14 +19,19 @@ namespace Motus3D {
 		void OnWindowResize(uint32_t width, uint32_t height, bool vsync) override;
 
 		Ref<GraphicsContext> GetContext() override { return m_GraphicsContext; };
+		uint8_t GetCurrentFrameIndex() const override { return m_Swapchain->GetCurrentFrameIndex(); }
 
 		void BeginFrame() override;
 		void EndFrame() override;
 		void BeginRender() override;
 		void EndRender() override;
 
+		// Clears render target (now only current swapchain image) with specified color.
 		void ClearColor(float r, float b, float g, float a) override;
-		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, const glm::mat4 vp, const glm::vec3& transform) override;
+		void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform) override;
+
+		// It is assumed that command buffer recording is already started and will be ended manually.
+		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
