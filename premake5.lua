@@ -26,6 +26,7 @@ LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
 
 group "Dependencies"
 include "Motus3D/thirdparty/GLFW"
+include "Motus3D/thirdparty/Assimp"
 group ""
 
 group "Core"
@@ -129,9 +130,6 @@ project "Motus3D"
 
 	targetdir("bin/%{prj.name}/" .. compileOutput)
 	objdir("obj/%{prj.name}/" .. compileOutput)
-
-	-- pchheader "motus_pch.h"
-	-- pchsource "Motus/src/motus_pch.cpp"
 
 	flags {
 		"MultiProcessorCompile"

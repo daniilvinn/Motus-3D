@@ -10,3 +10,6 @@
 [submodule "Motus3D/thirdparty/VulkanMemoryAllocator"]
 	path = Motus3D/thirdparty/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "Motus3D/thirdparty/Assimp"]
+	path = Motus3D/thirdparty/Assimp
+	url = https://github.com/AminAliari/assimp.git
