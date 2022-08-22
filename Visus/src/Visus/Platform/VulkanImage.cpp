@@ -120,7 +120,6 @@ namespace Motus3D {
 
 	// ==============
 	// Vulkan Sampler
-
 	static constexpr VkFilter VisusToVulkanSamplerFilter(SamplerFilter filter) 
 	{
 		switch (filter)

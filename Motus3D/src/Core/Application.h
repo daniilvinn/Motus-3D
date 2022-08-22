@@ -25,7 +25,6 @@ namespace Motus3D
 		void OnEvent(Event e);
 
 	private:
-
 		bool OnWindowResize(WindowResizedEvent& e);
 		bool OnWindowClosed(WindowClosedEvent& e);
 		void ProcessEvents();

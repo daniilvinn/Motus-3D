@@ -14,7 +14,7 @@ namespace Motus3D {
 
 		virtual glm::mat4 GetViewProjectionMatrix() const = 0;
 		virtual glm::mat4 GetProjectionMatrix() const = 0;
-		virtual glm::mat4 GetViewMatrix() const = 0;		
+		virtual glm::mat4 GetViewMatrix() const = 0;
 
 	};
 

@@ -19,7 +19,6 @@ namespace Motus3D
 		std::vector<Layer*>::iterator end() { return m_LayerStack.end(); }
 
 	private:
-
 		std::vector<Layer*> m_LayerStack;
 
 	};
