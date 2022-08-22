@@ -20,12 +20,14 @@ IncludeDirectory["Visus"] = "Visus/src"
 IncludeDirectory["VMA"] = "Motus3D/thirdparty/VulkanMemoryAllocator/include"
 IncludeDirectory["VulkanSDK_Sources"] = "%{VulkanSDK}/Source"
 IncludeDirectory["stb_image"] = "Motus3D/thirdparty/stb_image"
+IncludeDirectory["Assimp"] = "Motus3D/thirdparty/Assimp/include"
 
 LibraryDirectory = {}
 LibraryDirectory["VulkanSDK"] = "%{VulkanSDK}/Lib"
 
 group "Dependencies"
 include "Motus3D/thirdparty/GLFW"
+include "Motus3D/thirdparty/Assimp"
 group ""
 
 group "Core"
@@ -58,7 +60,8 @@ project "Visus"
 		"%{IncludeDirectory.spdlog}",
 		"%{IncludeDirectory.VMA}",
 		"%{IncludeDirectory.VulkanSDK_Sources}",
-		"%{IncludeDirectory.stb_image}"
+		"%{IncludeDirectory.stb_image}",
+		"%{IncludeDirectory.Assimp}",
 	}
 
 	libdirs {
@@ -68,6 +71,7 @@ project "Visus"
 	links {
 		"GLFW",
 		"vulkan-1.lib",
+		"assimp"
 	}
 
 	defines {
@@ -129,9 +133,6 @@ project "Motus3D"
 
 	targetdir("bin/%{prj.name}/" .. compileOutput)
 	objdir("obj/%{prj.name}/" .. compileOutput)
-
-	-- pchheader "motus_pch.h"
-	-- pchsource "Motus/src/motus_pch.cpp"
 
 	flags {
 		"MultiProcessorCompile"
