@@ -1,3 +1,18 @@
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+cmake_uninstall.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+*.FileListAbsolute.txt
+
 # Visual Studio files and folder
 *.sln
 *.vcxproj
@@ -13,6 +28,8 @@ obj/
 *.pdb
 *.exe
 *.tlog
+*.obj
+*.ilk
 
 # Misc
 *.rsuser
@@ -20,3 +37,5 @@ obj/
 *.user
 *.userosscache
 *.sln.docstates
+*.log
+*.recipe
