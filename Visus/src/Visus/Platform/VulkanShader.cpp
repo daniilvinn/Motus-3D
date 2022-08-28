@@ -4,6 +4,7 @@
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
 #include <SPIRV-Reflect/spirv_reflect.h>
+#include <SPIRV-Reflect/spirv_reflect.c>
 #include <shaderc/shaderc.hpp>
 #include <fstream>
 
