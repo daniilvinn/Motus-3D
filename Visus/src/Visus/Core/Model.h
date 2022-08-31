@@ -39,6 +39,9 @@ namespace Motus3D {
 			//std::vector<Ref<Image>> textures
 		);
 
+		Ref<VertexBuffer> GetVertexBuffer() { return m_VBO; }
+		Ref<IndexBuffer> GetIndexBuffer() { return m_IBO; }
+
 	private:
 		Ref<VertexBuffer> m_VBO;
 		Ref<IndexBuffer> m_IBO;
@@ -50,12 +53,20 @@ namespace Motus3D {
 	class VISUS_API Model
 	{
 	public:
-		Model(std::string filepath);
+		Model() {};
+		Model(std::string_view filepath);
+		void Load(std::string_view filepath);
+
+		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }
+
+	private:
+		// HACK: using void* to not to #include assimp in header file
+		// TODO: find better solution for abstraction
+		void ProcessNode(void* node, const void* scene);
+		Submesh ProcessSubmesh(void* submesh, const void* scene);
 
 	private:
 		std::vector<Submesh> m_Submeshes;
 		Ref<Image> m_Texture;
-
 	};
-
 }

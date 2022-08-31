@@ -34,26 +34,41 @@ public:
 			m_AccelerationMagnitude.x = 1.0f;
 		};
 
-		m_QuadPosition.x += m_Acceleration.x * m_AccelerationMagnitude.x;
-		m_QuadPosition.y += m_Acceleration.y * m_AccelerationMagnitude.y;
+		m_MeshPosition.x += m_Acceleration.x * m_AccelerationMagnitude.x;
+		m_MeshPosition.y += m_Acceleration.y * m_AccelerationMagnitude.y;
 		m_AccelerationMagnitude -= 0.001f;
 		if (m_AccelerationMagnitude.x < 0.0f) m_AccelerationMagnitude.x = 0.0f;
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
 
+		// Begin rendering scene
 		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
-		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, glm::vec3(0.0f, 0.0f, -15.0f));
-		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, m_QuadPosition);
+		std::vector<Submesh> rex_submeshes = m_Model.GetSubmeshes();
+		std::vector<Submesh> env_submeshes = m_EnvironmentModel.GetSubmeshes();
 
+		glm::mat4 transform = glm::translate(m_MeshPosition) * glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
+
+		for (int i = 0; i < rex_submeshes.size(); i++)
+		{
+			Renderer::Submit(&rex_submeshes[i], m_Pipeline, { m_DescriptorSet }, transform);
+		}
+
+		transform = glm::rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::vec3(10.0f, 10.0f, 10.0f));
+
+		for (int i = 0; i < env_submeshes.size(); i++)
+		{
+			Renderer::Submit(&env_submeshes[i], m_Pipeline, { m_EnvDescriptorSet }, transform);
+		}
 		Renderer::EndScene();
+		// End rendering scene and executing work on GPU
 	};
 
 	void OnAttach() override
 	{
-		m_Shader = Shader::Create("basic.glsl");
+		m_Shader = Shader::Create("texture.glsl");
 		VertexBufferLayout bufferLayout({
-			{ "aPos", ShaderDataType::FLOAT2 },
-			{ "aColor", ShaderDataType::FLOAT3 },
+			{ "aPos", ShaderDataType::FLOAT3 },
 			{ "aTexCoord", ShaderDataType::FLOAT2 },
+			{ "aNormal", ShaderDataType::FLOAT3 },
 		});
 
 		m_Pipeline = Pipeline::Create({
@@ -62,32 +77,30 @@ public:
 			PolygonMode::FILL
 		});
 
-		float vertices[] = {
-			// Position		// Color			// Texture Coords
-			-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,	0.0f, 1.0f,	
-			 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
-			 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
-			-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f
-		};
+		m_Camera = CreateRef<Camera3D>();
+		m_Camera->SetProjection(80.0f, 1.6f / 0.9f, 0.01f, 100.0f);
+		m_Camera->SetSensivity(0.1f);
 
-		uint8_t indices[] = {
-			0, 1, 2,
-			2, 3, 0
-		};
+		// Physics
+		m_MeshPosition = glm::vec3(0.0f, 0.3f, -3.0f);
+		m_Acceleration = glm::vec3(0.0f);
+		m_AccelerationMagnitude = glm::vec3(0.0f);
 
-		m_VBO = VertexBuffer::Create(vertices, sizeof(vertices), 0);
-		m_IBO = IndexBuffer::Create(indices, sizeof(indices), 0, IndexType::UINT8);
-		m_Texture = Image::Create("assets/textures/blending_test.png");
-		m_DefaultSampler = Sampler::Create(
+		m_Model.Load("assets/models/trex/trex.gltf");
+		m_EnvironmentModel.Load("assets/models/env/scene.gltf");
+
+		m_Texture = Image::Create("assets/textures/trex.jpeg");
+		m_EnvTexture = Image::Create("assets/textures/env.png");
+		m_Sampler = Sampler::Create(
 			{
 				SamplerFilter::LINEAR,
-				SamplerFilter::NEAREST,
+				SamplerFilter::LINEAR,
 				MipmapMode::LINEAR,
 				SamplerAddressMode::REPEAT,
 				16.0f
 			}
 		);
-		m_MeshDescriptorSet = DescriptorSet::Create({
+		m_DescriptorSet = DescriptorSet::Create({
 			{
 				0,
 				ResourceType::IMAGE,
@@ -95,18 +108,16 @@ public:
 				1
 			}
 		});
-
-		m_MeshDescriptorSet->UpdateDescriptor(0, m_Texture, m_DefaultSampler);
-
-		m_Camera = CreateRef<Camera3D>();
-		m_Camera->SetProjection(80.0f, 1.6f / 0.9f, 0.1f, 100.0f);
-		m_Camera->SetSensivity(0.1f);
-
-		// Physics
-		m_QuadPosition = glm::vec3(0.0f, 0.0f, -10.0f);
-		m_Acceleration = glm::vec3(0.0f);
-		m_AccelerationMagnitude = glm::vec3(0.0f);
-
+		m_EnvDescriptorSet = DescriptorSet::Create({
+			{
+				0,
+				ResourceType::IMAGE,
+				ShaderStage::FRAGMENT,
+				1
+			}
+		});
+		m_DescriptorSet->UpdateDescriptor(0, m_Texture, m_Sampler);
+		m_EnvDescriptorSet->UpdateDescriptor(0, m_EnvTexture, m_Sampler);
 
 		MT_LOG_TRACE("Test layer attached");
 	};
@@ -114,8 +125,6 @@ public:
 	void OnDetach() override
 	{
 		m_Pipeline.reset();
-		m_VBO.reset();
-		m_IBO.reset();
 		MT_LOG_TRACE("Test layer detached");
 	};
 
@@ -177,19 +186,23 @@ private:
 private:
 
 	// Static data
-	Ref<VertexBuffer> m_VBO;
-	Ref<IndexBuffer> m_IBO;
-	Ref<Image> m_Texture;
-	Ref<Sampler> m_DefaultSampler;
 	Ref<Pipeline> m_Pipeline;
 	Ref<Shader> m_Shader;
-	Ref<DescriptorSet> m_MeshDescriptorSet;
+	Model m_Model;
+	Model m_EnvironmentModel;
+	Ref<DescriptorSet> m_DescriptorSet;
+	Ref<DescriptorSet> m_EnvDescriptorSet;
+	Ref<Image> m_Texture;
+	Ref<Image> m_EnvTexture;
+	Ref<Sampler> m_Sampler;
+	
+	
 
 	// Dynamic data
 	Ref<Camera3D> m_Camera;
 
 	// Physics
-	glm::vec3 m_QuadPosition;
+	glm::vec3 m_MeshPosition;
 	glm::vec3 m_Acceleration;
 	glm::vec3 m_AccelerationMagnitude;
 

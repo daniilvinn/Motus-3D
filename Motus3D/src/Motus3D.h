@@ -17,6 +17,7 @@
 #include <Visus/Core/DescriptorSet.h>
 #include <Visus/Core/Pipeline.h>
 #include <Visus/Core/Camera.h>
+#include <Visus/Core/Model.h>
 // ====================
 
 #include <Core/EntryPoint.h>
