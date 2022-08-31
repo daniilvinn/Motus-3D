@@ -166,8 +166,11 @@ namespace Motus3D {
 		vkCmdEndRendering(m_CurrentCommandBuffer.buffer);
 	}
 
-	void VulkanRenderer::RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
+	void VulkanRenderer::RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform)
 	{
+		auto vbo = submesh->GetVertexBuffer();
+		auto ibo = submesh->GetIndexBuffer();
+
 		auto vulkanVertexBuffer = RefAs<VulkanVertexBuffer>(vbo);
 		auto vulkanIndexBuffer = RefAs<VulkanIndexBuffer>(ibo);
 		auto vulkanPipeline = RefAs<VulkanPipeline>(pipeline);
@@ -196,15 +199,13 @@ namespace Motus3D {
 		vkCmdBindVertexBuffers(m_CurrentCommandBuffer.buffer, 0, 1, vulkanVertexBuffer->GetHandle(), &offset);
 		vkCmdBindIndexBuffer(m_CurrentCommandBuffer.buffer, *vulkanIndexBuffer->GetHandle(), 0, vulkanIndexBuffer->GetVulkanIndexType());
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), transform);
-
 		vkCmdPushConstants(
 			m_CurrentCommandBuffer.buffer,
 			vulkanPipeline->GetLayoutHandle(),
 			VK_SHADER_STAGE_VERTEX_BIT,
 			0,
-			sizeof(model),
-			(const void*)&model
+			sizeof(transform),
+			(const void*)&transform
 		);
 
 		vkCmdDrawIndexed(

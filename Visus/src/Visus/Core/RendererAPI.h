@@ -7,6 +7,7 @@
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/Pipeline.h>
 #include <Visus/Core/DescriptorSet.h>
+#include <Visus/Core/Model.h>
 
 #include <glm/glm.hpp>
 
@@ -27,7 +28,7 @@ namespace Motus3D {
 
 		// Actual rendering
 		virtual void ClearColor(float r, float b, float g, float a) = 0;
-		virtual void RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform) = 0;
+		virtual void RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform) = 0;
 
 	};
 }
