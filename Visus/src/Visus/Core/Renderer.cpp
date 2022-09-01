@@ -28,6 +28,11 @@ namespace Motus3D
 
 	void Renderer::Shutdown()
 	{
+		for (int i = 0; i < s_Configuration.framesInFlight; i++)
+		{
+			s_SceneDataDescriptorSets[i].reset();
+			s_CameraDataBuffers[i].reset();
+		}
 		s_RendererAPI.reset();
 	}
 
@@ -103,5 +108,4 @@ namespace Motus3D
 			transform
 		);
 	}
-
 }

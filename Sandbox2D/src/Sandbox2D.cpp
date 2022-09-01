@@ -86,10 +86,16 @@ public:
 		m_Acceleration = glm::vec3(0.0f);
 		m_AccelerationMagnitude = glm::vec3(0.0f);
 
+		MT_LOG_INFO("\n	Creating trex model:");
 		m_Model.Load("assets/models/trex/trex.gltf");
+
+		MT_LOG_INFO("\n	Creating environment model:");
 		m_EnvironmentModel.Load("assets/models/env/scene.gltf");
 
+		MT_LOG_INFO("\n	Creating trex texture:");
 		m_Texture = Image::Create("assets/textures/trex.jpeg");
+
+		MT_LOG_INFO("\n	Creating environment texture:");
 		m_EnvTexture = Image::Create("assets/textures/env.png");
 		m_Sampler = Sampler::Create(
 			{
@@ -124,7 +130,15 @@ public:
 
 	void OnDetach() override
 	{
+		MT_LOG_INFO("~Test layer on detach~");
 		m_Pipeline.reset();
+		m_Texture.reset();
+		m_EnvTexture.reset();
+		m_Model.Release();
+		m_EnvironmentModel.Release();
+		m_DescriptorSet.reset();
+		m_EnvDescriptorSet.reset();
+		m_Sampler->Destroy();
 		MT_LOG_TRACE("Test layer detached");
 	};
 
@@ -196,8 +210,6 @@ private:
 	Ref<Image> m_EnvTexture;
 	Ref<Sampler> m_Sampler;
 	
-	
-
 	// Dynamic data
 	Ref<Camera3D> m_Camera;
 

@@ -20,6 +20,7 @@ namespace Motus3D {
 		static Ref<IndexBuffer> Create(uint64_t size);
 		static Ref<IndexBuffer> Create(void* data, uint64_t size, uint64_t offset, IndexType type);
 
+		virtual void Release() = 0;
 		virtual uint32_t GetCount() const = 0;
 
 	};

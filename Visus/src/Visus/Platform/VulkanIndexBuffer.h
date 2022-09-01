@@ -34,6 +34,7 @@ namespace Motus3D {
 		VkIndexType GetVulkanIndexType() const { return m_IndexType; }
 		uint32_t GetCount() const override { return m_Count; }
 
+		void Release() override;
 		void SetData(void* data, uint64_t size, uint64_t offset, IndexType type);
 
 	private:

@@ -47,7 +47,7 @@ namespace Motus3D {
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
+		//vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
 		vkDestroyDescriptorSetLayout(device->GetHandle(), m_DescriptorSetLayout, nullptr);
 	}
 

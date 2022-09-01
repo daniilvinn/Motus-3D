@@ -38,6 +38,7 @@ namespace Motus3D
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
+		
 		auto allocator = VulkanAllocator::Get();
 		allocator->DestroyBuffer(m_Buffer, m_Allocation);
 	}

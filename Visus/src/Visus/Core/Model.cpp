@@ -38,6 +38,15 @@ namespace Motus3D {
 		Load(filepath);
 	}
 
+	Model::~Model()
+	{
+		for (auto& submesh : m_Submeshes) 
+		{
+			submesh.GetVertexBuffer().reset();
+			submesh.GetIndexBuffer().reset();
+		}
+	}
+
 	void Model::Load(std::string_view filepath)
 	{
 		Assimp::Importer importer;
@@ -53,6 +62,15 @@ namespace Motus3D {
 		}
 
 		ProcessNode(scene->mRootNode, scene);
+	}
+
+	void Model::Release()
+	{
+		for (auto& submesh : m_Submeshes)
+		{
+			submesh.GetVertexBuffer()->Release();
+			submesh.GetIndexBuffer()->Release();
+		}
 	}
 
 	void Model::ProcessNode(void* node, const void* scene)
