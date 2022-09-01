@@ -55,7 +55,9 @@ namespace Motus3D {
 	public:
 		Model() {};
 		Model(std::string_view filepath);
+		~Model();
 		void Load(std::string_view filepath);
+		void Release();
 
 		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }
 

@@ -44,6 +44,7 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<Sampler> Create(SamplerSpecification specification);
+		virtual void Destroy() = 0;
 
 	};
 

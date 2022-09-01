@@ -16,6 +16,8 @@ namespace Motus3D {
 		~VulkanVertexBuffer();
 
 		VkBuffer* GetHandle() { return &m_Buffer;  }
+
+		void Release() override;
 		void SetData(void* data, uint64_t size, uint64_t offset) override;
 
 	private:

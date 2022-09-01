@@ -31,6 +31,7 @@ namespace Motus3D
 	{
 		for (auto& layer : m_LayerStack) {
 			layer->OnDetach();
+			delete layer;
 		}
 
 		Renderer::Shutdown();
@@ -41,6 +42,8 @@ namespace Motus3D
 		while (m_ApplicationRunning)
 		{
 			ProcessEvents();
+			m_AppWindow->OnUpdate();
+
 			Renderer::BeginFrame();
 			Renderer::ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			for(auto& layer : m_LayerStack)
@@ -48,7 +51,6 @@ namespace Motus3D
 				layer->OnUpdate();
 			}
 			Renderer::EndFrame();
-			m_AppWindow->OnUpdate();
 		}
 	}
 

@@ -26,7 +26,9 @@ namespace Motus3D {
 	{
 	public:
 		VulkanSampler(SamplerSpecification specification);
+		~VulkanSampler();
 
+		void Destroy() override;
 		VkSampler GetHandle() { return m_Sampler; }
 
 	private:

@@ -28,6 +28,11 @@ namespace Motus3D
 
 	VulkanIndexBuffer::~VulkanIndexBuffer()
 	{
+		Release();
+	}
+
+	void VulkanIndexBuffer::Release()
+	{
 		auto allocator = VulkanAllocator::Get();
 		allocator->DestroyBuffer(m_Buffer, m_Allocation);
 	}

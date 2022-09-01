@@ -172,12 +172,12 @@ namespace Motus3D
 
     VulkanDevice::~VulkanDevice()
     {
-
     }
 
     void VulkanDevice::Destroy()
     {
         vkDeviceWaitIdle(m_Device);
+        vkDestroyCommandPool(m_Device, m_DefaultCmdPool, nullptr);
         vkDestroyDevice(m_Device, nullptr);
         VISUS_TRACE("Logical device destroyed");
     }
