@@ -4,6 +4,7 @@
 #define GLM_FORCE_ALIGNED
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+
 using namespace Motus3D;
 
 class TestLayer : public Motus3D::Layer
@@ -86,10 +87,7 @@ public:
 		m_Acceleration = glm::vec3(0.0f);
 		m_AccelerationMagnitude = glm::vec3(0.0f);
 
-		MT_LOG_INFO("\n	Creating trex model:");
 		m_Model.Load("assets/models/trex/trex.gltf");
-
-		MT_LOG_INFO("\n	Creating environment model:");
 		m_EnvironmentModel.Load("assets/models/env/scene.gltf");
 
 		MT_LOG_INFO("\n	Creating trex texture:");

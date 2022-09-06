@@ -45,6 +45,7 @@ namespace Motus3D {
 			submesh.GetVertexBuffer().reset();
 			submesh.GetIndexBuffer().reset();
 		}
+
 	}
 
 	void Model::Load(std::string_view filepath)
@@ -53,7 +54,8 @@ namespace Motus3D {
 		const aiScene* scene = importer.ReadFile(filepath.data(),
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_FlipUVs |
-			aiProcess_Triangulate
+			aiProcess_Triangulate |
+			aiProcess_GenNormals
 		);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
