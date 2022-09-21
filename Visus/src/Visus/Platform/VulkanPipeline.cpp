@@ -76,7 +76,22 @@ namespace Motus3D
 		rasterization_state.rasterizerDiscardEnable = VK_FALSE;
 		rasterization_state.polygonMode = specification.polygonMode == PolygonMode::FILL ? VK_POLYGON_MODE_FILL : VK_POLYGON_MODE_LINE;
 		rasterization_state.lineWidth = 1.0f;
-		rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
+
+		switch (specification.cullMode)
+		{
+		case CullMode::NONE:
+			rasterization_state.cullMode = VK_CULL_MODE_NONE;
+			break;
+		case CullMode::BACK:
+			rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
+			break;
+		case CullMode::FRONT:
+			rasterization_state.cullMode = VK_CULL_MODE_FRONT_BIT;
+			break;
+		default:
+			rasterization_state.cullMode = VK_CULL_MODE_NONE;
+			break;
+		}
 		rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterization_state.depthBiasEnable = VK_FALSE;
 
@@ -119,7 +134,7 @@ namespace Motus3D
 		// Depth stencil State
 		VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
 		depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depth_stencil_state.depthTestEnable = VK_TRUE;
+		depth_stencil_state.depthTestEnable = specification.depthTestEnabled;
 		depth_stencil_state.depthWriteEnable = VK_TRUE;
 		depth_stencil_state.depthCompareOp = VK_COMPARE_OP_LESS;
 		depth_stencil_state.depthBoundsTestEnable = VK_FALSE;

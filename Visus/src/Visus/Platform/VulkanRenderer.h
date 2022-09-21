@@ -32,7 +32,7 @@ namespace Motus3D {
 		void RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform) override;
 
 		// It is assumed that command buffer recording is already started and will be ended manually.
-		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
+		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t arrayLayer = 0, uint32_t layerCount = 1);
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
