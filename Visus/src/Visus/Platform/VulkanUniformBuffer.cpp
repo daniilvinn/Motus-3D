@@ -1,6 +1,7 @@
 #include "VulkanUniformBuffer.h"
 
 #include <Visus/Platform/VulkanAllocator.h>
+#include <Visus/Platform/VulkanGraphicsContext.h>
 
 namespace Motus3D 
 {
@@ -50,6 +51,7 @@ namespace Motus3D
 		void* buffer_memory = allocator->MapMemory(m_Allocation);
 		memcpy(buffer_memory, data, size);
 		allocator->UnmapMemory(m_Allocation);
+
 	}
 
 }

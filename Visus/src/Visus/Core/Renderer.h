@@ -10,7 +10,6 @@
 #include <Visus/Core/DescriptorSet.h>
 #include <Visus/Core/Model.h>
 
-
 namespace Motus3D {
 	struct VISUS_API RendererConfiguration
 	{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Visus/Core/DescriptorSet.h>
+#include <Visus/Core/Cubemap.h>
 #include <vulkan/vulkan.h>
 
 namespace Motus3D {
@@ -38,6 +39,7 @@ namespace Motus3D {
 
 		void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) override;
 		void UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement = 0) override;
+		void UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement = 0) override;
 
 	private:
 		static VkDescriptorPool s_GlobalDescriptorPool;

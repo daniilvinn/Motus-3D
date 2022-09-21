@@ -3,6 +3,7 @@
 #include <Visus/Core/Macros.h>
 #include <Visus/Core/UniformBuffer.h>
 #include <Visus/Core/Image.h>
+#include <Visus/Core/Cubemap.h>
 
 #include <Visus/Core/Shader.h>
 
@@ -31,8 +32,8 @@ namespace Motus3D {
 		// range's 0 value is special value, which specifies whole buffer to be bound to descriptor.
 		virtual void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) = 0;
 		virtual void UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement = 0) = 0;
+		virtual void UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement = 0) = 0;
 		// virtual void UpdateDescriptor(uint8_t binding, Ref<StorageBuffer> ssbo) = 0;
-		// virtual void UpdateDescriptor(uint8_t binding, Ref<Image3D> image) = 0;
 
 		
 

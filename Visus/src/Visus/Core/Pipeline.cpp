@@ -10,6 +10,5 @@ namespace Motus3D
 		return CreateRef<VulkanPipeline>(specification);
 	}
 
-
 }
 
