@@ -62,10 +62,10 @@ namespace Motus3D
 
 		VK_CHECK_RESULT(vmaCreateBuffer(m_Allocator, create_info, &allocation_create_info, buffer, &allocation, &allocation_info));
 
-#ifdef VISUS_DEBUG
+#if 0
 		VISUS_TRACE("Allocating buffer: total allocated memory = {0} + {1}", m_Statistics.allocatedMemory, allocation_info.size);
-		m_Statistics.allocatedMemory += allocation_info.size;
 #endif
+		m_Statistics.allocatedMemory += allocation_info.size;
 
 		return allocation;
 	}
@@ -80,10 +80,10 @@ namespace Motus3D
 		vkDeviceWaitIdle(device->GetHandle());
 		vmaDestroyBuffer(m_Allocator, buffer, allocation);
 
-#ifdef VISUS_DEBUG
+#if 0
 		VISUS_TRACE("Destroying buffer: total freed memory = {0} + {1}", m_Statistics.freedMemory, allocation_info.size);
-		m_Statistics.freedMemory += allocation_info.size;
 #endif
+		m_Statistics.freedMemory += allocation_info.size;
 
 	}
 
@@ -98,10 +98,10 @@ namespace Motus3D
 
 		VK_CHECK_RESULT(vmaCreateImage(m_Allocator, create_info, &allocation_create_info, image, &allocation, &allocation_info));
 
-#ifdef VISUS_DEBUG
+#if 0
 		VISUS_TRACE("Allocating image: total allocated memory = {0} + {1}", m_Statistics.allocatedMemory, allocation_info.size);
-		m_Statistics.allocatedMemory += allocation_info.size;
 #endif
+		m_Statistics.allocatedMemory += allocation_info.size;
 		return allocation;
 	}
 
@@ -115,10 +115,10 @@ namespace Motus3D
 		vkDeviceWaitIdle(device->GetHandle());
 		vmaDestroyImage(m_Allocator, image, allocation);
 
-#ifdef VISUS_DEBUG
+#if 0
 		VISUS_TRACE("Destroying image: total freed memory = {0} + {1}", m_Statistics.freedMemory, allocation_info.size);
-		m_Statistics.freedMemory += allocation_info.size;
 #endif
+		m_Statistics.freedMemory += allocation_info.size;
 	}
 
 	void* VulkanAllocator::MapMemory(VmaAllocation allocation)

@@ -13,11 +13,19 @@ namespace Motus3D {
 		LINES // fill only edges of polygon
 	};
 
+	enum class VISUS_API CullMode : uint8_t {
+		NONE,
+		BACK,
+		FRONT
+	};
+
 	struct PipelineSpecification
 	{
 		Ref<Shader> shader;
 		VertexBufferLayout dataLayout;
 		PolygonMode polygonMode;
+		CullMode cullMode;
+		bool depthTestEnabled;
 	};
 
 	class VISUS_API Pipeline
