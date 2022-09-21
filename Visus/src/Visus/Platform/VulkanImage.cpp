@@ -13,6 +13,7 @@ namespace Motus3D {
 	// Vulkan Image
 
 	VulkanImage::VulkanImage(std::string filepath)
+		: m_Filepath(filepath.c_str())
 	{
 		int imageWidth;
 		int imageHeight;
@@ -88,6 +89,7 @@ namespace Motus3D {
 
 		vkDestroyFence(device->GetHandle(), wait_fence, nullptr);
 		allocator->DestroyBuffer(staging_buffer, staging_buffer_allocation);
+		vkResetCommandPool(device->GetHandle(), device->GetDefaultCmdPool(), 0);
 
 		VkImageViewCreateInfo image_view_create_info = {};
 		image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -113,8 +115,9 @@ namespace Motus3D {
 	VulkanImage::~VulkanImage()
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkDeviceWaitIdle(device->GetHandle());
 		auto allocator = VulkanAllocator::Get();
+		vkDeviceWaitIdle(device->GetHandle());
+		vkDestroyImageView(device->GetHandle(), m_ImageView, nullptr);
 		allocator->DestroyImage(m_Image, m_Allocation);
 	}
 
@@ -196,6 +199,17 @@ namespace Motus3D {
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		VK_CHECK_RESULT(vkCreateSampler(device->GetHandle(), &sampler_create_info, nullptr, &m_Sampler));
+	}
+
+	VulkanSampler::~VulkanSampler()
+	{
+		Destroy();
+	}
+
+	void VulkanSampler::Destroy()
+	{
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		vkDestroySampler(device->GetHandle(), m_Sampler, nullptr);
 	}
 
 }

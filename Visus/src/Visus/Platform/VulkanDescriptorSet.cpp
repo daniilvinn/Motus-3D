@@ -6,6 +6,8 @@
 #include <Visus/Platform/VulkanShader.h>
 #include <Visus/Platform/VulkanImage.h>
 
+#include <Visus/Platform/VulkanCubemap.h>
+
 namespace Motus3D {
 
 	VkDescriptorPool VulkanDescriptorSet::s_GlobalDescriptorPool = VK_NULL_HANDLE;
@@ -29,7 +31,7 @@ namespace Motus3D {
 		set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		set_layout_create_info.bindingCount = bindings.size();
 		set_layout_create_info.pBindings = bindings.data();
-		//set_layout_create_info.flags = update_after_bind ? VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT : 0;
+		//set_layout_create_info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device->GetHandle(), &set_layout_create_info, nullptr, &m_DescriptorSetLayout));
@@ -47,7 +49,7 @@ namespace Motus3D {
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
+		//vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
 		vkDestroyDescriptorSetLayout(device->GetHandle(), m_DescriptorSetLayout, nullptr);
 	}
 
@@ -76,6 +78,7 @@ namespace Motus3D {
 		pool_create_info.poolSizeCount = pool_sizes.size();
 		pool_create_info.pPoolSizes = pool_sizes.data();
 		pool_create_info.maxSets = 1000;
+		//pool_create_info.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device->GetHandle(), &pool_create_info, nullptr, &s_GlobalDescriptorPool));
@@ -134,4 +137,28 @@ namespace Motus3D {
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
 	}
+
+	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement)
+	{
+		Ref<VulkanCubemap> vulkanCubemap = RefAs<VulkanCubemap>(cubemap);
+		Ref<VulkanSampler> vulkanSampler = RefAs<VulkanSampler>(sampler);
+
+		VkDescriptorImageInfo image_info = {};
+		image_info.imageView = vulkanCubemap->GetImageView();
+		image_info.sampler = vulkanSampler->GetHandle();
+		image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		VkWriteDescriptorSet write_struct = {};
+		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_struct.dstSet = m_DescriptorSet;
+		write_struct.dstBinding = binding;
+		write_struct.pImageInfo = &image_info;
+		write_struct.dstArrayElement = arrayElement;
+		write_struct.descriptorCount = 1;
+
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+	}
+
 }

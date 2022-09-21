@@ -5,12 +5,10 @@
 #include <Visus/Core/VertexBuffer.h>
 #include <Visus/Core/IndexBuffer.h>
 #include <Visus/Core/Pipeline.h>
-
 #include <Visus/Core/Camera.h>
-
 #include <Visus/Core/RendererAPI.h>
-
 #include <Visus/Core/DescriptorSet.h>
+#include <Visus/Core/Model.h>
 
 namespace Motus3D {
 	struct VISUS_API RendererConfiguration
@@ -40,14 +38,12 @@ namespace Motus3D {
 		static void BeginScene(SceneData data);
 		static void EndScene();
 
-
 		static void ClearColor(float r, float g, float b, float a);
 		static void Submit(
-			Ref<VertexBuffer> vbo, 
-			Ref<IndexBuffer> ibo, 
+			Submesh* submesh,
 			Ref<Pipeline> pipeline, 
 			std::vector<Ref<DescriptorSet>> sets,
-			const glm::vec3& transform
+			const glm::mat4& transform
 		);
 
 	private:

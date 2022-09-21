@@ -40,6 +40,10 @@ namespace Motus3D
 		{
 			vkDestroyFence(m_Device->GetHandle(), fence, nullptr);
 		}
+		
+		auto allocator = VulkanAllocator::Get();
+		vkDestroyImageView(m_Device->GetHandle(), m_DepthBuffer.view, nullptr);
+		allocator->DestroyImage(m_DepthBuffer.image, m_DepthBuffer.allocation);
 
 		VISUS_TRACE("Swapchain destroyed");
 	}

@@ -23,7 +23,7 @@ namespace Motus3D {
 		m_GraphicsContext->Init({
 			renderer_config.windowHandle,
 			renderer_config.framesInFlight
-			});
+		});
 
 		m_Device = m_GraphicsContext->GetDevice();
 		m_Swapchain = m_GraphicsContext->GetSwapchain();
@@ -92,7 +92,7 @@ namespace Motus3D {
 		// so it will be optimal for rendering, since we draw stuff directly into swapchain images
 		TransitionImageLayout(
 			m_CurrentCommandBuffer.buffer,
-			m_Swapchain->GetCurrentImageView().image,
+			m_Swapchain->GetCurrentImageView().image, 
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		);
@@ -104,7 +104,7 @@ namespace Motus3D {
 		// Right before image being presented, it should be transitioned back into VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout.
 		TransitionImageLayout(
 			m_CurrentCommandBuffer.buffer,
-			m_Swapchain->GetCurrentImageView().image,
+			m_Swapchain->GetCurrentImageView().image, 
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 		);
@@ -166,8 +166,11 @@ namespace Motus3D {
 		vkCmdEndRendering(m_CurrentCommandBuffer.buffer);
 	}
 
-	void VulkanRenderer::RenderMesh(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
+	void VulkanRenderer::RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform)
 	{
+		auto vbo = submesh->GetVertexBuffer();
+		auto ibo = submesh->GetIndexBuffer();
+
 		auto vulkanVertexBuffer = RefAs<VulkanVertexBuffer>(vbo);
 		auto vulkanIndexBuffer = RefAs<VulkanIndexBuffer>(ibo);
 		auto vulkanPipeline = RefAs<VulkanPipeline>(pipeline);
@@ -196,15 +199,13 @@ namespace Motus3D {
 		vkCmdBindVertexBuffers(m_CurrentCommandBuffer.buffer, 0, 1, vulkanVertexBuffer->GetHandle(), &offset);
 		vkCmdBindIndexBuffer(m_CurrentCommandBuffer.buffer, *vulkanIndexBuffer->GetHandle(), 0, vulkanIndexBuffer->GetVulkanIndexType());
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), transform);
-
 		vkCmdPushConstants(
 			m_CurrentCommandBuffer.buffer,
 			vulkanPipeline->GetLayoutHandle(),
 			VK_SHADER_STAGE_VERTEX_BIT,
 			0,
-			sizeof(model),
-			(const void*)&model
+			sizeof(transform),
+			(const void*)&transform
 		);
 
 		vkCmdDrawIndexed(
@@ -217,7 +218,7 @@ namespace Motus3D {
 		);
 	}
 
-	void VulkanRenderer::TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+	void VulkanRenderer::TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t arrayLayer, uint32_t layerCount)
 	{
 		VkImageMemoryBarrier image_memory_barrier = {};
 		image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -229,8 +230,8 @@ namespace Motus3D {
 		image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		image_memory_barrier.subresourceRange.baseMipLevel = 0;
 		image_memory_barrier.subresourceRange.levelCount = 1;
-		image_memory_barrier.subresourceRange.baseArrayLayer = 0;
-		image_memory_barrier.subresourceRange.layerCount = 1;
+		image_memory_barrier.subresourceRange.baseArrayLayer = arrayLayer;
+		image_memory_barrier.subresourceRange.layerCount = layerCount;
 
 		if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
 			image_memory_barrier.srcAccessMask = 0;

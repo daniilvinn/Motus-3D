@@ -12,6 +12,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 *.FileListAbsolute.txt
+build/
 
 # Visual Studio files and folder
 *.sln

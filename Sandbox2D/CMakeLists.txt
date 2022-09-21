@@ -11,6 +11,12 @@ add_executable(${SANDBOX_PROJECT}
     ${SANDBOX_FILES}
 )
 
+if(WIN32)
+set_target_properties(${SANDBOX_PROJECT} PROPERTIES
+	WIN32_EXECUTABLE $<$<CONFIG:Release>:1>
+)
+endif()
+
 target_include_directories(${SANDBOX_PROJECT} PRIVATE
     "${MOTUS_CORE_INCLUDE_DIR}/src"
     "${MOTUS_RENDERER_INCLUDE_DIR}/src"

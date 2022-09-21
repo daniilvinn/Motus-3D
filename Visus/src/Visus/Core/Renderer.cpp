@@ -28,6 +28,11 @@ namespace Motus3D
 
 	void Renderer::Shutdown()
 	{
+		for (int i = 0; i < s_Configuration.framesInFlight; i++)
+		{
+			s_SceneDataDescriptorSets[i].reset();
+			s_CameraDataBuffers[i].reset();
+		}
 		s_RendererAPI.reset();
 	}
 
@@ -92,17 +97,15 @@ namespace Motus3D
 		s_RendererAPI->ClearColor(r, g, b, a);
 	}
 
-	// Temporar solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.
-	void Renderer::Submit(Ref<VertexBuffer> vbo, Ref<IndexBuffer> ibo, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::vec3& transform)
+	// Temporary solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.
+	void Renderer::Submit(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform)
 	{
 		sets.insert(sets.begin(), s_SceneDataDescriptorSets[0]);
-		s_RendererAPI->RenderMesh(
-			vbo,
-			ibo,
+		s_RendererAPI->RenderSubmesh(
+			submesh,
 			pipeline,
 			sets,
 			transform
 		);
 	}
-
 }

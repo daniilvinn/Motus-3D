@@ -9,6 +9,7 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<Image> Create(std::string filepath);
+		virtual std::string_view GetFilepath() const = 0;
 
 	};
 
@@ -44,6 +45,7 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<Sampler> Create(SamplerSpecification specification);
+		virtual void Destroy() = 0;
 
 	};
 

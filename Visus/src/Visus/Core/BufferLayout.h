@@ -27,12 +27,12 @@ namespace Motus3D {
 
 	struct VertexBufferLayoutElement
 	{
-		std::string name;
+		std::string_view name;
 		ShaderDataType format;
 		uint32_t size;
 		uint32_t offset;
 
-		VertexBufferLayoutElement(std::string Name, ShaderDataType Format)
+		VertexBufferLayoutElement(std::string_view Name, ShaderDataType Format)
 			: name(Name), format(Format) {}
 
 	};

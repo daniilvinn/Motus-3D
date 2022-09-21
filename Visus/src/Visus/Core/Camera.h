@@ -71,6 +71,7 @@ namespace Motus3D {
 
 		// Getters for common camera data
 		glm::vec3 GetPosition() const { return m_Position; }
+		glm::mat4 GetRotationMatrix() const;
 		float GetYaw() const { return m_Yaw; };
 		float GetPitch() const { return m_Pitch; };
 		float GetRoll() const { return m_Roll; };

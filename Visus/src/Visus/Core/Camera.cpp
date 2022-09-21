@@ -76,6 +76,11 @@ namespace Motus3D {
 		m_ViewProjectionMatrix = m_ProjectionMatrix * glm::inverse(m_ViewMatrix);
 	}
 
+	glm::mat4 Camera3D::GetRotationMatrix() const
+	{
+		return glm::lookAt(m_Position, m_Position + m_FrontVector, glm::vec3(0, 1, 0));
+	}
+
 	void Camera3D::LookAt(glm::vec3 at)
 	{
 		m_ViewMatrix = glm::lookAt(m_Position, at, m_UpVector);

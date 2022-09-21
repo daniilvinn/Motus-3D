@@ -1,9 +1,9 @@
 #stage vertex
 #version 460 core
 
-layout(location = 0) in vec2 aPos;
-layout(location = 1) in vec3 aColor;
-layout(location = 2) in vec2 aTexCoord;
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec2 aTexCoord;
+layout(location = 2) in vec3 aNormal;
 
 layout(location = 0) out vec4 Color;
 layout(location = 1) out vec2 fragTexCoord;
@@ -20,8 +20,8 @@ layout(set = 0, binding = 0) uniform CameraData {
 
 void main()
 {
-    gl_Position = camera.viewProjection * transform.matrix * vec4(aPos, 0.0f, 1.0f);
-    Color = vec4(aColor, 1.0f);
+    gl_Position = camera.viewProjection * transform.matrix * vec4(aPos, 1.0f);
+    Color = vec4(aPos, 1.0f);
     fragTexCoord = aTexCoord;
 }
 
@@ -32,8 +32,6 @@ layout(location = 0) in vec4 Color;
 layout(location = 1) in vec2 fragTexCoord;
 layout(location = 0) out vec4 finalColor;
 
-layout(set = 1, binding = 0) uniform sampler2D textureSampler;
-
 void main(){
-    finalColor = texture(textureSampler, fragTexCoord);
+    finalColor = vec4(Color);
 }

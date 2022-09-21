@@ -4,6 +4,7 @@
 #define GLM_FORCE_ALIGNED
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+
 using namespace Motus3D;
 
 class TestLayer : public Motus3D::Layer
@@ -34,88 +35,112 @@ public:
 			m_AccelerationMagnitude.x = 1.0f;
 		};
 
-		m_QuadPosition.x += m_Acceleration.x * m_AccelerationMagnitude.x;
-		m_QuadPosition.y += m_Acceleration.y * m_AccelerationMagnitude.y;
+		m_MeshPosition.x += m_Acceleration.x * m_AccelerationMagnitude.x;
+		m_MeshPosition.y += m_Acceleration.y * m_AccelerationMagnitude.y;
 		m_AccelerationMagnitude -= 0.001f;
 		if (m_AccelerationMagnitude.x < 0.0f) m_AccelerationMagnitude.x = 0.0f;
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
 
+		// Begin rendering scene
 		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
-		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, glm::vec3(0.0f, 0.0f, -15.0f));
-		Renderer::Submit(m_VBO, m_IBO, m_Pipeline, { m_MeshDescriptorSet }, m_QuadPosition);
+		Submesh* skybox_mesh = m_Skybox.GetSubmesh();
+		Renderer::Submit(skybox_mesh, m_SkyboxPipeline, { m_Skybox.GetDescriptorSet() }, glm::rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+		
+		std::vector<Submesh> model_submeshes = m_Model.GetSubmeshes();
 
+		glm::mat4 transform = glm::translate(m_MeshPosition) * glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) * glm::rotate(0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		for (int i = 0; i < model_submeshes.size(); i++)
+		{
+			Renderer::Submit(&model_submeshes[3], m_Pipeline, { m_DescriptorSets[3] }, transform);
+		}
 		Renderer::EndScene();
+		// End rendering scene and executing work on GPU
 	};
 
 	void OnAttach() override
 	{
-		m_Shader = Shader::Create("basic.glsl");
+		Ref<Shader> main_shader = Shader::Create("texture.glsl");
+		Ref<Shader> skybox_shader = Shader::Create("skybox.glsl");
+
 		VertexBufferLayout bufferLayout({
-			{ "aPos", ShaderDataType::FLOAT2 },
-			{ "aColor", ShaderDataType::FLOAT3 },
+			{ "aPos", ShaderDataType::FLOAT3 },
 			{ "aTexCoord", ShaderDataType::FLOAT2 },
+			{ "aNormal", ShaderDataType::FLOAT3 },
+		});
+
+		VertexBufferLayout skybox_buffer_layout({
+			{ "aPos", ShaderDataType::FLOAT3 }
 		});
 
 		m_Pipeline = Pipeline::Create({
-			m_Shader,
+			main_shader,
 			bufferLayout,
-			PolygonMode::FILL
+			PolygonMode::FILL,
+			CullMode::BACK,
+			true
 		});
 
-		float vertices[] = {
-			// Position		// Color			// Texture Coords
-			-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,	0.0f, 1.0f,	
-			 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
-			 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
-			-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f
-		};
+		m_SkyboxPipeline = Pipeline::Create({
+			skybox_shader,
+			skybox_buffer_layout,
+			PolygonMode::FILL,
+			CullMode::NONE,
+			false
+		});
 
-		uint8_t indices[] = {
-			0, 1, 2,
-			2, 3, 0
-		};
+		m_Camera = CreateRef<Camera3D>();
+		m_Camera->SetProjection(80.0f, 1.6f / 0.9f, 0.01f, 100.0f);
+		m_Camera->SetSensivity(0.1f);
 
-		m_VBO = VertexBuffer::Create(vertices, sizeof(vertices), 0);
-		m_IBO = IndexBuffer::Create(indices, sizeof(indices), 0, IndexType::UINT8);
-		m_Texture = Image::Create("assets/textures/blending_test.png");
-		m_DefaultSampler = Sampler::Create(
+		// Physics
+		m_MeshPosition = glm::vec3(0.0f, 0.3f, -3.0f);
+		m_Acceleration = glm::vec3(0.0f);
+		m_AccelerationMagnitude = glm::vec3(0.0f);
+
+		m_Model.Load("assets/models/solarsys/scene.gltf");
+
+		m_Sampler = Sampler::Create(
 			{
 				SamplerFilter::LINEAR,
-				SamplerFilter::NEAREST,
+				SamplerFilter::LINEAR,
 				MipmapMode::LINEAR,
 				SamplerAddressMode::REPEAT,
 				16.0f
 			}
 		);
-		m_MeshDescriptorSet = DescriptorSet::Create({
-			{
-				0,
-				ResourceType::IMAGE,
-				ShaderStage::FRAGMENT,
-				1
-			}
-		});
 
-		m_MeshDescriptorSet->UpdateDescriptor(0, m_Texture, m_DefaultSampler);
+		auto model_submeshes = m_Model.GetSubmeshes();
+		m_DescriptorSets.resize(model_submeshes.size());
 
-		m_Camera = CreateRef<Camera3D>();
-		m_Camera->SetProjection(80.0f, 1.6f / 0.9f, 0.1f, 100.0f);
-		m_Camera->SetSensivity(0.1f);
+		for (int i = 0; i < model_submeshes.size(); i++) {
+			m_DescriptorSets[i] = DescriptorSet::Create({
+				{
+					0,
+					ResourceType::IMAGE,
+					ShaderStage::FRAGMENT,
+					1
+				}
+			});
+			m_DescriptorSets[i]->UpdateDescriptor(0, model_submeshes[i].GetTexture(), m_Sampler);
+		}
 
-		// Physics
-		m_QuadPosition = glm::vec3(0.0f, 0.0f, -10.0f);
-		m_Acceleration = glm::vec3(0.0f);
-		m_AccelerationMagnitude = glm::vec3(0.0f);
-
+		m_Skybox.Load("assets/cubemaps/space", m_Sampler);
 
 		MT_LOG_TRACE("Test layer attached");
 	};
 
 	void OnDetach() override
 	{
+		MT_LOG_INFO("~Test layer on detach~");
 		m_Pipeline.reset();
-		m_VBO.reset();
-		m_IBO.reset();
+		m_Texture.reset();
+		m_EnvTexture.reset();
+		m_Model.Release();
+		for (auto& set : m_DescriptorSets) {
+			set.reset();
+		}
+		m_Sampler->Destroy();
 		MT_LOG_TRACE("Test layer detached");
 	};
 
@@ -177,19 +202,22 @@ private:
 private:
 
 	// Static data
-	Ref<VertexBuffer> m_VBO;
-	Ref<IndexBuffer> m_IBO;
-	Ref<Image> m_Texture;
-	Ref<Sampler> m_DefaultSampler;
 	Ref<Pipeline> m_Pipeline;
-	Ref<Shader> m_Shader;
-	Ref<DescriptorSet> m_MeshDescriptorSet;
+	Ref<Pipeline> m_SkyboxPipeline;
+	Model m_Model;
+	std::vector<Ref<DescriptorSet>> m_DescriptorSets;
+	Ref<Image> m_Texture;
+	Ref<Image> m_EnvTexture;
+	Ref<Sampler> m_Sampler;
 
+	// Skybox
+	Skybox m_Skybox;
+	
 	// Dynamic data
 	Ref<Camera3D> m_Camera;
 
 	// Physics
-	glm::vec3 m_QuadPosition;
+	glm::vec3 m_MeshPosition;
 	glm::vec3 m_Acceleration;
 	glm::vec3 m_AccelerationMagnitude;
 

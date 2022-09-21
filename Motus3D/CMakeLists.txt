@@ -33,6 +33,9 @@ target_compile_definitions(${MOTUS_CORE_PROJECT} PRIVATE
     MT_DYNAMIC
     MT_BUILD_DLL
     _CRT_SECURE_NO_WARNINGS
+)
+
+target_compile_definitions(${MOTUS_CORE_PROJECT} PUBLIC
     "$<$<CONFIG:Debug>:MT_DEBUG>"
     "$<$<CONFIG:RelWithDebInfo>:MT_RELEASE>"
     "$<$<CONFIG:MinSizeRel>:MT_DIST>"

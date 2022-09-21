@@ -84,9 +84,9 @@ namespace Motus3D
 	void VulkanGraphicsContext::Shutdown()
 	{
 		vkDeviceWaitIdle(m_Device->GetHandle());
-		VulkanAllocator::Shutdown();
 		VulkanDescriptorSet::ReleasePools();
 		m_Swapchain->Destroy();
+		VulkanAllocator::Shutdown();
 		m_Device->Destroy();
 		vkDestroyInstance(m_VulkanInstance, nullptr);
 
