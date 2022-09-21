@@ -9,6 +9,7 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<Image> Create(std::string filepath);
+		virtual std::string_view GetFilepath() const = 0;
 
 	};
 

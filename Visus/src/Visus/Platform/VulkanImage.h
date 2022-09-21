@@ -12,14 +12,18 @@ namespace Motus3D {
 		VulkanImage(std::string filepath);
 		~VulkanImage();
 
+		std::string_view GetFilepath() const override { return m_Filepath; };
+
 		VkImage GetHandle() { return m_Image; }
 		VkImageView GetImageView() { return m_ImageView; }
 
 	private:
 		VkImage m_Image;
 		VmaAllocation m_Allocation;
-
 		VkImageView m_ImageView;
+
+		std::string m_Filepath;
+
 	};
 
 	class VulkanSampler : public Sampler 

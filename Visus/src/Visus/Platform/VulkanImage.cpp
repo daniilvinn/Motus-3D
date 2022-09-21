@@ -13,6 +13,7 @@ namespace Motus3D {
 	// Vulkan Image
 
 	VulkanImage::VulkanImage(std::string filepath)
+		: m_Filepath(filepath.c_str())
 	{
 		int imageWidth;
 		int imageHeight;

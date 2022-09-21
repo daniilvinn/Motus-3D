@@ -43,21 +43,16 @@ public:
 
 		// Begin rendering scene
 		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
-		std::vector<Submesh> rex_submeshes = m_Model.GetSubmeshes();
-		std::vector<Submesh> env_submeshes = m_EnvironmentModel.GetSubmeshes();
+		Submesh* skybox_mesh = m_Skybox.GetSubmesh();
+		Renderer::Submit(skybox_mesh, m_SkyboxPipeline, { m_Skybox.GetDescriptorSet() }, glm::rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+		
+		std::vector<Submesh> model_submeshes = m_Model.GetSubmeshes();
 
-		glm::mat4 transform = glm::translate(m_MeshPosition) * glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
+		glm::mat4 transform = glm::translate(m_MeshPosition) * glm::scale(glm::vec3(1.0f, 1.0f, 1.0f)) * glm::rotate(0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
-		for (int i = 0; i < rex_submeshes.size(); i++)
+		for (int i = 0; i < model_submeshes.size(); i++)
 		{
-			Renderer::Submit(&rex_submeshes[i], m_Pipeline, { m_DescriptorSet }, transform);
-		}
-
-		transform = glm::rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::scale(glm::vec3(10.0f, 10.0f, 10.0f));
-
-		for (int i = 0; i < env_submeshes.size(); i++)
-		{
-			Renderer::Submit(&env_submeshes[i], m_Pipeline, { m_EnvDescriptorSet }, transform);
+			Renderer::Submit(&model_submeshes[3], m_Pipeline, { m_DescriptorSets[3] }, transform);
 		}
 		Renderer::EndScene();
 		// End rendering scene and executing work on GPU
@@ -65,17 +60,33 @@ public:
 
 	void OnAttach() override
 	{
-		m_Shader = Shader::Create("texture.glsl");
+		Ref<Shader> main_shader = Shader::Create("texture.glsl");
+		Ref<Shader> skybox_shader = Shader::Create("skybox.glsl");
+
 		VertexBufferLayout bufferLayout({
 			{ "aPos", ShaderDataType::FLOAT3 },
 			{ "aTexCoord", ShaderDataType::FLOAT2 },
 			{ "aNormal", ShaderDataType::FLOAT3 },
 		});
 
+		VertexBufferLayout skybox_buffer_layout({
+			{ "aPos", ShaderDataType::FLOAT3 }
+		});
+
 		m_Pipeline = Pipeline::Create({
-			m_Shader,
+			main_shader,
 			bufferLayout,
-			PolygonMode::FILL
+			PolygonMode::FILL,
+			CullMode::BACK,
+			true
+		});
+
+		m_SkyboxPipeline = Pipeline::Create({
+			skybox_shader,
+			skybox_buffer_layout,
+			PolygonMode::FILL,
+			CullMode::NONE,
+			false
 		});
 
 		m_Camera = CreateRef<Camera3D>();
@@ -87,14 +98,8 @@ public:
 		m_Acceleration = glm::vec3(0.0f);
 		m_AccelerationMagnitude = glm::vec3(0.0f);
 
-		m_Model.Load("assets/models/trex/trex.gltf");
-		m_EnvironmentModel.Load("assets/models/env/scene.gltf");
+		m_Model.Load("assets/models/solarsys/scene.gltf");
 
-		MT_LOG_INFO("\n	Creating trex texture:");
-		m_Texture = Image::Create("assets/textures/trex.jpeg");
-
-		MT_LOG_INFO("\n	Creating environment texture:");
-		m_EnvTexture = Image::Create("assets/textures/env.png");
 		m_Sampler = Sampler::Create(
 			{
 				SamplerFilter::LINEAR,
@@ -104,24 +109,23 @@ public:
 				16.0f
 			}
 		);
-		m_DescriptorSet = DescriptorSet::Create({
-			{
-				0,
-				ResourceType::IMAGE,
-				ShaderStage::FRAGMENT,
-				1
-			}
-		});
-		m_EnvDescriptorSet = DescriptorSet::Create({
-			{
-				0,
-				ResourceType::IMAGE,
-				ShaderStage::FRAGMENT,
-				1
-			}
-		});
-		m_DescriptorSet->UpdateDescriptor(0, m_Texture, m_Sampler);
-		m_EnvDescriptorSet->UpdateDescriptor(0, m_EnvTexture, m_Sampler);
+
+		auto model_submeshes = m_Model.GetSubmeshes();
+		m_DescriptorSets.resize(model_submeshes.size());
+
+		for (int i = 0; i < model_submeshes.size(); i++) {
+			m_DescriptorSets[i] = DescriptorSet::Create({
+				{
+					0,
+					ResourceType::IMAGE,
+					ShaderStage::FRAGMENT,
+					1
+				}
+			});
+			m_DescriptorSets[i]->UpdateDescriptor(0, model_submeshes[i].GetTexture(), m_Sampler);
+		}
+
+		m_Skybox.Load("assets/cubemaps/space", m_Sampler);
 
 		MT_LOG_TRACE("Test layer attached");
 	};
@@ -133,9 +137,9 @@ public:
 		m_Texture.reset();
 		m_EnvTexture.reset();
 		m_Model.Release();
-		m_EnvironmentModel.Release();
-		m_DescriptorSet.reset();
-		m_EnvDescriptorSet.reset();
+		for (auto& set : m_DescriptorSets) {
+			set.reset();
+		}
 		m_Sampler->Destroy();
 		MT_LOG_TRACE("Test layer detached");
 	};
@@ -199,14 +203,15 @@ private:
 
 	// Static data
 	Ref<Pipeline> m_Pipeline;
-	Ref<Shader> m_Shader;
+	Ref<Pipeline> m_SkyboxPipeline;
 	Model m_Model;
-	Model m_EnvironmentModel;
-	Ref<DescriptorSet> m_DescriptorSet;
-	Ref<DescriptorSet> m_EnvDescriptorSet;
+	std::vector<Ref<DescriptorSet>> m_DescriptorSets;
 	Ref<Image> m_Texture;
 	Ref<Image> m_EnvTexture;
 	Ref<Sampler> m_Sampler;
+
+	// Skybox
+	Skybox m_Skybox;
 	
 	// Dynamic data
 	Ref<Camera3D> m_Camera;

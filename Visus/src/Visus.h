@@ -3,3 +3,7 @@
 
 #include <Visus/Core/GraphicsContext.h>
 #include <Visus/Core/Renderer.h>
+#include <Visus/Core/Cubemap.h>
+
+// Scene and Scene Renderer
+#include <Visus/Scene/Skybox.h>
