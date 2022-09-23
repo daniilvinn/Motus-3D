@@ -134,12 +134,12 @@ public:
 	{
 		MT_LOG_INFO("~Test layer on detach~");
 		m_Pipeline.reset();
-		m_Texture.reset();
-		m_EnvTexture.reset();
+		m_SkyboxPipeline.reset();
 		m_Model.Release();
 		for (auto& set : m_DescriptorSets) {
-			set.reset();
+			set->Release();
 		}
+		m_Skybox.Release();
 		m_Sampler->Destroy();
 		MT_LOG_TRACE("Test layer detached");
 	};

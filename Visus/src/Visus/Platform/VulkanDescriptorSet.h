@@ -35,6 +35,8 @@ namespace Motus3D {
 		static void InitPools();
 		static void ReleasePools();
 
+		void Release() override;
+
 		VkDescriptorSet GetHandle() { return m_DescriptorSet; }
 
 		void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) override;

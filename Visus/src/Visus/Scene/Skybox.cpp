@@ -96,6 +96,14 @@ namespace Motus3D {
 
 	}
 
+	void Skybox::Release()
+	{
+		m_Cubemap->Release();
+		m_CubeMesh.GetVertexBuffer()->Release();
+		m_CubeMesh.GetIndexBuffer()->Release();
+		m_DescriptorSet->Release();
+	}
+
 	void Skybox::LoadFront(std::string_view filepath)
 	{
 

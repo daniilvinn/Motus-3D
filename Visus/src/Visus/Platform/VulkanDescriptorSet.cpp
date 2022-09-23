@@ -48,9 +48,7 @@ namespace Motus3D {
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
-		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		//vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
-		vkDestroyDescriptorSetLayout(device->GetHandle(), m_DescriptorSetLayout, nullptr);
+		Release();
 	}
 
 	void VulkanDescriptorSet::InitPools()
@@ -89,6 +87,13 @@ namespace Motus3D {
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		vkDestroyDescriptorPool(device->GetHandle(), s_GlobalDescriptorPool, nullptr);
+	}
+
+	void VulkanDescriptorSet::Release()
+	{
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		//vkFreeDescriptorSets(device->GetHandle(), s_GlobalDescriptorPool, 1, &m_DescriptorSet);
+		vkDestroyDescriptorSetLayout(device->GetHandle(), m_DescriptorSetLayout, nullptr);
 	}
 
 	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement /*= 0*/)

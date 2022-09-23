@@ -11,6 +11,8 @@ namespace Motus3D {
 		static Ref<Image> Create(std::string filepath);
 		virtual std::string_view GetFilepath() const = 0;
 
+		virtual void Release() = 0;
+
 	};
 
 	// Sampler and data which corresponds to it

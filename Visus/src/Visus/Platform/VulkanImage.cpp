@@ -108,11 +108,17 @@ namespace Motus3D {
 		image_view_create_info.subresourceRange.baseMipLevel = 0;
 		image_view_create_info.subresourceRange.levelCount = 1;
 		
+		STBI_FREE(pixel_data);
 		VK_CHECK_RESULT(vkCreateImageView(device->GetHandle(), &image_view_create_info, nullptr, &m_ImageView));
 
 	}
 
 	VulkanImage::~VulkanImage()
+	{
+		Release();
+	}
+
+	void VulkanImage::Release()
 	{
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		auto allocator = VulkanAllocator::Get();

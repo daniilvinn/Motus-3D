@@ -87,9 +87,6 @@ namespace Motus3D {
 			aiString texture_filepath;
 			mat->GetTexture(aiTextureType_DIFFUSE, 0, &texture_filepath);
 
-			aiColor3D diffuse_color;
-			VISUS_TRACE("	material #{0} name: {1}", i, mat->GetName().C_Str());
-
 			if (texture_filepath.length == 0);
 			else {
 				// Calculate full texture filepath
@@ -123,6 +120,9 @@ namespace Motus3D {
 			submesh.GetVertexBuffer()->Release();
 			submesh.GetIndexBuffer()->Release();
 		}
+		for (auto& image : m_Textures) {
+			image->Release();
+		}
 	}
 
 	void Model::ProcessNode(void* node, const void* scene)
@@ -148,12 +148,6 @@ namespace Motus3D {
 		const aiScene* ai_scene = static_cast<const aiScene*>(scene);
 		std::vector<float> vertices;
 		vertices.reserve(ai_mesh->mNumVertices * 8);
-
-		for (int j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; j++) {
-			if (ai_mesh->HasVertexColors(j)) {
-				VISUS_TRACE("do stuff");
-			}
-		}
 
 		// Calculating which texture this submesh uses.
 		unsigned int texture_index = 0;

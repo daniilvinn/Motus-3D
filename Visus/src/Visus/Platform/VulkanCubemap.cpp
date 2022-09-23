@@ -151,6 +151,21 @@ namespace Motus3D {
 		image_view_create_info.subresourceRange.levelCount = 1;
 
 		VK_CHECK_RESULT(vkCreateImageView(device->GetHandle(), &image_view_create_info, nullptr, &m_ImageView));
+
+		for (int i = 0; i < 6; i++) {
+			delete pixel_data[i];
+		}
+	}
+
+	void VulkanCubemap::Release()
+	{
+		auto allocator = VulkanAllocator::Get();
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+
+		vkDestroyImageView(device->GetHandle(), m_ImageView, nullptr);
+
+		allocator->DestroyImage(m_Image, m_Allocation);
+
 	}
 
 }

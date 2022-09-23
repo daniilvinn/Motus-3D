@@ -28,6 +28,7 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<DescriptorSet> Create(std::initializer_list<Descriptor> layout);
+		virtual void Release() = 0;
 
 		// range's 0 value is special value, which specifies whole buffer to be bound to descriptor.
 		virtual void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) = 0;

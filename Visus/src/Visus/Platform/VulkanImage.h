@@ -17,6 +17,8 @@ namespace Motus3D {
 		VkImage GetHandle() { return m_Image; }
 		VkImageView GetImageView() { return m_ImageView; }
 
+		void Release() override;
+
 	private:
 		VkImage m_Image;
 		VmaAllocation m_Allocation;
