@@ -189,8 +189,6 @@ public:
 		m_Type = e.m_Type;
 	}
 
-	
-
 	bool IsHandled() const { return m_IsHandled; }
 
 	constexpr std::string ToString()

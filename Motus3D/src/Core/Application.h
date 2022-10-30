@@ -7,10 +7,19 @@
 #include <Core/Events/Event.h>
 #include <Core/Events/EventQueue.h>
 
+#include <filesystem>
+
 #include <Visus.h>
 
 namespace Motus3D
 {
+	struct MOTUS_API AppConfig 
+	{
+		std::string applicationName;
+		std::filesystem::path workingDirectory;
+
+	};
+
 	class MOTUS_API Application
 	{
 	public:

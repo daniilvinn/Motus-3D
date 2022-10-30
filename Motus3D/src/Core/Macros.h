@@ -38,8 +38,13 @@
 
 // Thanks Yan TheCherno Chernikov for this macro <3
 // https://github.com/TheCherno
+
 #define MT_BIND_EVENT_FUNCTION(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+
 // --------------------------------------
+
+#define MT_TRUE true
+#define MT_FALSE false
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -53,6 +58,8 @@ typedef int64_t i64;
 
 typedef float f32;
 typedef double d64;
+
+typedef bool b8;
 
 // TODO: move this to application's config struct
 #define APP_CONFIG_MAX_EVENT_QUEUE_SIZE 200
