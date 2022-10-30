@@ -11,8 +11,7 @@ namespace Motus3D {
 
 	// ============
 	// Vulkan Image
-
-	VulkanImage::VulkanImage(std::string filepath)
+	VulkanImage::VulkanImage(std::string filepath, ImageFormat format)
 		: m_Filepath(filepath.c_str())
 	{
 		int imageWidth;
@@ -42,7 +41,7 @@ namespace Motus3D {
 		image_create_info.arrayLayers = 1;
 		image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-		image_create_info.format = VK_FORMAT_R8G8B8A8_SRGB;
+		image_create_info.format = VisusToVulkanImageFormat(format);
 		image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
 		image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		image_create_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;

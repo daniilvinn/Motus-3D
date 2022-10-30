@@ -5,14 +5,14 @@
 #include <Visus/Platform/VulkanVertexBuffer.h>
 #include <Visus/Platform/VulkanIndexBuffer.h>
 #include <Visus/Platform/VulkanPipeline.h>
-
 #include <Visus/Platform/VulkanUniformBuffer.h>
+#include <Visus/Platform/VulkanDescriptorSet.h>
+#include <Visus/Platform/VulkanCommandBuffer.h>
+#include <Visus/Platform/VulkanImage.h>
+
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
-
-#include <Visus/Core/Renderer.h>
-#include <Visus/Platform/VulkanDescriptorSet.h>
 
 namespace Motus3D {
 
@@ -166,6 +166,38 @@ namespace Motus3D {
 		vkCmdEndRendering(m_CurrentCommandBuffer.buffer);
 	}
 
+	void VulkanRenderer::ExecuteCommands(Ref<CommandBuffer> cmd_buffer)
+	{
+		VkPipelineStageFlags stagemasks[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+		Ref<VulkanCommandBuffer> vulkan_cmd_buffer = RefAs<VulkanCommandBuffer>(cmd_buffer);
+
+		VkCommandBuffer handle = vulkan_cmd_buffer->GetHandle();
+
+		VkSubmitInfo submitinfo = {};
+		submitinfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitinfo.commandBufferCount = 1;
+		submitinfo.pCommandBuffers = &handle;
+		submitinfo.signalSemaphoreCount = 1;
+		submitinfo.pSignalSemaphores = &m_Swapchain->m_Semaphores.renderComplete;
+		submitinfo.waitSemaphoreCount = 1;
+		submitinfo.pWaitSemaphores = &m_Swapchain->m_Semaphores.presentComplete;
+		submitinfo.pWaitDstStageMask = stagemasks;
+
+		switch (vulkan_cmd_buffer->GetType())
+		{
+		case CommandBufferType::GRAPHICS_TRANSFER:
+			VK_CHECK_RESULT(vkQueueSubmit(m_Device->GetGraphicsTransferQueue(), 1, &submitinfo, m_Swapchain->m_Fences[m_Swapchain->m_CurrentFrameIndex]));
+			break;
+		case CommandBufferType::COMPUTE:
+			VK_CHECK_RESULT(vkQueueSubmit(m_Device->GetComputeQueue(), 1, &submitinfo, VK_NULL_HANDLE));
+			break;
+		default:
+			VISUS_ASSERT(false, "Attempting to execute null command buffer!");
+			break;
+		}
+	}
+
 	void VulkanRenderer::RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform)
 	{
 		auto vbo = submesh->GetVertexBuffer();
@@ -290,6 +322,50 @@ namespace Motus3D {
 		}
 	}
 	
+	void VulkanRenderer::BlitToSwapchain(Ref<Image> image)
+	{
+		auto src_image = RefAs<VulkanImage>(image);
+
+		VkOffset3D offset[2] = { {0, 0, 0}, {0, 0, 0} };
+
+		VkImageBlit image_blit = {};
+		image_blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		image_blit.srcSubresource.baseArrayLayer = 0;
+		image_blit.srcSubresource.layerCount = 1;
+		image_blit.srcSubresource.mipLevel = 0;
+		image_blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		image_blit.dstSubresource.baseArrayLayer = 0;
+		image_blit.dstSubresource.layerCount = 1;
+		image_blit.dstSubresource.mipLevel = 0;
+
+		//vkCmdBlitImage(m_CurrentCommandBuffer.buffer, src_image->GetHandle());
+
+	}
+
+	void VulkanRenderer::DispatchCompute(Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ)
+	{
+		auto vk_pipeline = RefAs<VulkanPipeline>(pipeline);
+		
+		std::vector<VkDescriptorSet> vk_descriptor_sets(sets.size());
+		for (auto& set : sets) {
+			vk_descriptor_sets.push_back(RefAs<VulkanDescriptorSet>(set)->GetHandle());
+		}
+
+		vkCmdBindDescriptorSets(
+			m_CurrentCommandBuffer.buffer, 
+			VK_PIPELINE_BIND_POINT_COMPUTE, 
+			vk_pipeline->GetLayoutHandle(), 
+			0, 
+			vk_descriptor_sets.size(), 
+			vk_descriptor_sets.data(), 
+			0, 
+			0
+		);
+
+		vkCmdBindPipeline(m_CurrentCommandBuffer.buffer, VK_PIPELINE_BIND_POINT_COMPUTE, vk_pipeline->GetHandle());
+		vkCmdDispatch(m_CurrentCommandBuffer.buffer, workGroupX, workGroupY, workGroupZ);
+	}
+
 	void VulkanRenderer::ClearColor(float r, float b, float g, float a)
 	{
 		std::array<VkClearValue, 2> clear_values;

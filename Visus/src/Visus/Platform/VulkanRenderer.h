@@ -26,27 +26,34 @@ namespace Motus3D {
 		void EndFrame() override;
 		void BeginRender() override;
 		void EndRender() override;
+		void BlitToSwapchain(Ref<Image> image) override;
+
+		void ExecuteCommands(Ref<CommandBuffer> cmd_buffer) override;
 
 		// Clears render target (now only current swapchain image) with specified color.
 		void ClearColor(float r, float b, float g, float a) override;
 		void RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform) override;
 
+		void DispatchCompute(Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ) override;
+
 		// It is assumed that command buffer recording is already started and will be ended manually.
 		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t arrayLayer = 0, uint32_t layerCount = 1);
+
+
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanSwapchain> m_Swapchain;
 
-		struct CommandBuffer
+		struct CommandBufferAndPool
 		{
 			VkCommandPool pool;
 			VkCommandBuffer buffer;
 		};
-		std::vector<CommandBuffer> m_CommandBuffers;
+		std::vector<CommandBufferAndPool> m_CommandBuffers;
 
-		CommandBuffer m_CurrentCommandBuffer;
+		CommandBufferAndPool m_CurrentCommandBuffer;
 
 	};
 }

@@ -57,7 +57,7 @@ namespace Motus3D {
 		VkQueue GetComputeQueue() { return m_ComputeQueue; };
 
 		VkCommandPool GetDefaultCmdPool() { return m_DefaultCmdPool; }
-		VkCommandBuffer GetDefaultCmdBuffer() { return m_CommandBuffer; }
+		VkCommandBuffer GetDefaultCmdBuffer() { return m_DefaultCommandBuffer; }
  
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;
@@ -68,9 +68,9 @@ namespace Motus3D {
 		VkQueue m_ComputeQueue = VK_NULL_HANDLE;
 
 		// General purpose command buffer. Recommended for use in one-time submission cases.
-		// Owned by graphics-transfer queue.
+		// Owned by graphics-transfer queue family.
 		VkCommandPool m_DefaultCmdPool;
-		VkCommandBuffer m_CommandBuffer;
+		VkCommandBuffer m_DefaultCommandBuffer;
 
 	};
 

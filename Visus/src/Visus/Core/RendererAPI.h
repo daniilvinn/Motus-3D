@@ -8,6 +8,7 @@
 #include <Visus/Core/Pipeline.h>
 #include <Visus/Core/DescriptorSet.h>
 #include <Visus/Core/Model.h>
+#include <Visus/Core/CommandBuffer.h>
 
 #include <glm/glm.hpp>
 
@@ -25,10 +26,17 @@ namespace Motus3D {
 		virtual void EndFrame() = 0;
 		virtual void BeginRender() = 0;
 		virtual void EndRender() = 0;
+		virtual void BlitToSwapchain(Ref<Image> image) = 0;
+
+		virtual void ExecuteCommands(Ref<CommandBuffer> cmd_buffer) = 0;
 
 		// Actual rendering
 		virtual void ClearColor(float r, float b, float g, float a) = 0;
 		virtual void RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform) = 0;
 
+		// Compute
+		virtual void DispatchCompute(Ref<Pipeline>, std::vector<Ref<DescriptorSet>> sets, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ) = 0;
+
+		
 	};
 }

@@ -52,6 +52,11 @@ namespace Motus3D
 		return 0.0f;
 	}
 
+	uint32_t Renderer::GetCurrentFrameIndex()
+	{
+		return s_RendererAPI->GetCurrentFrameIndex();
+	}
+
 	void Renderer::BeginFrame()
 	{
 		s_RendererAPI->BeginFrame();
@@ -82,6 +87,11 @@ namespace Motus3D
 		s_RendererAPI->EndRender();
 	}
 
+	void Renderer::BlitToSwapchain(Ref<Image> image)
+	{
+		s_RendererAPI->BlitToSwapchain(image);
+	}
+
 	void Renderer::BeginRender()
 	{
 		s_RendererAPI->BeginRender();
@@ -108,4 +118,10 @@ namespace Motus3D
 			transform
 		);
 	}
+
+	void Renderer::Dispatch(Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ)
+	{
+		s_RendererAPI->DispatchCompute(pipeline, sets, workGroupX, workGroupY, workGroupZ);
+	}
+
 }

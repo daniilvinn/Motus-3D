@@ -66,7 +66,7 @@ namespace Motus3D {
 		
 	}
 
-	void Model::Load(std::string_view filepath)
+	b8 Model::Load(std::string_view filepath)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath.data(),
@@ -80,6 +80,7 @@ namespace Motus3D {
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			VISUS_ERROR("Assimp: {0}", importer.GetErrorString());
+			return MT_FALSE;
 		}
 
 		for (int i = 0; i < scene->mNumMaterials; i++) {
@@ -106,11 +107,13 @@ namespace Motus3D {
 				}
 
 				if (texture_already_exists);
-				else m_Textures.push_back(Image::Create(model_texture_filepath));
+				else m_Textures.push_back(Image::Create(model_texture_filepath, ImageFormat::C8));
 			}
 		}
 
 		ProcessNode(scene->mRootNode, scene);
+
+		return MT_TRUE;
 	}
 
 	void Model::Release()
@@ -168,9 +171,6 @@ namespace Motus3D {
 				}
 			}
 		}
-
-		VISUS_ERROR("	submesh name: {0}", ai_mesh->mName.C_Str());
-		VISUS_TRACE(" SUBMESH'ES texture material index: {0}", ai_mesh->mMaterialIndex);
 
 		glm::vec3 buffer;
 		Vertex vertex;

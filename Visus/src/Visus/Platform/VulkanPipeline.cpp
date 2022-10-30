@@ -6,6 +6,41 @@ namespace Motus3D
 {
 	VulkanPipeline::VulkanPipeline(PipelineSpecification specification)
 	{
+		m_Shader = RefAs<VulkanShader>(specification.shader);
+
+		switch (specification.executionModel)
+		{
+		case PipelineExecutionModel::GRAPHICS:
+			m_IsValid = CreateGraphicsPipeline(specification);
+			break;
+		case PipelineExecutionModel::COMPUTE:
+			m_IsValid = CreateComputePipeline(specification);
+			break;
+		default:
+			VISUS_ASSERT(false, "PipelineSpecification: Invalid argument");
+			break;
+		}
+
+		if (!m_IsValid)
+			VISUS_ERROR("Failed to create pipeline \"{0}\"", specification.debugName);
+
+	}
+
+	VulkanPipeline::~VulkanPipeline()
+	{
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice()->GetHandle();
+		vkDeviceWaitIdle(device);
+		vkDestroyPipeline(device, m_Pipeline, nullptr);
+		vkDestroyPipelineLayout(device, m_Layout, nullptr);
+		VISUS_TRACE("Pipeline destroyed");
+	}
+
+	bool VulkanPipeline::CreateGraphicsPipeline(PipelineSpecification specification)
+	{
+		if (!m_Shader->IsValid()) {
+			return false;
+		};
+
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice()->GetHandle();
 		m_Shader = RefAs<VulkanShader>(specification.shader);
 
@@ -14,12 +49,12 @@ namespace Motus3D
 		VkVertexInputBindingDescription vertex_input_binding = {};
 		vertex_input_binding.binding = 0;
 		vertex_input_binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		vertex_input_binding.stride = specification.dataLayout.GetStride();
+		vertex_input_binding.stride = specification.pDataLayout->GetStride();
 		std::vector<VkVertexInputAttributeDescription> vertex_input_attributes;
 
 		// Computing locations
 		int previousLocationsWidth = 0;
-		for (auto element : specification.dataLayout.GetElements())
+		for (auto element : specification.pDataLayout->GetElements())
 		{
 			uint32_t location;
 			float locationComputeResult = (float)element.size / 16.0f;
@@ -39,7 +74,7 @@ namespace Motus3D
 				.binding = 0,
 				.format = VisusToVulkanDataFormat(element.format),
 				.offset = element.offset
-			});
+				});
 		}
 
 		VkPipelineVertexInputStateCreateInfo vertex_input_state = {};
@@ -123,7 +158,7 @@ namespace Motus3D
 		color_blend_attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 		color_blend_attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 		color_blend_attachment.alphaBlendOp = VK_BLEND_OP_ADD;
-		
+
 		VkPipelineColorBlendStateCreateInfo color_blend_state = {};
 		color_blend_state.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		color_blend_state.attachmentCount = 1;
@@ -190,21 +225,49 @@ namespace Motus3D
 
 		VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &m_Pipeline));
 
-		VISUS_TRACE("Pipeline created succesffully!");
+		VISUS_TRACE("Pipeline \"{0}\" created successfully!", specification.debugName);
 
-		for(auto& stage : stages_create_infos)
+		for (auto& stage : stages_create_infos)
 		{
 			vkDestroyShaderModule(device, stage.module, nullptr);
 		}
 
+		return true;
 	}
 
-	VulkanPipeline::~VulkanPipeline()
+	bool VulkanPipeline::CreateComputePipeline(PipelineSpecification specification)
 	{
-		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice()->GetHandle();
-		vkDeviceWaitIdle(device);
-		vkDestroyPipeline(device, m_Pipeline, nullptr);
-		vkDestroyPipelineLayout(device, m_Layout, nullptr);
-		VISUS_TRACE("Pipeline destroyed");
+		if (!m_Shader->IsValid()) {
+			return false;
+		};
+
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		VISUS_ASSERT(m_Shader->GetPipelineStageCreateInfos().size() == 1, "Shader has more or less than 1 stage!");
+		VISUS_ASSERT(m_Shader->GetPipelineStageCreateInfos()[0].stage == VK_SHADER_STAGE_COMPUTE_BIT, "Passed graphics shader, compute shader required!");
+
+		std::vector<VkPushConstantRange> push_constant_ranges = m_Shader->GetPushConstantRangeCreateInfos();
+		std::vector<VkDescriptorSetLayout> set_layouts = m_Shader->GetDescriptorSetLayouts();
+
+		VkPipelineLayoutCreateInfo pipeline_layout = {};
+		pipeline_layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipeline_layout.pushConstantRangeCount = push_constant_ranges.size();
+		pipeline_layout.pPushConstantRanges = push_constant_ranges.data();
+		pipeline_layout.setLayoutCount = set_layouts.size();
+		pipeline_layout.pSetLayouts = set_layouts.data();
+
+		VK_CHECK_RESULT(vkCreatePipelineLayout(device->GetHandle(), &pipeline_layout, nullptr, &m_Layout));
+
+		VkComputePipelineCreateInfo pipeline_create_info = {};
+		pipeline_create_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		pipeline_create_info.layout = m_Layout;
+		pipeline_create_info.stage = m_Shader->GetPipelineStageCreateInfos()[0]; // This is the only stage
+
+		VK_CHECK_RESULT(vkCreateComputePipelines(device->GetHandle(), VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &m_Pipeline));
+		VISUS_TRACE("Pipeline \"{0}\" created successfully!", specification.debugName);
+
+		vkDestroyShaderModule(device->GetHandle(), m_Shader->GetPipelineStageCreateInfos()[0].module, nullptr);
+		
+		return true;
 	}
+
 }

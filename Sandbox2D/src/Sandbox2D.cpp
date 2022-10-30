@@ -62,6 +62,7 @@ public:
 	{
 		Ref<Shader> main_shader = Shader::Create("texture.glsl");
 		Ref<Shader> skybox_shader = Shader::Create("skybox.glsl");
+		Ref<Shader> test_compute = Shader::Create("pp_gamma_hdr.glsl");
 
 		VertexBufferLayout bufferLayout({
 			{ "aPos", ShaderDataType::FLOAT3 },
@@ -75,7 +76,9 @@ public:
 
 		m_Pipeline = Pipeline::Create({
 			main_shader,
-			bufferLayout,
+			PipelineExecutionModel::GRAPHICS,
+			"Main",
+			&bufferLayout,
 			PolygonMode::FILL,
 			CullMode::BACK,
 			true
@@ -83,10 +86,18 @@ public:
 
 		m_SkyboxPipeline = Pipeline::Create({
 			skybox_shader,
-			skybox_buffer_layout,
+			PipelineExecutionModel::GRAPHICS,
+			"Skybox",
+			&skybox_buffer_layout,
 			PolygonMode::FILL,
 			CullMode::NONE,
 			false
+		});
+
+		m_TestCompute = Pipeline::Create({
+			test_compute,
+			PipelineExecutionModel::COMPUTE,
+			"TestCompute"
 		});
 
 		m_Camera = CreateRef<Camera3D>();
@@ -204,6 +215,8 @@ private:
 	// Static data
 	Ref<Pipeline> m_Pipeline;
 	Ref<Pipeline> m_SkyboxPipeline;
+	Ref<Pipeline> m_TestCompute;
+
 	Model m_Model;
 	std::vector<Ref<DescriptorSet>> m_DescriptorSets;
 	Ref<Image> m_Texture;
