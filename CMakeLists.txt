@@ -11,6 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
 add_subdirectory(Motus3D)
 add_subdirectory(Visus)
 add_subdirectory(Sandbox2D)
+add_subdirectory(Scene)
 add_subdirectory("Motus3D/thirdparty/GLFW")
 add_subdirectory("Motus3D/thirdparty/Assimp")
 

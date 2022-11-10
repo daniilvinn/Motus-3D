@@ -13,6 +13,7 @@ public:
 	void OnUpdate() override
 	{
 		OnCameraUpdate();
+		m_RenderTargetSet->UpdateDescriptor(0, m_TestRenderTarget);
 
 		if (Input::KeyPressed(KeyCode::KEY_UP)) {
 			m_Acceleration.y = 0.0f;
@@ -42,7 +43,8 @@ public:
 		if (m_AccelerationMagnitude.y < 0.0f) m_AccelerationMagnitude.y = 0.0f;
 
 		// Begin rendering scene
-		Renderer::BeginScene({ RefAs<Camera>(m_Camera) });
+		Renderer::ClearImage(m_TestRenderTarget, 0.0f, 0.0f, 0.0f, 0.0f, false);
+		Renderer::BeginScene({ RefAs<Camera>(m_Camera) }, m_TestRenderTarget);
 		Submesh* skybox_mesh = m_Skybox.GetSubmesh();
 		Renderer::Submit(skybox_mesh, m_SkyboxPipeline, { m_Skybox.GetDescriptorSet() }, glm::rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
 		
@@ -54,14 +56,25 @@ public:
 		{
 			Renderer::Submit(&model_submeshes[3], m_Pipeline, { m_DescriptorSets[3] }, transform);
 		}
+
 		Renderer::EndScene();
-		// End rendering scene and executing work on GPU
+
+		Renderer::Dispatch(m_PipelineFilmGrain, { m_RenderTargetSet }, (1600 / 16) + 1, (900 / 16) + 1, 1);
+		Renderer::Dispatch(m_ToneMapping, { m_RenderTargetSet, m_PPSet }, (1600 / 16) + 1, (900 / 16) + 1, 1);
+		Renderer::BlitToSwapchain(m_TestRenderTarget);
 	};
+
+
+
 
 	void OnAttach() override
 	{
 		Ref<Shader> main_shader = Shader::Create("texture.glsl");
 		Ref<Shader> skybox_shader = Shader::Create("skybox.glsl");
+		Ref<Shader> test_compute = Shader::Create("pp_gamma_hdr.glsl");
+		Ref<Shader> film_grain = Shader::Create("pp_film_grain.glsl");
+
+		m_TestRenderTarget = Image::Create(ImageUsage::RENDER_TARGET_HDR);
 
 		VertexBufferLayout bufferLayout({
 			{ "aPos", ShaderDataType::FLOAT3 },
@@ -75,7 +88,9 @@ public:
 
 		m_Pipeline = Pipeline::Create({
 			main_shader,
-			bufferLayout,
+			PipelineExecutionModel::GRAPHICS,
+			"Main",
+			&bufferLayout,
 			PolygonMode::FILL,
 			CullMode::BACK,
 			true
@@ -83,10 +98,24 @@ public:
 
 		m_SkyboxPipeline = Pipeline::Create({
 			skybox_shader,
-			skybox_buffer_layout,
+			PipelineExecutionModel::GRAPHICS,
+			"Skybox",
+			&skybox_buffer_layout,
 			PolygonMode::FILL,
 			CullMode::NONE,
 			false
+		});
+
+		m_ToneMapping = Pipeline::Create({
+			test_compute,
+			PipelineExecutionModel::COMPUTE,
+			"TestCompute"
+		});
+
+		m_PipelineFilmGrain = Pipeline::Create({
+			film_grain,
+			PipelineExecutionModel::COMPUTE,
+			"Film grain"
 		});
 
 		m_Camera = CreateRef<Camera3D>();
@@ -127,6 +156,20 @@ public:
 
 		m_Skybox.Load("assets/cubemaps/space", m_Sampler);
 
+		// Post Processing
+		m_PPData = UniformBuffer::Create(8, 1);
+		float pp_data[] = { 2.2f, 0.8f };
+		m_PPData->SetData(pp_data, sizeof(pp_data));
+
+		m_RenderTargetSet = DescriptorSet::Create({
+			{ 0, ResourceType::STORAGE_IMAGE, ShaderStage::COMPUTE, 1 },
+		});
+		m_PPSet = DescriptorSet::Create({
+			{ 1, ResourceType::UBO, ShaderStage::COMPUTE, 1 }, 
+		});
+		m_RenderTargetSet->UpdateDescriptor(0, m_TestRenderTarget);
+		m_PPSet->UpdateDescriptor(1, 0, 0, m_PPData);
+
 		MT_LOG_TRACE("Test layer attached");
 	};
 
@@ -134,12 +177,12 @@ public:
 	{
 		MT_LOG_INFO("~Test layer on detach~");
 		m_Pipeline.reset();
-		m_Texture.reset();
-		m_EnvTexture.reset();
+		m_SkyboxPipeline.reset();
 		m_Model.Release();
 		for (auto& set : m_DescriptorSets) {
-			set.reset();
+			set->Release();
 		}
+		m_Skybox.Release();
 		m_Sampler->Destroy();
 		MT_LOG_TRACE("Test layer detached");
 	};
@@ -174,6 +217,7 @@ private:
 	bool OnWindowResize(WindowResizedEvent& e) 
 	{
 		m_Camera->SetProjection(65.0f, (float)e.width / (float)e.height, 0.1f, 100.0f);
+		m_TestRenderTarget->Invalidate();
 		return false;
 	}
 
@@ -204,11 +248,23 @@ private:
 	// Static data
 	Ref<Pipeline> m_Pipeline;
 	Ref<Pipeline> m_SkyboxPipeline;
+	Ref<Pipeline> m_ToneMapping;
+	Ref<Pipeline> m_PipelineFilmGrain;
+
 	Model m_Model;
 	std::vector<Ref<DescriptorSet>> m_DescriptorSets;
 	Ref<Image> m_Texture;
 	Ref<Image> m_EnvTexture;
 	Ref<Sampler> m_Sampler;
+
+
+	// Post processing
+	Ref<DescriptorSet> m_RenderTargetSet;
+	Ref<DescriptorSet> m_PPSet;
+
+	Ref<Image> m_TestRenderTarget;
+	Ref<UniformBuffer> m_ImageData;
+	Ref<UniformBuffer> m_PPData;
 
 	// Skybox
 	Skybox m_Skybox;

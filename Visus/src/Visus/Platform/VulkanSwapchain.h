@@ -13,11 +13,6 @@ namespace Motus3D {
 	class VulkanSwapchain : public Swapchain
 	{
 	public:
-		struct SwapchainImage
-		{
-			VkImage image;
-			VkImageView view;
-		};
 		struct DepthBuffer {
 			VkImage image = VK_NULL_HANDLE;
 			VkImageView view = VK_NULL_HANDLE;
@@ -41,7 +36,7 @@ namespace Motus3D {
 		VkSurfaceKHR GetSurfaceHandle() { return m_Surface; }
 		VkFormat GetImageFormat() { return m_SurfaceFormat; };
 		
-		SwapchainImage GetCurrentImageView() { return m_SwapchainImages[m_CurrentSwapchainImageIndex]; }
+		VkImage GetCurrentImage() { return m_SwapchainImages[m_CurrentSwapchainImageIndex]; }
 		DepthBuffer GetDepthBuffer() { return m_DepthBuffer; }
 
 		std::pair<uint32_t, uint32_t> GetExtent() const override { return {m_SwapchainExtent.width, m_SwapchainExtent.height}; }
@@ -68,7 +63,7 @@ namespace Motus3D {
 //		\/ \/ \/  FIFO mode is guaranteed to be available, while MAILBOX may be not available, so it is optional. \/ \/ \/
 		std::pair<VkPresentModeKHR, std::optional<VkPresentModeKHR>> m_PresentModes;
 
-		std::vector<SwapchainImage> m_SwapchainImages;
+		std::vector<VkImage> m_SwapchainImages;
 		DepthBuffer m_DepthBuffer;
 
 		uint32_t m_CurrentSwapchainImageIndex;

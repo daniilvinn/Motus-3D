@@ -24,6 +24,9 @@ namespace Motus3D {
 		// Each file corresponds to each cubemap face, for example: posx will be uploaded as right (+X) face of cubemap, and so on.
 		void Load(std::string_view filepath, Ref<Sampler> sampler);
 
+		// Frees skybox and its memory
+		void Release();
+
 		/*
 		* Methods to upload skybox textures.
 		* Loads texture for each face of cube separately.

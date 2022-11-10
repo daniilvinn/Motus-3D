@@ -77,7 +77,9 @@ namespace Motus3D {
 		Model() {};
 		Model(std::string_view filepath);
 		~Model();
-		void Load(std::string_view filepath);
+
+		// @return MT_TRUE if loaded successfully | MT_FALSE if load failed
+		b8 Load(std::string_view filepath);
 		void Release();
 
 		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }

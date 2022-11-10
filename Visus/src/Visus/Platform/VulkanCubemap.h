@@ -16,9 +16,13 @@ namespace Motus3D {
 
 		std::string_view GetFilepath() const override { return m_Filepath; }
 		void Load(std::string_view filepath) override;
+		void Release() override;
 
 		VkImage GetHandle() { return m_Image; }
 		VkImageView GetImageView() { return m_ImageView; }
+
+	private:
+		void Invalidate() override {};
 
 	private:
 		VkImage m_Image;

@@ -20,7 +20,7 @@ namespace Motus3D {
 		virtual std::string_view GetFilepath() const = 0;
 
 		virtual void Load(std::string_view filepath) = 0;
-
+		virtual void Release() = 0;
 	};
 
 }

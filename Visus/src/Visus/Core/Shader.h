@@ -32,7 +32,8 @@ namespace Motus3D {
 	{
 	public:
 		static Ref<Shader> Create(const std::string& filename);
-
+		
 		virtual ~Shader(){};
+		virtual bool IsValid() = 0;
 	};
 }

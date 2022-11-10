@@ -20,10 +20,14 @@ namespace Motus3D {
 		std::vector<VkPushConstantRange> GetPushConstantRangeCreateInfos() { return m_PushConstantRanges; }
 		std::vector<VkDescriptorSetLayout> GetDescriptorSetLayouts() { return m_DescriptorSetLayouts; }
 
+		bool IsValid() override { return m_IsValid; };
+
 	private:
 		void ParseFile(const std::string& filename);
 
 	private:
+		bool m_IsValid;
+
 		std::array<std::optional<std::pair<ShaderStage, std::stringstream>>, ShaderStage::MAX_VALUE + 1> m_ShaderSources; // Sources of shaders
 		std::map<ShaderStage, std::vector<uint32_t>> m_BinaryData;
 		std::vector<VkPipelineShaderStageCreateInfo> m_CreateInfos;

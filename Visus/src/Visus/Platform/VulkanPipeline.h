@@ -17,6 +17,12 @@ namespace Motus3D {
 		VkPushConstantRange GetPushConstant(const std::string& name) { return m_PushConstantRanges[name]; }
 
 	private:
+		bool CreateGraphicsPipeline(PipelineSpecification specification);
+		bool CreateComputePipeline(PipelineSpecification specification);
+
+	private:
+		bool m_IsValid;
+
 		VkPipeline m_Pipeline;
 		VkPipelineLayout m_Layout;
 		// vvv It is specific for each pipeline (not even shader), so should be stored in Pipeline's class

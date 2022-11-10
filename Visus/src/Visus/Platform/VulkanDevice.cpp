@@ -128,6 +128,7 @@ namespace Motus3D
         enabledExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         enabledExtensions.push_back(VK_EXT_INDEX_TYPE_UINT8_EXTENSION_NAME);
         enabledExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+        enabledExtensions.push_back(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
 
         VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature_enable_struct = {};
         dynamic_rendering_feature_enable_struct.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
@@ -166,7 +167,7 @@ namespace Motus3D
         cmd_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         cmd_buffer_allocate_info.commandBufferCount = 1;
 
-        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_Device, &cmd_buffer_allocate_info, &m_CommandBuffer));
+        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_Device, &cmd_buffer_allocate_info, &m_DefaultCommandBuffer));
 
     }
 

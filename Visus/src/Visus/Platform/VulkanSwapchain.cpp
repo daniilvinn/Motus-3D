@@ -28,11 +28,6 @@ namespace Motus3D
 		vkDestroySwapchainKHR(m_Device->GetHandle(), m_Swapchain, nullptr);
 		vkDestroySurfaceKHR(vk_instance, m_Surface, nullptr);
 
-		for (auto& image : m_SwapchainImages)
-		{
-			vkDestroyImageView(m_Device->GetHandle(), image.view, nullptr);
-		}
-
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.presentComplete, nullptr);
 		vkDestroySemaphore(m_Device->GetHandle(), m_Semaphores.renderComplete, nullptr);
 
@@ -129,7 +124,7 @@ namespace Motus3D
 		swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchain_create_info.imageFormat = m_SurfaceFormat;
 		swapchain_create_info.imageColorSpace = m_SurfaceColorSpace;
-		swapchain_create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		swapchain_create_info.imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		swapchain_create_info.imageArrayLayers = 1;
 		swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -163,39 +158,8 @@ namespace Motus3D
 
 		uint32_t swapchain_image_count;
 		vkGetSwapchainImagesKHR(m_Device->GetHandle(), m_Swapchain, &swapchain_image_count, nullptr);
-		std::vector<VkImage> swapchain_images(swapchain_image_count);
-		vkGetSwapchainImagesKHR(m_Device->GetHandle(), m_Swapchain, &swapchain_image_count, swapchain_images.data());
-
-		for (auto& image : m_SwapchainImages)
-		{
-			vkDestroyImageView(m_Device->GetHandle(), image.view, nullptr);
-			m_SwapchainImages.clear();
-		}
-
-		for (int i = 0; i < swapchain_images.size(); i++)
-		{
-			VkImageViewCreateInfo image_view_create_info = {};
-			image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			image_view_create_info.pNext = nullptr;
-			image_view_create_info.flags = 0;
-			image_view_create_info.image = swapchain_images[i];
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			image_view_create_info.format = m_SurfaceFormat;
-			image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			image_view_create_info.subresourceRange.baseMipLevel = 0;
-			image_view_create_info.subresourceRange.levelCount = 1;
-			image_view_create_info.subresourceRange.baseArrayLayer = 0;
-			image_view_create_info.subresourceRange.layerCount = 1;
-
-			VkImageView view;
-			VK_CHECK_RESULT(vkCreateImageView(m_Device->GetHandle(), &image_view_create_info, nullptr, &view));
-			m_SwapchainImages.push_back({ swapchain_images[i], view });
-
-		}
+		m_SwapchainImages.resize(swapchain_image_count);
+		vkGetSwapchainImagesKHR(m_Device->GetHandle(), m_Swapchain, &swapchain_image_count, m_SwapchainImages.data());
 
 		// Creating sync objects
 		// Semaphores
@@ -242,7 +206,6 @@ namespace Motus3D
 		depth_buffer_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		
 		m_DepthBuffer.allocation = allocator->AllocateImage(&depth_buffer_create_info, 0, &m_DepthBuffer.image);
-
 		
 		VkImageViewCreateInfo depth_buffer_view_create_info = {};
 		depth_buffer_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

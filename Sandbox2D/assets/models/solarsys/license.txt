@@ -1,0 +1,11 @@
+Model Information:
+* title:	Solar System Paint 3D
+* source:	https://sketchfab.com/3d-models/solar-system-paint-3d-fd0cb20fd0794d3886cbbc8cc86ff6c9
+* author:	savounited (https://sketchfab.com/savounited)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Solar System Paint 3D" (https://sketchfab.com/3d-models/solar-system-paint-3d-fd0cb20fd0794d3886cbbc8cc86ff6c9) by savounited (https://sketchfab.com/savounited) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

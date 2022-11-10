@@ -20,6 +20,9 @@ namespace Motus3D {
 			// Make sure it is correct descriptor type.
 			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			break;
+		case ResourceType::STORAGE_IMAGE:
+			return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			break;
 		default:
 			MT_CORE_ASSERT(false, "Invalid descriptor type");
 			break;
@@ -35,10 +38,13 @@ namespace Motus3D {
 		static void InitPools();
 		static void ReleasePools();
 
+		void Release() override;
+
 		VkDescriptorSet GetHandle() { return m_DescriptorSet; }
 
 		void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) override;
 		void UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement = 0) override;
+		void UpdateDescriptor(uint8_t binding, Ref<Image> image, uint32_t arrayElement = 0) override;
 		void UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement = 0) override;
 
 	private:

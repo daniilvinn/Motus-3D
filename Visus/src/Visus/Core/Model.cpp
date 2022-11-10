@@ -66,7 +66,7 @@ namespace Motus3D {
 		
 	}
 
-	void Model::Load(std::string_view filepath)
+	b8 Model::Load(std::string_view filepath)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath.data(),
@@ -80,15 +80,13 @@ namespace Motus3D {
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			VISUS_ERROR("Assimp: {0}", importer.GetErrorString());
+			return MT_FALSE;
 		}
 
 		for (int i = 0; i < scene->mNumMaterials; i++) {
 			aiMaterial* mat = scene->mMaterials[i];
 			aiString texture_filepath;
 			mat->GetTexture(aiTextureType_DIFFUSE, 0, &texture_filepath);
-
-			aiColor3D diffuse_color;
-			VISUS_TRACE("	material #{0} name: {1}", i, mat->GetName().C_Str());
 
 			if (texture_filepath.length == 0);
 			else {
@@ -109,11 +107,13 @@ namespace Motus3D {
 				}
 
 				if (texture_already_exists);
-				else m_Textures.push_back(Image::Create(model_texture_filepath));
+				else m_Textures.push_back(Image::Create(ImageUsage::SHADER_READ_ONLY, model_texture_filepath));
 			}
 		}
 
 		ProcessNode(scene->mRootNode, scene);
+
+		return MT_TRUE;
 	}
 
 	void Model::Release()
@@ -122,6 +122,9 @@ namespace Motus3D {
 		{
 			submesh.GetVertexBuffer()->Release();
 			submesh.GetIndexBuffer()->Release();
+		}
+		for (auto& image : m_Textures) {
+			image->Release();
 		}
 	}
 
@@ -149,12 +152,6 @@ namespace Motus3D {
 		std::vector<float> vertices;
 		vertices.reserve(ai_mesh->mNumVertices * 8);
 
-		for (int j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; j++) {
-			if (ai_mesh->HasVertexColors(j)) {
-				VISUS_TRACE("do stuff");
-			}
-		}
-
 		// Calculating which texture this submesh uses.
 		unsigned int texture_index = 0;
 		aiMaterial* mesh_texture_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
@@ -174,9 +171,6 @@ namespace Motus3D {
 				}
 			}
 		}
-
-		VISUS_ERROR("	submesh name: {0}", ai_mesh->mName.C_Str());
-		VISUS_TRACE(" SUBMESH'ES texture material index: {0}", ai_mesh->mMaterialIndex);
 
 		glm::vec3 buffer;
 		Vertex vertex;
