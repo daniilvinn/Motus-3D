@@ -5,9 +5,9 @@
 namespace Motus3D {
 	
 	// Image
-	Ref<Image> Image::Create(std::string filepath, ImageFormat format)
+	Ref<Image> Image::Create(ImageUsage usage, std::string filepath)
 	{
-		return CreateRef<VulkanImage>(filepath, format);
+		return CreateRef<VulkanImage>(usage, filepath);
 	}
 
 	// Sampler

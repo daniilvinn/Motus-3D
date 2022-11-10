@@ -32,7 +32,5 @@ layout(location = 0) out vec4 finalColor;
 layout(set = 1, binding = 0) uniform sampler2D textureSampler;
 
 void main(){
-    vec4 fragColor = texture(textureSampler, fragTexCoord);
-    finalColor.rgb = pow(fragColor.rgb, vec3(1.0f / 2.2f));
-    finalColor.a = fragColor.a;
+    finalColor = texture(textureSampler, fragTexCoord);
 }

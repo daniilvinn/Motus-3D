@@ -67,9 +67,9 @@ namespace Motus3D
 		s_RendererAPI->EndFrame();
 	}
 
-	void Renderer::BeginScene(SceneData data)
+	void Renderer::BeginScene(SceneData data, Ref<Image> target)
 	{
-		s_RendererAPI->BeginRender();
+		s_RendererAPI->BeginRender(target);
 
 		glm::mat4 matrices[3] = 
 		{
@@ -92,9 +92,9 @@ namespace Motus3D
 		s_RendererAPI->BlitToSwapchain(image);
 	}
 
-	void Renderer::BeginRender()
+	void Renderer::BeginRender(Ref<Image> target)
 	{
-		s_RendererAPI->BeginRender();
+		s_RendererAPI->BeginRender(target);
 	}
 
 	void Renderer::EndRender()
@@ -105,6 +105,11 @@ namespace Motus3D
 	void Renderer::ClearColor(float r, float g, float b, float a)
 	{
 		s_RendererAPI->ClearColor(r, g, b, a);
+	}
+
+	void Renderer::ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now /*= true*/)
+	{
+		s_RendererAPI->ClearImage(image, r, g, b, a, now);
 	}
 
 	// Temporary solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.

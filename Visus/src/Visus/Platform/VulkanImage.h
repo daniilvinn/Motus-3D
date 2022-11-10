@@ -10,21 +10,28 @@ namespace Motus3D {
 	class VulkanImage : public Image
 	{
 	public:
-		VulkanImage(std::string filepath, ImageFormat format);
+		VulkanImage(ImageUsage usage, std::string filepath = "");
 		~VulkanImage();
 
 		std::string_view GetFilepath() const override { return m_Filepath; };
 
 		VkImage GetHandle() { return m_Image; }
-		VkImageView GetImageView() { return m_ImageView; }
+		VkImageView GetImageView();
+
+		void Invalidate() override;
 
 		void Release() override;
 
 	private:
+		void CreateTexture(VkFormat format);
+		void CreateRenderTarget(VkFormat format);
+
+	private:
 		VkImage m_Image;
 		VmaAllocation m_Allocation;
-		VkImageView m_ImageView;
+		std::vector<VkImageView> m_ImageViews;
 
+		ImageUsage m_Usage;
 		std::string m_Filepath;
 
 	};

@@ -196,12 +196,12 @@ namespace Motus3D
 
 		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pipeline_layout, nullptr, &m_Layout));
 
-		VkFormat image_format = VulkanGraphicsContext::GetVulkanContext()->GetSwapchain()->GetImageFormat();
+		VkFormat image_formats[] = { VK_FORMAT_R16G16B16A16_SFLOAT };
 
 		VkPipelineRenderingCreateInfo pipeline_rendering = {};
 		pipeline_rendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipeline_rendering.colorAttachmentCount = 1;
-		pipeline_rendering.pColorAttachmentFormats = &image_format;
+		pipeline_rendering.pColorAttachmentFormats = image_formats;
 		pipeline_rendering.depthAttachmentFormat = VulkanGraphicsContext::GetVulkanContext()->GetSwapchain()->GetDepthBuffer().format;
 
 		// vvv Dangling pointer fix vvv

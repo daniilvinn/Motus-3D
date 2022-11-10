@@ -107,7 +107,7 @@ namespace Motus3D {
 				}
 
 				if (texture_already_exists);
-				else m_Textures.push_back(Image::Create(model_texture_filepath, ImageFormat::C8));
+				else m_Textures.push_back(Image::Create(ImageUsage::SHADER_READ_ONLY, model_texture_filepath));
 			}
 		}
 

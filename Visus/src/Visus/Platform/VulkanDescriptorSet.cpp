@@ -166,4 +166,27 @@ namespace Motus3D {
 		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
 	}
 
+	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Image> image, uint32_t arrayElement /*= 0*/)
+	{
+		Ref<VulkanImage> vk_image = RefAs<VulkanImage>(image);
+
+		VkDescriptorImageInfo image_info = {};
+		image_info.sampler = VK_NULL_HANDLE;
+		image_info.imageView = vk_image->GetImageView();
+		image_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		VkWriteDescriptorSet write_struct = {};
+		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		write_struct.dstSet = m_DescriptorSet;
+		write_struct.dstBinding = binding;
+		write_struct.pImageInfo = & image_info;
+		write_struct.dstArrayElement = arrayElement;
+		write_struct.descriptorCount = 1;
+
+		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+
+	}
+
 }

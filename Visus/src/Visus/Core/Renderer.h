@@ -32,7 +32,7 @@ namespace Motus3D {
 		static void Init(RendererConfiguration configuration);
 		static void Shutdown();
 
-		static void OnWindowResize(uint32_t width, uint32_t height, bool vsync = true);
+		static void OnWindowResize(uint32_t width, uint32_t height, bool vsync = false);
 
 		static Ref<GraphicsContext> GetContext();
 		static RendererConfiguration GetConfiguration() { return s_Configuration; }
@@ -41,13 +41,15 @@ namespace Motus3D {
 
 		static void BeginFrame();
 		static void EndFrame();
-		static void BeginScene(SceneData data);
+		static void BeginScene(SceneData data, Ref<Image> target);
 		static void EndScene();
 		static void BlitToSwapchain(Ref<Image> image);
+
 
 		//static void ExecuteCommands(Ref<CommandBuffer> cmd_buffer, QueueFamily family);
 
 		static void ClearColor(float r, float g, float b, float a);
+		static void ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now = true);
 		static void Submit(
 			Submesh* submesh,
 			Ref<Pipeline> pipeline, 
@@ -78,7 +80,7 @@ namespace Motus3D {
 		*/
 		static void DispatchAsync(Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>>, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ);
 
-		static void BeginRender();
+		static void BeginRender(Ref<Image> target);
 		static void EndRender();
 
 	private:

@@ -13,7 +13,8 @@ namespace Motus3D {
 	{
 		UBO,
 		SSBO,
-		IMAGE
+		IMAGE,
+		STORAGE_IMAGE
 	};
 
 	// This struct is used ONLY in DescriptorSet constructor. It is not standalone.
@@ -33,6 +34,7 @@ namespace Motus3D {
 		// range's 0 value is special value, which specifies whole buffer to be bound to descriptor.
 		virtual void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) = 0;
 		virtual void UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement = 0) = 0;
+		virtual void UpdateDescriptor(uint8_t binding, Ref<Image> image, uint32_t arrayElement = 0) = 0;
 		virtual void UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement = 0) = 0;
 		// virtual void UpdateDescriptor(uint8_t binding, Ref<StorageBuffer> ssbo) = 0;
 

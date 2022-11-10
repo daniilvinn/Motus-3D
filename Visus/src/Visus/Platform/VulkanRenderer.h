@@ -24,13 +24,14 @@ namespace Motus3D {
 
 		void BeginFrame() override;
 		void EndFrame() override;
-		void BeginRender() override;
+		void BeginRender(Ref<Image> target) override;
 		void EndRender() override;
 		void BlitToSwapchain(Ref<Image> image) override;
 
 		void ExecuteCommands(Ref<CommandBuffer> cmd_buffer) override;
 
 		// Clears render target (now only current swapchain image) with specified color.
+		void ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now) override;
 		void ClearColor(float r, float b, float g, float a) override;
 		void RenderSubmesh(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform) override;
 
