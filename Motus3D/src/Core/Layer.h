@@ -9,7 +9,6 @@ namespace Motus3D
 	class MOTUS_API Layer
 	{
 	public:
-
 		virtual void OnUpdate() = 0;
 		virtual void OnEvent(Event& e) = 0;
 		virtual void OnAttach() = 0;

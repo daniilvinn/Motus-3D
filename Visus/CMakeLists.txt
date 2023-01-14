@@ -28,6 +28,7 @@ target_include_directories(${VISUS_PROJECT} PRIVATE
     ${MOTUS_VULKAN_SDK_SRC_INCLUDE_DIR}
     ${MOTUS_STBI_INCLUDE_DIR}
     ${MOTUS_ASSIMP_INCLUDE_DIR}
+    ${MOTUS_IMGUI_INCLUDE_DIR}
 )
 
 target_link_directories(${VISUS_PROJECT} PRIVATE
@@ -37,6 +38,7 @@ target_link_directories(${VISUS_PROJECT} PRIVATE
 target_link_libraries(${VISUS_PROJECT} PRIVATE
     glfw
     vulkan-1.lib
+    imgui
     assimp
     debug shaderc_sharedd.lib optimized shaderc_shared.lib
     debug shaderc_utild.lib optimized shaderc_util.lib

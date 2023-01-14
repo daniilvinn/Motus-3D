@@ -21,17 +21,17 @@ namespace Motus3D
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 		m_Handle = glfwCreateWindow(width, height, title.c_str(), nullptr , nullptr);
-		glfwSetInputMode(m_Handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 		m_WindowData.width = width;
 		m_WindowData.height = height;
 		m_WindowData.title = title;
 
 		Renderer::Init({
+			GraphicsAPI::VULKAN,
 			m_Handle,
 			3
 		});
-
 
 		glfwSetWindowUserPointer(m_Handle, &m_WindowData);
 

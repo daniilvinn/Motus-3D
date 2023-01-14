@@ -76,9 +76,7 @@ namespace Motus3D
 
 		m_Swapchain = CreateRef<VulkanSwapchain>();
 		m_Swapchain->InitSurface();
-		m_Swapchain->Create(windowWidth, windowHeight, false);
-
-		
+		m_Swapchain->Create(windowWidth, windowHeight, false);	
 	}
 
 	void VulkanGraphicsContext::Shutdown()
@@ -113,7 +111,6 @@ namespace Motus3D
 
 		if (VISUS_INTERNAL_ENABLE_VALIDATION) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-			extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		}
 
 		extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);

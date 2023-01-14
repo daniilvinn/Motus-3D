@@ -4,6 +4,12 @@
 #include <vk_mem_alloc.h>
 
 namespace Motus3D {
+	struct MemoryStatistics
+	{
+		uint64_t allocatedMemory;
+		uint64_t freedMemory;
+	};
+
 	class VulkanAllocator
 	{
 	public:
@@ -12,6 +18,7 @@ namespace Motus3D {
 
 		static VulkanAllocator* Get() { return s_Instance; }
 		VmaAllocator GetHandle() { return m_Allocator; }
+		MemoryStatistics GetStatistics() const { return m_Statistics; }
 
 		VmaAllocation AllocateBuffer(VkBufferCreateInfo* create_info, uint32_t flags, VkBuffer* buffer);
 		void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
@@ -26,14 +33,10 @@ namespace Motus3D {
 		VulkanAllocator();
 		~VulkanAllocator();
 
-		static VulkanAllocator* s_Instance;
-		struct MemoryStatistics
-		{
-			uint64_t allocatedMemory;
-			uint64_t freedMemory;
-		} m_Statistics;
-
 		VmaAllocator m_Allocator;
+
+		static VulkanAllocator* s_Instance;
+		MemoryStatistics m_Statistics;
 
 	};
 }

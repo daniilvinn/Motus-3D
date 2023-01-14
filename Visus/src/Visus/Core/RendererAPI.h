@@ -20,15 +20,19 @@ namespace Motus3D {
 		virtual void OnWindowResize(uint32_t width, uint32_t height, bool vsync) = 0;
 
 		virtual uint8_t GetCurrentFrameIndex() const = 0;
+		virtual uint64_t GetGPUMemoryUsage() const = 0;
 
 		// Other helping methods
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
-		virtual void BeginRender(Ref<Image> target) = 0;
+		virtual void BeginRender(Ref<Image> target, bool useDepth = true) = 0;
 		virtual void EndRender() = 0;
 		virtual void BlitToSwapchain(Ref<Image> image) = 0;
+		virtual void RenderImGui() = 0;
 
 		virtual void ExecuteCommands(Ref<CommandBuffer> cmd_buffer) = 0;
+
+		virtual void SetupImGuiRenderTarget(Ref<Image> target) = 0;
 
 		// Actual rendering
 		virtual void ClearImage(Ref<Image> image, float r, float b, float g, float a, bool now) = 0;

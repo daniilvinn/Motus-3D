@@ -36,4 +36,17 @@ namespace Motus3D {
 		MT_CORE_ASSERT(false, "Method not implemented");
 		return 0.0f;
 	}
+
+	void WindowsInput::LockMouse_Impl()
+	{
+		GLFWwindow* window = (GLFWwindow*)Application::Get()->GetWindow()->GetHandle();
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	void WindowsInput::ReleaseMouse_Impl()
+	{
+		GLFWwindow* window = (GLFWwindow*)Application::Get()->GetWindow()->GetHandle();
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 }

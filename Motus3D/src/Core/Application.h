@@ -3,13 +3,12 @@
 #include <Core/Macros.h>
 #include <Core/ApplicationWindow.h>
 #include <Core/LayerStack.h>
-
 #include <Core/Events/Event.h>
 #include <Core/Events/EventQueue.h>
+#include <Visus.h>
 
 #include <filesystem>
 
-#include <Visus.h>
 
 namespace Motus3D
 {

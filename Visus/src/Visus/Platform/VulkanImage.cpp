@@ -23,7 +23,7 @@ namespace Motus3D {
 			CreateRenderTarget(VK_FORMAT_R16G16B16A16_SFLOAT);
 			break;
 		case ImageUsage::RENDER_TARGET_LDR:
-			CreateRenderTarget(VK_FORMAT_R8G8B8A8_SRGB);
+			CreateRenderTarget(VK_FORMAT_R8G8B8A8_UNORM);
 			break;
 		default:
 			break;

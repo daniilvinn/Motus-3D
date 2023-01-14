@@ -3,6 +3,8 @@
 #include <Visus/Platform/VulkanAllocator.h>
 #include <Visus/Platform/VulkanGraphicsContext.h>
 
+#include <Visus/Platform/VulkanRenderer.h>
+
 namespace Motus3D 
 {
 
@@ -10,24 +12,17 @@ namespace Motus3D
 		: m_Binding(binding)
 	{
 		auto allocator = VulkanAllocator::Get();
+		m_Size = VulkanRenderer::AlignBuffer(size);
 
 		VkBufferCreateInfo buffer_create_info = {};
 		buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		buffer_create_info.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		buffer_create_info.size = size;
+
+		size_t actual_size = m_Size * Renderer::GetConfiguration().framesInFlight;
+		buffer_create_info.size = actual_size;
 
 		m_Allocation = allocator->AllocateBuffer(&buffer_create_info, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, &m_Buffer);
-
-		m_DescriptorBufferInfo.buffer = m_Buffer;
-		m_DescriptorBufferInfo.range = size;
-		m_DescriptorBufferInfo.offset = 0;
-
-		m_WriteDescriptorStruct = {};
-		m_WriteDescriptorStruct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		m_WriteDescriptorStruct.dstBinding = m_Binding;
-		m_WriteDescriptorStruct.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		m_WriteDescriptorStruct.pBufferInfo = &m_DescriptorBufferInfo;
 
 	}
 
@@ -44,14 +39,31 @@ namespace Motus3D
 		allocator->DestroyBuffer(m_Buffer, m_Allocation);
 	}
 
+	VkWriteDescriptorSet VulkanUniformBuffer::GetWriteDescriptorStruct()
+	{
+		VkDescriptorBufferInfo buffer_info = {};
+		buffer_info.buffer = m_Buffer;
+		buffer_info.range = m_Size;
+		buffer_info.offset = m_Size * (size_t)(Renderer::GetCurrentFrameIndex() - 1);
+
+		VkWriteDescriptorSet write_struct = {};
+		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_struct.dstBinding = m_Binding;
+		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_struct.pBufferInfo = &buffer_info;
+
+		return write_struct;
+	}
+
 	void VulkanUniformBuffer::SetData(void* data, uint32_t size)
 	{
 		auto allocator = VulkanAllocator::Get();
 
-		void* buffer_memory = allocator->MapMemory(m_Allocation);
-		memcpy(buffer_memory, data, size);
+		uint8_t* buffer_memory = (uint8_t*)allocator->MapMemory(m_Allocation);
+		uint32_t offset = m_Size * Renderer::GetCurrentFrameIndex();
+		memset(buffer_memory + offset, 0, m_Size);
+		memcpy(buffer_memory + offset, data, size);
 		allocator->UnmapMemory(m_Allocation);
-
 	}
 
 }

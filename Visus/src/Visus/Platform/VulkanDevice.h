@@ -3,6 +3,7 @@
 #include <string>
 #include <Visus/Core/Macros.h>
 #include <vulkan/vulkan.h>
+#include <Visus/Core/Renderer.h>
 
 #include <vector>
 
@@ -25,6 +26,7 @@ namespace Motus3D {
 		static Ref<VulkanPhysicalDevice> SelectDevice();
 
 		VkPhysicalDevice GetHandle() { return m_PhysicalDevice; }
+		VkPhysicalDeviceProperties GetProperties() { return m_Properties; }
 		QueueFamilyIndices GetQueueFamilyIndices() const { return m_QueueFamilyIndices; }
 
 		bool IsExtensionSupported(std::string ext) const;
@@ -34,6 +36,7 @@ namespace Motus3D {
 
 	private: // Private fields
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+		VkPhysicalDeviceProperties m_Properties;
 		QueueFamilyIndices m_QueueFamilyIndices;
 		const float m_DefaultQueuePriority = 1.0f;
 
@@ -58,7 +61,8 @@ namespace Motus3D {
 
 		VkCommandPool GetDefaultCmdPool() { return m_DefaultCmdPool; }
 		VkCommandBuffer GetDefaultCmdBuffer() { return m_DefaultCommandBuffer; }
- 
+		void ImmediateExecute(VkCommandBuffer cmd_buffer, QueueFamily family);
+
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;
 

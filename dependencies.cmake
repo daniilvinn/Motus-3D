@@ -34,8 +34,11 @@ set(MOTUS_STBI_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Motus3D/thirdparty/stb_image")
 #7 Assimp
 set(MOTUS_ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Motus3D/thirdparty/Assimp/include")
 
-# Scene Project
+#8 Scene Project
 set(MOTUS_SCENE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Scene/src")
+
+#9 ImGui
+set(MOTUS_IMGUI_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Motus3D/thirdparty/imgui")
 
 #
 #   Motus3D dependencies' library directory

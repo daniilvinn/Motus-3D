@@ -21,14 +21,18 @@ namespace Motus3D {
 
 		Ref<GraphicsContext> GetContext() override { return m_GraphicsContext; };
 		uint8_t GetCurrentFrameIndex() const override { return m_Swapchain->GetCurrentFrameIndex(); }
+		uint64_t GetGPUMemoryUsage() const override;
 
 		void BeginFrame() override;
 		void EndFrame() override;
-		void BeginRender(Ref<Image> target) override;
+		void BeginRender(Ref<Image> target, bool useDepth = true) override;
 		void EndRender() override;
 		void BlitToSwapchain(Ref<Image> image) override;
+		void RenderImGui() override;
 
 		void ExecuteCommands(Ref<CommandBuffer> cmd_buffer) override;
+
+		void SetupImGuiRenderTarget(Ref<Image> target) override;
 
 		// Clears render target (now only current swapchain image) with specified color.
 		void ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now) override;
@@ -39,13 +43,14 @@ namespace Motus3D {
 
 		// It is assumed that command buffer recording is already started and will be ended manually.
 		static void TransitionImageLayout(VkCommandBuffer cmd_buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t arrayLayer = 0, uint32_t layerCount = 1);
-
+		static size_t AlignBuffer(uint64_t size);
 
 
 	private:
 		Ref<VulkanGraphicsContext> m_GraphicsContext;
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanSwapchain> m_Swapchain;
+		Ref<Image> m_ImGuiRenderTarget;
 
 		struct CommandBufferAndPool
 		{

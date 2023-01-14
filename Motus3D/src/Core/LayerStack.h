@@ -13,7 +13,6 @@ namespace Motus3D
 		~LayerStack();
 
 		void AddLayer(Layer* layer);
-		// TODO: AddOverlay()
 
 		std::vector<Layer*>::iterator begin() { return m_LayerStack.begin(); }
 		std::vector<Layer*>::iterator end() { return m_LayerStack.end(); }

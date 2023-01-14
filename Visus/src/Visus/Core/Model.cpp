@@ -158,6 +158,8 @@ namespace Motus3D {
 		aiString texture_filepath;
 		mesh_texture_material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_filepath);
 
+		
+
 		if (texture_filepath.length == 0);
 		else 
 		{

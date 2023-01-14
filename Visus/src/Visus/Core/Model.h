@@ -57,6 +57,28 @@ namespace Motus3D {
 			std::vector<uint32_t> indices,
 			Ref<Image> texture
 		);
+		void Load(
+			std::vector<float> vertices,
+			std::vector<uint8_t> indices,
+			Ref<Image> texture,
+			Ref<Image> roughness,
+			Ref<Image> metallic
+		);
+		void Load(
+			std::vector<float> vertices,
+			std::vector<uint16_t> indices,
+			Ref<Image> texture,
+			Ref<Image> roughness,
+			Ref<Image> metallic
+		);
+
+		void Load(
+			std::vector<float> vertices,
+			std::vector<uint32_t> indices,
+			Ref<Image> albedo,
+			Ref<Image> roughness,
+			Ref<Image> metallic
+		);
 
 		Ref<VertexBuffer> GetVertexBuffer() { return m_VBO; }
 		Ref<IndexBuffer> GetIndexBuffer() { return m_IBO; }

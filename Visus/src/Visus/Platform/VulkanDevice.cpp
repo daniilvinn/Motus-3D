@@ -1,6 +1,6 @@
 #include "VulkanDevice.h"
-#include <Visus/Platform/VulkanGraphicsContext.h>
 
+#include <Visus/Platform/VulkanGraphicsContext.h>
 #include <Visus/Core/Logger.h>
 
 #include <vector>
@@ -44,6 +44,8 @@ namespace Motus3D
             VISUS_TRACE("No discrete GPU was found.");
             m_PhysicalDevice = physicalDevices.front();
         }
+
+        vkGetPhysicalDeviceProperties(m_PhysicalDevice, &m_Properties);
 
         // Creating queue create infos
         FindQueueFamilies();
@@ -182,4 +184,35 @@ namespace Motus3D
         vkDestroyDevice(m_Device, nullptr);
         VISUS_TRACE("Logical device destroyed");
     }
+
+	void VulkanDevice::ImmediateExecute(VkCommandBuffer cmd_buffer, QueueFamily family)
+	{
+        VkFenceCreateInfo fence_create_info = {};
+        fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        
+        VkFence fence;
+        vkCreateFence(m_Device, &fence_create_info, nullptr, &fence);
+
+        VkSubmitInfo submit_info = {};
+        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit_info.commandBufferCount = 1;
+        submit_info.pCommandBuffers = &cmd_buffer;
+        
+        switch (family)
+        {
+        case QueueFamily::GRAPHICS_TRANSFER:
+            vkQueueSubmit(m_GraphicsTransferQueue, 1, &submit_info, fence);
+            break;
+        case QueueFamily::COMPUTE:
+            vkQueueSubmit(m_ComputeQueue, 1, &submit_info, fence);
+            break;
+        default:
+            break;
+        }
+
+        vkWaitForFences(m_Device, 1, &fence, VK_TRUE, UINT64_MAX);
+        vkDestroyFence(m_Device, fence, nullptr);
+        vkResetCommandPool(m_Device, m_DefaultCmdPool, 0);
+	}
+
 }

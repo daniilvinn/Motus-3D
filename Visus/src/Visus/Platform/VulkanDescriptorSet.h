@@ -2,6 +2,7 @@
 
 #include <Visus/Core/DescriptorSet.h>
 #include <Visus/Core/Cubemap.h>
+#include <Visus/Core/Renderer.h>
 #include <vulkan/vulkan.h>
 
 namespace Motus3D {
@@ -17,7 +18,6 @@ namespace Motus3D {
 			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			break;
 		case ResourceType::IMAGE:
-			// Make sure it is correct descriptor type.
 			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			break;
 		case ResourceType::STORAGE_IMAGE:
@@ -40,7 +40,7 @@ namespace Motus3D {
 
 		void Release() override;
 
-		VkDescriptorSet GetHandle() { return m_DescriptorSet; }
+		VkDescriptorSet GetHandle() { return m_DescriptorSets[Renderer::GetCurrentFrameIndex()]; }
 
 		void UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement = 0) override;
 		void UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement = 0) override;
@@ -50,7 +50,7 @@ namespace Motus3D {
 	private:
 		static VkDescriptorPool s_GlobalDescriptorPool;
 
-		VkDescriptorSet m_DescriptorSet;
+		std::vector<VkDescriptorSet> m_DescriptorSets;
 		VkDescriptorSetLayout m_DescriptorSetLayout;
 
 	};

@@ -140,6 +140,10 @@ namespace Motus3D {
 		static std::pair<int32_t, int32_t> MousePosition() { return s_Instance->MousePosition_Impl(); };
 		static float MouseScrolledY() { return s_Instance->MouseScrolledY_Impl(); };
 		static float MouseScrolledX() { return s_Instance->MouseScrolledX_Impl(); };
+
+		static void LockMouse() { return s_Instance->LockMouse_Impl(); };
+		static void ReleaseMouse() { return s_Instance->ReleaseMouse_Impl(); };
+
 	protected:
 		virtual bool KeyPressed_Impl(KeyCode code) = 0;
 		virtual bool MouseButtonPressed_Impl(KeyCode code) = 0;
@@ -152,6 +156,9 @@ namespace Motus3D {
 		// Mouse scrolled by X axis
 		// Returns -1 is scrolled down, 1 if scrolled up, 0 if not scrolled
 		virtual float MouseScrolledX_Impl() = 0;
+
+		virtual void LockMouse_Impl() = 0;
+		virtual void ReleaseMouse_Impl() = 0;
 
 	private:
 		static Input* s_Instance;
