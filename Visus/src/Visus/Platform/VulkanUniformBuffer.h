@@ -15,24 +15,22 @@ namespace Motus3D {
 		~VulkanUniformBuffer();
 
 		VkBuffer GetHandle() { return m_Buffer; }
-		VkDescriptorBufferInfo GetDescriptorBufferInfo() { return m_DescriptorBufferInfo; }
 
 		// Returns semi-filled VkWriteDescriptorSet structure. User should fill:
 		// - dstSet
 		// - dstArrayElement
 		// - descriptorCount
-		VkWriteDescriptorSet GetWriteDescriptorStruct() { return m_WriteDescriptorStruct; }
+		VkWriteDescriptorSet GetWriteDescriptorStruct();
 
 		uint32_t GetBinding() { return m_Binding; }
 		
-
 		void SetData(void* data, uint32_t size) override;
+		size_t GetSize() const override { return m_Size; }
 
 	private:
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation;
-		VkDescriptorBufferInfo m_DescriptorBufferInfo;
-		VkWriteDescriptorSet m_WriteDescriptorStruct;
+		size_t m_Size;
 
 		uint32_t m_Binding;
 

@@ -23,12 +23,14 @@ target_include_directories(${SANDBOX_PROJECT} PRIVATE
     ${MOTUS_SPDLOG_INCLUDE_DIR}
     ${MOTUS_GLM_INCLUDE_DIR}
 	${MOTUS_SCENE_INCLUDE_DIR}
+	${MOTUS_IMGUI_INCLUDE_DIR}
 )
 
 target_link_libraries(${SANDBOX_PROJECT} PRIVATE
     Motus-Core
     Visus
 	Scene
+    imgui
 )
 
 target_compile_definitions(${SANDBOX_PROJECT} PRIVATE

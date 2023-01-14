@@ -17,6 +17,10 @@ namespace Motus3D {
 
 		float MouseScrolledX_Impl() override;
 
+		void LockMouse_Impl() override;
+
+		void ReleaseMouse_Impl() override;
+
 	};
 
 }

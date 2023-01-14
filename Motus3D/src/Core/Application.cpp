@@ -1,9 +1,12 @@
 #include "Application.h"
+
 #include <Core/Logger.h>
 #include <Platform/Windows/WinApplicationWindow.h>
 #include <Core/Events/Event.h>
+#include <Visus.h>
+#include <UI/UILayer.h>
 
-#include "Visus.h"
+#include <imgui.h>
 
 namespace Motus3D
 {
@@ -23,8 +26,11 @@ namespace Motus3D
 		s_Instance = this;
 
 		m_AppWindow = CreateRef<WinApplicationWindow>();
-		m_AppWindow->SetEventHandle(MT_BIND_EVENT_FUNCTION(Application::OnEvent));
+		m_AppWindow->SetEventHandler(MT_BIND_EVENT_FUNCTION(Application::OnEvent));
 
+		m_LayerStack.AddLayer(new UILayer);
+		ImGuiContext* ctx = GetImGuiContext();
+		ImGui::SetCurrentContext(ctx);
 	}
 	
 	Application::~Application()
@@ -44,11 +50,14 @@ namespace Motus3D
 			m_AppWindow->OnUpdate();
 
 			Renderer::BeginFrame();
-			//Renderer::ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			BeginFrameUI();
+
 			for(auto& layer : m_LayerStack)
 			{
 				layer->OnUpdate();
 			}
+
+			EndFrameUI();
 			Renderer::EndFrame();
 
 			ProcessEvents();

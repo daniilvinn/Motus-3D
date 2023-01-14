@@ -14,6 +14,8 @@ namespace Motus3D {
 
 	VulkanDescriptorSet::VulkanDescriptorSet(std::initializer_list<Descriptor> layout /*bool update_after_bind*/) // TODO
 	{
+		m_DescriptorSets.resize(Renderer::GetConfiguration().framesInFlight);
+
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 
 		for (auto& descriptor : layout) 
@@ -36,19 +38,23 @@ namespace Motus3D {
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
 		VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device->GetHandle(), &set_layout_create_info, nullptr, &m_DescriptorSetLayout));
 
+		VkDescriptorSetLayout layouts[] = { m_DescriptorSetLayout, m_DescriptorSetLayout, m_DescriptorSetLayout };
+
 		VkDescriptorSetAllocateInfo set_allocate_info = {};
 		set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		set_allocate_info.descriptorSetCount = 1;
+		set_allocate_info.descriptorSetCount = Renderer::GetConfiguration().framesInFlight;
 		set_allocate_info.descriptorPool = s_GlobalDescriptorPool;
-		set_allocate_info.pSetLayouts = &m_DescriptorSetLayout;
+		set_allocate_info.pSetLayouts = layouts;
 
-		VK_CHECK_RESULT(vkAllocateDescriptorSets(device->GetHandle(), &set_allocate_info, &m_DescriptorSet));
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(device->GetHandle(), &set_allocate_info, m_DescriptorSets.data()));
 
 	}
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
 		Release();
+		
+		
 	}
 
 	void VulkanDescriptorSet::InitPools()
@@ -96,96 +102,145 @@ namespace Motus3D {
 		vkDestroyDescriptorSetLayout(device->GetHandle(), m_DescriptorSetLayout, nullptr);
 	}
 
+	/*
+	* Uniform Buffer Descriptor
+	*/
 	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, uint32_t range, uint32_t offset, Ref<UniformBuffer> ubo, uint32_t arrayElement /*= 0*/)
 	{
 		MT_CORE_ASSERT(!(offset > 0 && range == 0), "Out-of-range descriptor: range can't be set as whole size with non-zero offset!");
 
 		Ref<VulkanUniformBuffer> vulkanUBO = RefAs<VulkanUniformBuffer>(ubo);
 
-		VkDescriptorBufferInfo buffer_info = {};
-		buffer_info.buffer = vulkanUBO->GetHandle();
-		buffer_info.range = range ? range : VK_WHOLE_SIZE;
-		buffer_info.offset = offset;
+		std::vector<VkWriteDescriptorSet> writes(Renderer::GetConfiguration().framesInFlight);
+		std::vector<VkDescriptorBufferInfo> buffer_infos(Renderer::GetConfiguration().framesInFlight);
 
-		VkWriteDescriptorSet write_struct = {};
-		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write_struct.dstSet = m_DescriptorSet;
-		write_struct.dstBinding = binding;
-		write_struct.pBufferInfo = &buffer_info;
-		write_struct.dstArrayElement = arrayElement;
-		write_struct.descriptorCount = 1;
-		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		for (int i = 0; i < buffer_infos.size(); i++) {
+			VkDescriptorBufferInfo info = {};
+			info.buffer = vulkanUBO->GetHandle();
+			info.range = range ? range : vulkanUBO->GetSize();
+			info.offset = offset ? offset : vulkanUBO->GetSize() * i;
 
-		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+			buffer_infos[i] = info;
+		}
+
+		for (int i = 0; i < writes.size(); i++) {
+
+			VkWriteDescriptorSet write_struct = {};
+			write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write_struct.dstSet = m_DescriptorSets[i];
+			write_struct.dstBinding = binding;
+			write_struct.pBufferInfo = &buffer_infos[i];
+			write_struct.dstArrayElement = arrayElement;
+			write_struct.descriptorCount = 1;
+			write_struct.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+			writes[i] = write_struct;
+		}
+
+ 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
+		vkUpdateDescriptorSets(device->GetHandle(), writes.size(), writes.data(), 0, nullptr);
 	}
 
+	/*
+	* Texture descriptor
+	*/
 	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Image> image, Ref<Sampler> sampler, uint32_t arrayElement)
 	{
 		Ref<VulkanImage> vulkanImage = RefAs<VulkanImage>(image);
 		Ref<VulkanSampler> vulkanSampler = RefAs<VulkanSampler>(sampler);
 
-		VkDescriptorImageInfo image_info = {};
-		image_info.imageView = vulkanImage->GetImageView();
-		image_info.sampler = vulkanSampler->GetHandle();
-		image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		std::vector<VkDescriptorImageInfo> image_infos(Renderer::GetConfiguration().framesInFlight);
+		for (auto& info : image_infos) {
+			info.imageView = vulkanImage->GetImageView();
+			info.sampler = vulkanSampler->GetHandle();
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+		std::vector<VkWriteDescriptorSet> writes(Renderer::GetConfiguration().framesInFlight);
 
-		VkWriteDescriptorSet write_struct = {};
-		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		write_struct.dstSet = m_DescriptorSet;
-		write_struct.dstBinding = binding;
-		write_struct.pImageInfo = &image_info;
-		write_struct.dstArrayElement = arrayElement;
-		write_struct.descriptorCount = 1;
+		for (int i = 0; i < writes.size(); i++) {
+
+			VkWriteDescriptorSet write_struct = {};
+			write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write_struct.dstSet = m_DescriptorSets[i];
+			write_struct.dstBinding = binding;
+			write_struct.pImageInfo = &image_infos[i];
+			write_struct.dstArrayElement = arrayElement;
+			write_struct.descriptorCount = 1;
+
+			writes[i] = write_struct;
+		}
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+		vkUpdateDescriptorSets(device->GetHandle(), writes.size(), writes.data(), 0, nullptr);
 	}
 
+	/*
+	* Cubemap descriptor
+	*/
 	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Cubemap> cubemap, Ref<Sampler> sampler, uint32_t arrayElement)
 	{
 		Ref<VulkanCubemap> vulkanCubemap = RefAs<VulkanCubemap>(cubemap);
 		Ref<VulkanSampler> vulkanSampler = RefAs<VulkanSampler>(sampler);
 
-		VkDescriptorImageInfo image_info = {};
-		image_info.imageView = vulkanCubemap->GetImageView();
-		image_info.sampler = vulkanSampler->GetHandle();
-		image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		std::vector<VkDescriptorImageInfo> image_infos(Renderer::GetConfiguration().framesInFlight);
+		for (auto& info : image_infos) {
+			info.imageView = vulkanCubemap->GetImageView();
+			info.sampler = vulkanSampler->GetHandle();
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+		std::vector<VkWriteDescriptorSet> writes(Renderer::GetConfiguration().framesInFlight);
 
-		VkWriteDescriptorSet write_struct = {};
-		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		write_struct.dstSet = m_DescriptorSet;
-		write_struct.dstBinding = binding;
-		write_struct.pImageInfo = &image_info;
-		write_struct.dstArrayElement = arrayElement;
-		write_struct.descriptorCount = 1;
+		for (int i = 0; i < writes.size(); i++) {
+
+			VkWriteDescriptorSet write_struct = {};
+			write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write_struct.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write_struct.dstSet = m_DescriptorSets[i];
+			write_struct.dstBinding = binding;
+			write_struct.pImageInfo = &image_infos[i];
+			write_struct.dstArrayElement = arrayElement;
+			write_struct.descriptorCount = 1;
+
+			writes[i] = write_struct;
+		}
 
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+		vkUpdateDescriptorSets(device->GetHandle(), writes.size(), writes.data(), 0, nullptr);
 	}
 
+	/*
+	* Storage image descriptor
+	*/
 	void VulkanDescriptorSet::UpdateDescriptor(uint8_t binding, Ref<Image> image, uint32_t arrayElement /*= 0*/)
 	{
 		Ref<VulkanImage> vk_image = RefAs<VulkanImage>(image);
 
-		VkDescriptorImageInfo image_info = {};
-		image_info.sampler = VK_NULL_HANDLE;
-		image_info.imageView = vk_image->GetImageView();
-		image_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		auto image_views = vk_image->GetAllImageViews();
+		std::vector<VkDescriptorImageInfo> image_infos(image_views.size());
+		for (int i = 0; i < image_infos.size(); i++) {
+			image_infos[i].sampler = VK_NULL_HANDLE;
+			image_infos[i].imageView = image_views[i];
+			image_infos[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		}
 
-		VkWriteDescriptorSet write_struct = {};
-		write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write_struct.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		write_struct.dstSet = m_DescriptorSet;
-		write_struct.dstBinding = binding;
-		write_struct.pImageInfo = & image_info;
-		write_struct.dstArrayElement = arrayElement;
-		write_struct.descriptorCount = 1;
+		std::vector<VkWriteDescriptorSet> writes(Renderer::GetConfiguration().framesInFlight);
 
+		for (int i = 0; i < writes.size(); i++) {
+
+			VkWriteDescriptorSet write_struct = {};
+			write_struct.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write_struct.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			write_struct.dstSet = m_DescriptorSets[i];
+			write_struct.dstBinding = binding;
+			write_struct.pImageInfo = &image_infos[i];
+			write_struct.dstArrayElement = arrayElement;
+			write_struct.descriptorCount = 1;
+
+			writes[i] = write_struct;
+		}
 		auto device = VulkanGraphicsContext::GetVulkanContext()->GetDevice();
-		vkUpdateDescriptorSets(device->GetHandle(), 1, &write_struct, 0, nullptr);
+		vkUpdateDescriptorSets(device->GetHandle(), writes.size(), writes.data(), 0, nullptr);
 
 	}
 

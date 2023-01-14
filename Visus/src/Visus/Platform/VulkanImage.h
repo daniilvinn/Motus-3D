@@ -17,6 +17,7 @@ namespace Motus3D {
 
 		VkImage GetHandle() { return m_Image; }
 		VkImageView GetImageView();
+		std::vector<VkImageView> GetAllImageViews() { return m_ImageViews; }
 
 		void Invalidate() override;
 

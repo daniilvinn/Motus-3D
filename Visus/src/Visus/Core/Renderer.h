@@ -11,8 +11,15 @@
 #include <Visus/Core/Model.h>
 
 namespace Motus3D {
+
+	enum class VISUS_API GraphicsAPI : uint8_t {
+		VULKAN,
+		D3D12
+	};
+
 	struct VISUS_API RendererConfiguration
 	{
+		GraphicsAPI api;
 		void* windowHandle;
 		uint8_t framesInFlight;
 	};
@@ -38,16 +45,18 @@ namespace Motus3D {
 		static RendererConfiguration GetConfiguration() { return s_Configuration; }
 		static float GetDeltaTime();
 		static uint32_t GetCurrentFrameIndex();
+		static uint64_t GetGPUMemoryUsage();
 
 		static void BeginFrame();
 		static void EndFrame();
 		static void BeginScene(SceneData data, Ref<Image> target);
 		static void EndScene();
 		static void BlitToSwapchain(Ref<Image> image);
+		static void RenderImGui();
 
+		static void SetupImGuiRenderTarget(Ref<Image> target);
 
-		//static void ExecuteCommands(Ref<CommandBuffer> cmd_buffer, QueueFamily family);
-
+		// DEPRECATED: use Renderer::ClearImage() instead!
 		static void ClearColor(float r, float g, float b, float a);
 		static void ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now = true);
 		static void Submit(
@@ -88,8 +97,8 @@ namespace Motus3D {
 		static RendererConfiguration s_Configuration;
 
 		// Scene data descriptor sets and buffers, images with its data
-		static std::vector<Ref<DescriptorSet>> s_SceneDataDescriptorSets;
-		static std::vector<Ref<UniformBuffer>> s_CameraDataBuffers;
+		static Ref<DescriptorSet> s_SceneDataDescriptorSets;
+		static Ref<UniformBuffer> s_CameraDataBuffers;
 
 		static float m_DeltaTime;
 	};

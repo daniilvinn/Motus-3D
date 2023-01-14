@@ -14,7 +14,7 @@ namespace Motus3D
 		WinApplicationWindow(uint32_t width = 1600, uint32_t height = 900, std::string title = "Motus3D");
 		~WinApplicationWindow() override;
 
-		void SetEventHandle(const EventHandlerFn& fn) override { m_WindowData.eventHandler = fn; }
+		void SetEventHandler(const EventHandlerFn& fn) override { m_WindowData.eventHandler = fn; }
 		void OnUpdate() override;
 
 		// Returns void pointer, therefore to be casted to GLFWwindow*

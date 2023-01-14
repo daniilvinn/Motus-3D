@@ -19,7 +19,7 @@ namespace Motus3D
 	
 	void LayerStack::AddLayer(Layer* layer)
 	{
-		m_LayerStack.push_back(layer);
+		m_LayerStack.insert(m_LayerStack.begin(), layer);
 		layer->OnAttach();
 	}
 

@@ -6,8 +6,8 @@ namespace Motus3D
 {
 	Ref<RendererAPI> Renderer::s_RendererAPI = nullptr;
 	RendererConfiguration Renderer::s_Configuration;
-	std::vector<Ref<DescriptorSet>> Renderer::s_SceneDataDescriptorSets;
-	std::vector<Ref<UniformBuffer>> Renderer::s_CameraDataBuffers;
+	Ref<DescriptorSet> Renderer::s_SceneDataDescriptorSets;
+	Ref<UniformBuffer> Renderer::s_CameraDataBuffers;
 		
 	void Renderer::Init(RendererConfiguration configuration)
 	{
@@ -15,23 +15,22 @@ namespace Motus3D
 		s_RendererAPI = CreateRef<VulkanRenderer>();
 
 		// Setting up descriptor sets
-		for (int i = 0; i < s_Configuration.framesInFlight; i++) {
-			s_SceneDataDescriptorSets.push_back(DescriptorSet::Create({
-				{ 0, ResourceType::UBO, ShaderStage::VERTEX, 1 }
-			}));
+		s_SceneDataDescriptorSets = DescriptorSet::Create({
+			{ 0, ResourceType::UBO, ShaderStage::VERTEX, 1 }
+		});
 
-			s_CameraDataBuffers.push_back(UniformBuffer::Create(sizeof(glm::mat4) * 3, 0));
 
-			s_SceneDataDescriptorSets[i]->UpdateDescriptor(0, 0, 0, s_CameraDataBuffers[i], 0);
-		}
+		s_CameraDataBuffers = UniformBuffer::Create(sizeof(glm::mat4) * 3, 0);
+		s_SceneDataDescriptorSets->UpdateDescriptor(0, 0, 0, s_CameraDataBuffers, 0);
+		
 	}
 
 	void Renderer::Shutdown()
 	{
 		for (int i = 0; i < s_Configuration.framesInFlight; i++)
 		{
-			s_SceneDataDescriptorSets[i].reset();
-			s_CameraDataBuffers[i].reset();
+			s_SceneDataDescriptorSets.reset();
+			s_CameraDataBuffers.reset();
 		}
 		s_RendererAPI.reset();
 	}
@@ -57,6 +56,11 @@ namespace Motus3D
 		return s_RendererAPI->GetCurrentFrameIndex();
 	}
 
+	uint64_t Renderer::GetGPUMemoryUsage()
+	{
+		return s_RendererAPI->GetGPUMemoryUsage();
+	}
+
 	void Renderer::BeginFrame()
 	{
 		s_RendererAPI->BeginFrame();
@@ -78,7 +82,7 @@ namespace Motus3D
 			data.camera->GetViewMatrix()
 		};
 
-		s_CameraDataBuffers[s_RendererAPI->GetCurrentFrameIndex()]->SetData(matrices, sizeof(matrices));
+		s_CameraDataBuffers->SetData(matrices, sizeof(matrices));
 
 	}
 
@@ -90,6 +94,16 @@ namespace Motus3D
 	void Renderer::BlitToSwapchain(Ref<Image> image)
 	{
 		s_RendererAPI->BlitToSwapchain(image);
+	}
+
+	void Renderer::RenderImGui()
+	{
+		s_RendererAPI->RenderImGui();
+	}
+
+	void Renderer::SetupImGuiRenderTarget(Ref<Image> target)
+	{
+		s_RendererAPI->SetupImGuiRenderTarget(target);
 	}
 
 	void Renderer::BeginRender(Ref<Image> target)
@@ -115,7 +129,7 @@ namespace Motus3D
 	// Temporary solution. Renderer shouldn't own ANY descriptor set. To be moved to Sandbox2D.
 	void Renderer::Submit(Submesh* submesh, Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, const glm::mat4& transform)
 	{
-		sets.insert(sets.begin(), s_SceneDataDescriptorSets[0]);
+		sets.insert(sets.begin(), s_SceneDataDescriptorSets);
 		s_RendererAPI->RenderSubmesh(
 			submesh,
 			pipeline,

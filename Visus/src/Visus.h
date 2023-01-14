@@ -7,3 +7,6 @@
 
 // Scene and Scene Renderer
 #include <Visus/Scene/Skybox.h>
+
+// GUI
+#include <Visus/UI/UI.h>

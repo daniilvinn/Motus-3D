@@ -9,10 +9,13 @@
 #include <Visus/Platform/VulkanDescriptorSet.h>
 #include <Visus/Platform/VulkanCommandBuffer.h>
 #include <Visus/Platform/VulkanImage.h>
-
+#include <Visus/Platform/VulkanAllocator.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include <imgui.h>
+#include <backends/imgui_impl_vulkan.h>
 
 namespace Motus3D {
 
@@ -65,6 +68,14 @@ namespace Motus3D {
 	void VulkanRenderer::OnWindowResize(uint32_t width, uint32_t height, bool vsync)
 	{
 		m_Swapchain->Create(width, height, vsync);
+		m_ImGuiRenderTarget->Invalidate();
+	}
+
+	uint64_t VulkanRenderer::GetGPUMemoryUsage() const
+	{
+		auto allocator = VulkanAllocator::Get();
+		uint64_t memory_usage = allocator->GetStatistics().allocatedMemory - allocator->GetStatistics().freedMemory;
+		return memory_usage;
 	}
 
 	void VulkanRenderer::BeginFrame()
@@ -78,6 +89,8 @@ namespace Motus3D {
 		cmd_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CurrentCommandBuffer.buffer, &cmd_buffer_begin_info));
+
+		ClearImage(m_ImGuiRenderTarget, 0.0f, 0.0f, 0.0f, 1.0f, false);
 
 		auto viewportBounds = m_Swapchain->GetExtent();
 		VkViewport viewport = { 0, viewportBounds.second, viewportBounds.first, -(float)viewportBounds.second, 0.0f, 1.0f };
@@ -128,7 +141,7 @@ namespace Motus3D {
 		m_Swapchain->EndFrame();
 	}
 
-	void VulkanRenderer::BeginRender(Ref<Image> target)
+	void VulkanRenderer::BeginRender(Ref<Image> target, bool useDepth /*= true*/)
 	{
 		auto vk_target = RefAs<VulkanImage>(target);
 
@@ -139,26 +152,28 @@ namespace Motus3D {
 		color_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		color_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-		VkRenderingAttachmentInfo depth_rendering_attachment = {};
-		depth_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		depth_rendering_attachment.imageView = m_Swapchain->GetDepthBuffer().view;
-		depth_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depth_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depth_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-		depth_rendering_attachment.clearValue = { 1.0f, 0 };
-
 		auto renderArea = m_Swapchain->GetExtent();
 
 		VkRenderingInfo rendering_info = {};
 		rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 		rendering_info.colorAttachmentCount = 1;
 		rendering_info.pColorAttachments = &color_rendering_attachment;
-		rendering_info.pDepthAttachment = &depth_rendering_attachment;
 		rendering_info.layerCount = 1;
 		rendering_info.renderArea = {
 			{ 0, 0 },
 			{ renderArea.first, renderArea.second }
 		};
+		if (useDepth) {
+			VkRenderingAttachmentInfo depth_rendering_attachment = {};
+			depth_rendering_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+			depth_rendering_attachment.imageView = m_Swapchain->GetDepthBuffer().view;
+			depth_rendering_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depth_rendering_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depth_rendering_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+			depth_rendering_attachment.clearValue = { 1.0f, 0 };
+
+			rendering_info.pDepthAttachment = &depth_rendering_attachment;
+		}
 
 		vkCmdBeginRendering(m_CurrentCommandBuffer.buffer, &rendering_info);
 	}
@@ -198,6 +213,11 @@ namespace Motus3D {
 			VISUS_ASSERT(false, "Attempting to execute null command buffer!");
 			break;
 		}
+	}
+
+	void VulkanRenderer::SetupImGuiRenderTarget(Ref<Image> target)
+	{
+		m_ImGuiRenderTarget = target;
 	}
 
 	void VulkanRenderer::ClearImage(Ref<Image> image, float r, float g, float b, float a, bool now)
@@ -401,8 +421,22 @@ namespace Motus3D {
 		}
 	}
 	
+	size_t VulkanRenderer::AlignBuffer(uint64_t size)
+	{
+		auto props = VulkanGraphicsContext::GetVulkanContext()->GetDevice()->GetPhysicalDevice()->GetProperties();
+		size_t minUboAlignment = props.limits.minUniformBufferOffsetAlignment;
+		size_t aligned_size = size;
+		if (minUboAlignment > 0) {
+			aligned_size = (aligned_size + minUboAlignment - 1) & ~(minUboAlignment - 1);
+		}
+		return aligned_size;
+	}
+
 	void VulkanRenderer::BlitToSwapchain(Ref<Image> image)
 	{
+		// HACK: it definitely shouldn't be here lmao
+		RenderImGui();
+
 		auto src_image = RefAs<VulkanImage>(image);
 		auto resolution = m_Swapchain->GetExtent();
 
@@ -451,6 +485,16 @@ namespace Motus3D {
 
 	}
 
+	void VulkanRenderer::RenderImGui()
+	{
+		ImGui::Render();
+		ImDrawData* draw_data = ImGui::GetDrawData();
+
+		BeginRender(m_ImGuiRenderTarget, false);
+		ImGui_ImplVulkan_RenderDrawData(draw_data, m_CurrentCommandBuffer.buffer);
+		EndRender();
+	}
+
 	void VulkanRenderer::DispatchCompute(Ref<Pipeline> pipeline, std::vector<Ref<DescriptorSet>> sets, uint32_t workGroupX, uint32_t workGroupY, uint32_t workGroupZ)
 	{
 		auto vk_pipeline = RefAs<VulkanPipeline>(pipeline);
@@ -475,6 +519,10 @@ namespace Motus3D {
 		vkCmdDispatch(m_CurrentCommandBuffer.buffer, workGroupX, workGroupY, workGroupZ);
 	}
 
+
+	/*
+	* DEPRECATED: use Renderer::ClearImage instead!
+	*/
 	void VulkanRenderer::ClearColor(float r, float b, float g, float a)
 	{
 		std::array<VkClearValue, 2> clear_values;

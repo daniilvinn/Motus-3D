@@ -17,6 +17,7 @@ target_include_directories(${MOTUS_CORE_PROJECT} PRIVATE
     ${MOTUS_VULKAN_SDK_INCLUDE_DIR}
     ${MOTUS_GLM_INCLUDE_DIR}
     "${MOTUS_RENDERER_INCLUDE_DIR}/src"
+    ${MOTUS_IMGUI_INCLUDE_DIR}
 )
 
 target_link_directories(${MOTUS_CORE_PROJECT} PRIVATE
@@ -26,6 +27,7 @@ target_link_directories(${MOTUS_CORE_PROJECT} PRIVATE
 target_link_libraries(${MOTUS_CORE_PROJECT} PRIVATE
     glfw
     Visus
+    imgui
     vulkan-1.lib
 )
 

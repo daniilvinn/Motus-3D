@@ -28,6 +28,7 @@ void main()
 
     vec4 pixel_data = imageLoad(input_image, ivec2(gl_GlobalInvocationID.xy));
     pixel_data.rgb = vec3(1.0) - exp(-pixel_data.rgb * data.exposure);
+    pixel_data.rgb = pow(pixel_data.rgb, vec3(1.0 / data.gamma));
 
     imageStore(input_image, ivec2(pixel_x, pixel_y), pixel_data);
 }

@@ -34,6 +34,7 @@ namespace Motus3D {
 
 		std::vector<VkPushConstantRange> m_PushConstantRanges;
 		std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
+		std::map<int, VkDescriptorSetLayoutCreateInfo> m_LayoutCreateInfos;
 	};
 
 	constexpr VkShaderStageFlagBits VisusToVulkanShaderStage(ShaderStage stage)

@@ -72,7 +72,7 @@ namespace Motus3D
 
 		for(int i = 0; i < surfaceFormats.size(); i++)
 		{
-			if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
 				m_SurfaceFormat = surfaceFormats[i].format;
 				m_SurfaceColorSpace = surfaceFormats[i].colorSpace;
 				break;

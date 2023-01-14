@@ -16,7 +16,7 @@ namespace Motus3D
 		using EventHandlerFn = std::function<void(Event)>;
 		virtual ~ApplicationWindow() {};
 
-		virtual void SetEventHandle(const EventHandlerFn& fn) = 0;
+		virtual void SetEventHandler(const EventHandlerFn& fn) = 0;
 		virtual void OnUpdate() = 0;
 
 		virtual void* GetHandle() = 0;

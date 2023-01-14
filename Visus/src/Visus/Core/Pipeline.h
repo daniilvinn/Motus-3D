@@ -6,19 +6,19 @@
 #include <Visus/Core/BufferLayout.h>
 
 namespace Motus3D {
-
+	
 	enum class VISUS_API PipelineExecutionModel : uint8_t {
 		GRAPHICS,
 		COMPUTE
 	};
-
+	
 	enum class VISUS_API PolygonMode : uint8_t
 	{
 		FILL, // fill polygon
 		LINES, // fill only edges of polygon
 		NONE // used for compute pipelines
 	};
-
+	
 	enum class VISUS_API CullMode : uint8_t {
 		NONE,
 		BACK,
